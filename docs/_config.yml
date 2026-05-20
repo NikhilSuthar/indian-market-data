@@ -1,0 +1,28 @@
+title: nse-data
+description: Python library to download market data from NSE India — indices, bhavcopy, and reports
+remote_theme: just-the-docs/just-the-docs
+url: "https://NikhilSuthar.github.io/nse-data"
+baseurl: "/nse-data"
+
+# Repository
+aux_links:
+  "View on GitHub":
+    - "https://github.com/NikhilSuthar/nse-data"
+
+aux_links_new_tab: true
+
+# Footer
+footer_content: "Copyright &copy; 2026 Lumiq.ai. Distributed under the MIT License."
+
+# Search
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+
+# Color scheme
+color_scheme: light
+
+# Back to top link
+back_to_top: true
+back_to_top_text: "Back to top"

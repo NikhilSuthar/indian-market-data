@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nse-data"
+version = "0.1.0"
+description = "Python library to download market data from NSE India — indices, bhavcopy, and reports"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    {name = "Nikhil Suthar", email = "nikhil.suthar@lumiq.ai"},
+]
+keywords = ["nse", "nifty", "india", "stock", "market", "indices", "bhavcopy", "trading"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "pandas>=2.0.0",
+    "cloudscraper>=1.2.71",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "black", "ruff"]
+
+[project.scripts]
+nse-data = "nsedata.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/NikhilSuthar/nse-data"
+Documentation = "https://NikhilSuthar.github.io/nse-data"
+Repository = "https://github.com/NikhilSuthar/nse-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/nse-data/issues"
+Changelog = "https://github.com/NikhilSuthar/nse-data/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

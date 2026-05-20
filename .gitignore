@@ -1,0 +1,47 @@
+# Internal reference data (not part of package)
+.data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.data
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Linting
+.ruff_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (don't commit downloaded CSVs)
+*.csv
+!tests/fixtures/*.csv
+!samples/**/*.csv
+
+# Jekyll / docs
+docs/_site/
+docs/.jekyll-cache/
+docs/Gemfile.lock
