@@ -126,12 +126,15 @@ def get(report_type: str, date: str) -> pd.DataFrame:
         decompressed = gzip.decompress(resp.content)
         df = pd.read_csv(io.BytesIO(decompressed))
     elif url.endswith(".zip"):
-        # ZIP (PR bundle) — extract first CSV
+        # ZIP (PR bundle) — extract the main pr file or first CSV
         with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
             csv_files = [n for n in zf.namelist() if n.lower().endswith(".csv")]
             if not csv_files:
                 raise RuntimeError(f"No CSV found in ZIP from {url}")
-            df = pd.read_csv(io.BytesIO(zf.read(csv_files[0])))
+            # For PR bundle, prefer the pr{DDMMYYYY}.csv file (main price data)
+            pr_file = [n for n in csv_files if n.lower().startswith("pr") and not n.lower().startswith("pre")]
+            target = pr_file[0] if pr_file else csv_files[0]
+            df = pd.read_csv(io.BytesIO(zf.read(target)))
     elif url.endswith(".DAT") or url.endswith(".T01"):
         # Fixed-width / pipe-delimited — try CSV parse with flexible separator
         df = pd.read_csv(io.StringIO(resp.text), sep=None, engine="python")
