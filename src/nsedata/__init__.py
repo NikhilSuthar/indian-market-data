@@ -2,25 +2,22 @@
 nse-data — Python library to download market data from NSE India.
 
 Module:
-    reports  — Daily reports from nsearchives.nseindia.com (bhavcopy, bhav, indices, etc.)
+    reports  — Daily reports from nsearchives.nseindia.com
 
 Quick Start:
     from nsedata import reports
 
-    # Download bhavcopy for a date
-    df = reports.get_bhavcopy("2026-04-17")
+    # Get any report as DataFrame
+    df = reports.get("sec_bhavdata_full", "2026-05-19")
+    df = reports.get("ind_close_all", "2026-05-19")
+    df = reports.get("cmvolt", "2026-05-19")
 
-    # Download sec_bhavdata_full
-    df = reports.get_sec_bhavdata("2026-04-17")
-
-    # All index closing values
-    df = reports.get_ind_close_all("2026-04-17")
-
-    # Market activity
-    df = reports.get_market_activity("2026-04-17")
+    # Download raw file to S3
+    uri = reports.download_report("security_master", "2026-05-19",
+                                  s3_bucket="my-bucket", s3_prefix="nse/")
 """
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 from nsedata.reports import (
     REPORT_PATTERNS,

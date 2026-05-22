@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nse-data"
-version = "0.2.2"
+version = "0.3.0"
 description = "Python library to download market data from NSE India — bhavcopy, indices close, and daily reports"
 readme = "README.md"
 license = "MIT"
@@ -32,6 +32,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+s3 = ["boto3>=1.28.0"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.scripts]
