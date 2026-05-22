@@ -23,7 +23,9 @@ Quick Start:
 __version__ = "0.2.0"
 
 from nsedata.reports import (
+    REPORT_PATTERNS,
     download_report,
+    get,
     get_bhavcopy,
     get_ind_close_all,
     get_market_activity,
