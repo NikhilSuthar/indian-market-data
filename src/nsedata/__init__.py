@@ -20,7 +20,7 @@ Quick Start:
     df = reports.get_market_activity("2026-04-17")
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from nsedata.reports import (
     REPORT_PATTERNS,
