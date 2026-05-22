@@ -1,7 +1,11 @@
 """
-NSE Daily Reports — Bhavcopy and other daily files from nseindia.com/all-reports.
+NSE Daily Reports — Bhavcopy and other daily files from nsearchives.nseindia.com.
 
 Data source: https://www.nseindia.com/all-reports
+
+This module downloads reports that are available as direct file URLs from
+nsearchives.nseindia.com. These work reliably from any environment including
+AWS Lambda, Snowflake, and other cloud platforms (no Cloudflare protection).
 
 Functions:
     get_bhavcopy(date) → DataFrame
@@ -24,12 +28,33 @@ from nsedata.session import create_nse_session
 NSE_ARCHIVES = "https://nsearchives.nseindia.com"
 
 # URL patterns for various reports
+# Date placeholders:
+#   {ddmmyy}     → 170426
+#   {ddmmyyyy}   → 17042026
+#   {yyyymmdd}   → 20260417
+#   {MON}        → APR (uppercase 3-letter month)
+#   {ddMONyyyy}  → 17APR2026
 REPORT_PATTERNS = {
     "pr": "/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
     "sec_bhavdata_full": "/products/content/sec_bhavdata_full_{ddmmyyyy}.csv",
-    "bhav_copy": "/content/historical/EQUITIES/2026/{MON}/cm{ddMONyyyy}bhav.csv.zip",
     "ind_close_all": "/content/indices/ind_close_all_{ddmmyyyy}.csv",
-    "market_activity": "/archives/equities/market-activity/MA{ddmmyy}.csv",
+    "market_activity": "/archives/equities/mkt/MA{ddmmyy}.csv",
+    "bhav_udiff": "/content/cm/BhavCopy_NSE_CM_0_0_0_{yyyymmdd}_F_0000.csv.zip",
+    "security_master": "/content/cm/NSE_CM_security_{ddmmyyyy}.csv.gz",
+    "cm_52wk": "/content/equities/CM_52_wk_High_low_{ddmmyyyy}.csv",
+    "short_selling": "/archives/equities/shortSelling/shortselling_{ddmmyyyy}.csv",
+    "cmvolt": "/archives/nsccl/volt/CMVOLT_{ddmmyyyy}.CSV",
+    "sme": "/archives/sme/sme{ddmmyyyy}.csv",
+    "pe": "/archives/equities/mkt/PE_{ddmmyy}.csv",
+    "reg_ind": "/archives/equities/mkt/REG_IND{ddmmyy}.csv",
+    "mto": "/archives/equities/mto/MTO_{ddmmyyyy}.DAT",
+    "fo_secban": "/archives/fo/sec_ban/fo_secban_{ddmmyyyy}.csv",
+    "fovolt": "/archives/nsccl/volt/FOVOLT_{ddmmyyyy}.csv",
+    "fo_sett": "/archives/nsccl/fao/FOSett_prce_{ddmmyyyy}.csv",
+    "co_volt": "/archives/nsccl/volt/CO_VOLT_{ddmmyyyy}.csv",
+    "x_volt": "/archives/nsccl/volt/X_VOLT_{ddmmyyyy}.csv",
+    "cd_sett": "/archives/nsccl/cd/CDSett_prce_{ddmmyyyy}.csv",
+    "trm_bc": "/archives/trep/TRM_BC{ddmmyyyy}.csv",
 }
 
 
@@ -98,21 +123,20 @@ def get_sec_bhavdata(date: str) -> pd.DataFrame:
     return df
 
 
-def get_pr_file(date: str) -> pd.DataFrame:
-    """Alias for get_bhavcopy — downloads the PR zip file."""
-    return get_bhavcopy(date)
-
-
 def get_ind_close_all(date: str) -> pd.DataFrame:
     """
     Download ind_close_all CSV — closing values for all indices on a given date.
+
+    This is the recommended way to get index data (OHLC for all 147+ indices)
+    in automated pipelines. Works from AWS Lambda, Snowflake, etc.
 
     Args:
         date: Date string in YYYY-MM-DD format e.g. "2026-04-17"
 
     Returns:
         DataFrame with columns: Index Name, Index Date, Open Index Value,
-        High Index Value, Low Index Value, Closing Index Value, etc.
+        High Index Value, Low Index Value, Closing Index Value,
+        Points Change, Change(%), Volume, Turnover (Rs. Cr.), P/E, P/B, Div Yield
 
     Example:
         >>> from nsedata import reports
@@ -143,7 +167,7 @@ def get_market_activity(date: str) -> pd.DataFrame:
         date: Date string in YYYY-MM-DD format e.g. "2026-04-17"
 
     Returns:
-        DataFrame with market activity data.
+        DataFrame with market activity data (turnover, advances/declines, etc.)
     """
     dt = _parse_date(date)
     session = create_nse_session()
@@ -166,9 +190,15 @@ def download_report(report_type: str, date: str, output_dir: str = ".") -> Path:
     Download any report type and save the raw file to disk.
 
     Args:
-        report_type: One of "pr", "sec_bhavdata_full", "ind_close_all", "market_activity"
+        report_type: One of the keys in REPORT_PATTERNS (see list below)
         date: Date string in YYYY-MM-DD format
         output_dir: Directory to save the file (default: current directory)
+
+    Available report types:
+        pr, sec_bhavdata_full, ind_close_all, market_activity,
+        bhav_udiff, security_master, cm_52wk, short_selling,
+        cmvolt, sme, pe, reg_ind, mto, fo_secban, fovolt,
+        fo_sett, co_volt, x_volt, cd_sett, trm_bc
 
     Returns:
         Path to the saved file.
@@ -182,14 +212,15 @@ def download_report(report_type: str, date: str, output_dir: str = ".") -> Path:
 
     if report_type not in REPORT_PATTERNS:
         raise ValueError(
-            f"Unknown report type: {report_type}. "
-            f"Available: {list(REPORT_PATTERNS.keys())}"
+            f"Unknown report type: '{report_type}'. "
+            f"Available: {sorted(REPORT_PATTERNS.keys())}"
         )
 
     pattern = REPORT_PATTERNS[report_type]
     url = NSE_ARCHIVES + pattern.format(
         ddmmyy=dt.strftime("%d%m%y"),
         ddmmyyyy=dt.strftime("%d%m%Y"),
+        yyyymmdd=dt.strftime("%Y%m%d"),
         ddMONyyyy=dt.strftime("%d%b%Y").upper(),
         MON=dt.strftime("%b").upper(),
     )

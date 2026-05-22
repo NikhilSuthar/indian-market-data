@@ -1,11 +1,10 @@
 """
 Session management for NSE websites.
-Handles Cloudflare bypass and cookie warming.
+Handles cookie warming for nsearchives.nseindia.com.
 """
 
 import time
 
-import cloudscraper
 import requests
 
 # Common browser headers
@@ -20,30 +19,13 @@ BROWSER_HEADERS = {
 }
 
 
-def create_niftyindices_session() -> cloudscraper.CloudScraper:
-    """
-    Create a session for niftyindices.com with Cloudflare bypass.
-    Warms up cookies by visiting the historical data page.
-    """
-    session = cloudscraper.create_scraper(
-        browser={"browser": "chrome", "platform": "windows", "mobile": False}
-    )
-    session.headers.update({
-        **BROWSER_HEADERS,
-        "Content-Type": "application/json; charset=UTF-8",
-        "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://niftyindices.com/reports/historical-data",
-        "Origin": "https://niftyindices.com",
-    })
-    session.get("https://niftyindices.com/reports/historical-data", timeout=30)
-    time.sleep(2)
-    return session
-
-
 def create_nse_session() -> requests.Session:
     """
-    Create a session for nseindia.com.
+    Create a session for nseindia.com / nsearchives.nseindia.com.
     Warms up cookies by visiting the main page and reports page.
+
+    This works reliably from any environment including AWS Lambda,
+    Snowflake external functions, and other cloud/serverless platforms.
     """
     session = requests.Session()
     session.headers.update({

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nse-data"
-version = "0.1.0"
-description = "Python library to download market data from NSE India — indices, bhavcopy, and reports"
+version = "0.2.0"
+description = "Python library to download market data from NSE India — bhavcopy, indices close, and daily reports"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -17,7 +17,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Developers",
-
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -30,11 +29,10 @@ classifiers = [
 dependencies = [
     "requests>=2.31.0",
     "pandas>=2.0.0",
-    "cloudscraper>=1.2.71",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "black", "ruff"]
+dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.scripts]
 nse-data = "nsedata.cli:main"
