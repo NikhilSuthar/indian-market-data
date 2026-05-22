@@ -17,7 +17,7 @@ pip install nse-data
 From TestPyPI (latest dev):
 
 ```bash
-pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nse-data==0.2.0
+pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nse-data==0.2.2
 ```
 
 ## Quick Start
@@ -25,11 +25,11 @@ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/
 ```python
 from nsedata import reports
 
-# Universal getter — works for all 20 report types, returns DataFrame
+# Universal getter — returns DataFrame for any report type
 df = reports.get("sec_bhavdata_full", "2026-05-19")
 df = reports.get("ind_close_all", "2026-05-19")
+df = reports.get("security_master", "2026-05-19")
 df = reports.get("cmvolt", "2026-05-19")
-df = reports.get("fo_secban", "2026-05-19")
 
 # Named convenience functions
 df = reports.get_bhavcopy("2026-05-19")
@@ -37,9 +37,9 @@ df = reports.get_sec_bhavdata("2026-05-19")
 df = reports.get_ind_close_all("2026-05-19")
 df = reports.get_market_activity("2026-05-19")
 
-# Download raw file to disk
+# Download raw file to disk (for .DAT/.T01 or archival)
 from nsedata.reports import download_report
-path = download_report("security_master", "2026-05-19", output_dir="./data")
+path = download_report("mto", "2026-05-19", output_dir="./data")
 ```
 
 ## Command Line
@@ -49,86 +49,96 @@ path = download_report("security_master", "2026-05-19", output_dir="./data")
 nse-data reports --type bhavcopy --date 2026-05-19
 nse-data reports --type sec_bhavdata --date 2026-05-19
 nse-data reports --type ind_close_all --date 2026-05-19
-nse-data reports --type market_activity --date 2026-05-19
 
-# Download raw file
+# Download raw file to disk
 nse-data download --type cmvolt --date 2026-05-19 --out ./data
 nse-data download --type security_master --date 2026-05-19 --out ./data
+nse-data download --type mto --date 2026-05-19 --out ./data
 ```
 
-## All 20 Supported Report Types
+## Complete Report Type Reference
 
-Every report type returns a **pandas DataFrame** via `reports.get(type, date)`:
+All report types work with `reports.get(type, date)` → returns `pandas.DataFrame`.
+
+Date format for all: **`YYYY-MM-DD`** (e.g. `"2026-05-19"`)
 
 ### Capital Market — Prices
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `pr` | Bhavcopy (PR) Daily Zip Bundle | ZIP→CSV |
-| `sec_bhavdata_full` | Full Bhavcopy with Delivery Data | CSV |
-| `bhav_udiff` | UDiFF Bhavcopy (ISIN-keyed, modern format) | ZIP→CSV |
-| `sme` | SME Platform EOD Market Data | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `pr` | `PR{DDMMYY}.zip` → `pr{DDMMYYYY}.csv` | ZIP containing 13 files | CSV (main price file extracted) |
+| `sec_bhavdata_full` | `sec_bhavdata_full_{DDMMYYYY}.csv` | CSV | CSV |
+| `bhav_udiff` | `BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip` | ZIP→CSV | CSV |
+| `sme` | `sme{DDMMYYYY}.csv` | CSV | CSV |
 
 ### Capital Market — Indices
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `ind_close_all` | All Indices Daily Close (147+ indices OHLC) | CSV |
-| `pe` | Index P/E, P/B & Dividend Yield | CSV |
-| `reg_ind` | Regional Indices Daily | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `ind_close_all` | `ind_close_all_{DDMMYYYY}.csv` | CSV | CSV |
+| `pe` | `PE_{DDMMYY}.csv` | CSV | CSV |
+| `reg_ind` | `REG_IND{DDMMYY}.csv` | CSV | CSV |
 
 ### Capital Market — Activity & Deals
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `market_activity` | Market Activity Report (turnover, breadth) | CSV |
-| `short_selling` | Short Selling Daily Report | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `market_activity` | `MA{DDMMYY}.csv` | CSV | CSV |
+| `short_selling` | `shortselling_{DDMMYYYY}.csv` | CSV | CSV |
 
 ### Capital Market — Reference & Master
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `security_master` | NSE CM Security Master (ISIN, face value, lot) | GZIP→CSV |
-| `cm_52wk` | 52-Week High/Low for all securities | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `security_master` | `NSE_CM_security_{DDMMYYYY}.csv.gz` | GZIP→CSV | CSV (decompressed in memory) |
+| `cm_52wk` | `CM_52_wk_High_low_{DDMMYYYY}.csv` | CSV | CSV |
 
 ### Capital Market — Risk & Margin
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `cmvolt` | CM Security Volatility (annualized + daily) | CSV |
-| `mto` | Multiple Trade Orders (delivery breakdown) | DAT |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `cmvolt` | `CMVOLT_{DDMMYYYY}.CSV` | CSV | CSV |
+| `mto` | `MTO_{DDMMYYYY}.DAT` | DAT (fixed-width) | ⚠️ Best-effort parse; use `download_report()` for raw file |
 
 ### Derivatives — Equity F&O
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `fo_secban` | F&O Security Ban List | CSV |
-| `fovolt` | F&O Volatility | CSV |
-| `fo_sett` | F&O Settlement Prices | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `fo_secban` | `fo_secban_{DDMMYYYY}.csv` | CSV | CSV |
+| `fovolt` | `FOVOLT_{DDMMYYYY}.csv` | CSV | CSV |
+| `fo_sett` | `FOSett_prce_{DDMMYYYY}.csv` | CSV | CSV |
 
 ### Derivatives — Commodity & Currency
 
-| Type | Description | Format |
-|------|-------------|--------|
-| `co_volt` | Commodity Volatility | CSV |
-| `x_volt` | Currency Volatility | CSV |
-| `cd_sett` | Currency Derivatives Settlement Prices | CSV |
-| `trm_bc` | Tri-Party Repo Bhavcopy | CSV |
+| Input Param | NSE File Name | Source Format | Parsed As |
+|-------------|---------------|---------------|-----------|
+| `co_volt` | `CO_VOLT_{DDMMYYYY}.csv` | CSV | CSV |
+| `x_volt` | `X_VOLT_{DDMMYYYY}.csv` | CSV | CSV |
+| `cd_sett` | `CDSett_prce_{DDMMYYYY}.csv` | CSV | CSV |
+| `trm_bc` | `TRM_BC{DDMMYYYY}.csv` | CSV | CSV |
+
+### ⚠️ DAT/T01 Files
+
+Files with `.DAT` or `.T01` extensions are fixed-width or pipe-delimited formats. `reports.get()` attempts to auto-detect the delimiter, but results may not be clean. For these files, prefer:
+
+```python
+# Download raw file, then parse manually
+path = reports.download_report("mto", "2026-05-19", "./data")
+# Parse with your own logic
+df = pd.read_fwf(path)  # or custom parsing
+```
 
 ## Source URLs
 
-All data comes from `nsearchives.nseindia.com` (direct file downloads, no Cloudflare):
+All data comes from `nsearchives.nseindia.com` — direct file downloads, no Cloudflare:
 
 ```
 https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{DDMMYYYY}.csv
 https://nsearchives.nseindia.com/content/indices/ind_close_all_{DDMMYYYY}.csv
+https://nsearchives.nseindia.com/content/cm/NSE_CM_security_{DDMMYYYY}.csv.gz
 https://nsearchives.nseindia.com/archives/nsccl/volt/CMVOLT_{DDMMYYYY}.CSV
 https://nsearchives.nseindia.com/archives/fo/sec_ban/fo_secban_{DDMMYYYY}.csv
-https://nsearchives.nseindia.com/content/cm/NSE_CM_security_{DDMMYYYY}.csv.gz
-...
 ```
-
-Date format for all functions: **`YYYY-MM-DD`** (e.g. `"2026-05-19"`)
 
 ## Cloud / Lambda Usage
 
@@ -151,6 +161,7 @@ def handler(event, context):
 - Data is only available for **trading days** (weekends/holidays return HTTP errors)
 - NSE may rate-limit aggressive requests — add delays for bulk downloads
 - URL patterns may change without notice — pin your version
+- `.DAT`/`.T01` files may not parse cleanly as DataFrames — use `download_report()` for raw files
 
 ## Dependencies
 
