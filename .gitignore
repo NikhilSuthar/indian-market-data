@@ -1,6 +1,11 @@
 # Internal reference data (not part of package)
 .data/
 
+# Lambda layer build artifacts
+.lambda_layer/layer_build/
+.lambda_layer/*.zip
+.lambda_layer/
+
 # Python
 __pycache__/
 *.py[cod]
