@@ -77,19 +77,22 @@ REPORT_PATTERNS = {
     "co_contract": "/content/com/NSE_COM_contract_{ddmmyyyy}.csv.gz",
 
     # ===== Derivatives: Currency =====
-    "x_volt": "/archives/nsccl/volt/X_VOLT_{ddmmyyyy}.csv",
+    "x_volt": "/archives/nsccl/volt/X_VOLT_{ddmmyyyy}.CSV",
     "cd_sett": "/archives/nsccl/cd/CDSett_prce_{ddmmyyyy}.csv",
     "cd_bhav_udiff": "/content/cd/BhavCopy_NSE_CD_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "cd_contract": "/content/cd/NSE_CD_contract_{ddmmyyyy}.csv.gz",
 
     # ===== Debt =====
     "trm_bc": "/archives/trep/TRM_BC{ddmmyyyy}.csv",
+}
 
-    # ===== PDF Reports (download only, not parseable as DataFrame) =====
-    "index_dashboard_pdf": "/reports/indices/Index_Dashboard_{MON}{YYYY}.pdf",
-    "fi_index_dashboard_pdf": "/reports/indices/Index_Dashboard_FixedIncome_{MON}{YYYY}.pdf",
-    "passive_fund_pdf": "/reports/indices/NiftyPassiveFundReport-{mon}{YYYY}-B2B-HR.pdf",
-    "riskometer_pdf": "/reports/indices/NSE_Indices_Riskometer_{YYYY}-{mm}.pdf",
+# Reports hosted on www.nseindia.com (different base URL, need portal session)
+# These are PDFs/monthly reports — not on nsearchives
+_NSEINDIA_PATTERNS = {
+    "index_dashboard_pdf": "https://www.nseindia.com/reports/indices/Index_Dashboard_{MON}{YYYY}.pdf",
+    "fi_index_dashboard_pdf": "https://www.nseindia.com/reports/indices/Index_Dashboard_FixedIncome_{MON}{YYYY}.pdf",
+    "passive_fund_pdf": "https://www.nseindia.com/reports/indices/NiftyPassiveFundReport-{mon}{YYYY}-B2B-HR.pdf",
+    "riskometer_pdf": "https://www.nseindia.com/reports/indices/NSE_Indices_Riskometer_{YYYY}-{mm}.pdf",
 }
 
 # Report types that are binary/non-parseable (PDF, DAT, T01)
@@ -133,6 +136,13 @@ def get(report_type: str, date: str) -> pd.DataFrame:
         raise ValueError(
             f"'{report_type}' is a PDF/binary file and cannot be parsed as DataFrame. "
             f"Use download_report('{report_type}', '{date}', output_dir) instead."
+        )
+
+    all_patterns = {**REPORT_PATTERNS, **_NSEINDIA_PATTERNS}
+    if report_type not in all_patterns:
+        raise ValueError(
+            f"Unknown report type: '{report_type}'. "
+            f"Available: {sorted(all_patterns.keys())}"
         )
 
     content, url = _fetch_raw(report_type, date)
@@ -260,16 +270,24 @@ def get_market_activity(date: str) -> pd.DataFrame:
 def _fetch_raw(report_type: str, date: str) -> tuple:
     """Fetch raw bytes for a report. Returns (content_bytes, url)."""
     dt = _parse_date(date)
-    session = create_nse_session()
 
-    if report_type not in REPORT_PATTERNS:
+    all_patterns = {**REPORT_PATTERNS, **_NSEINDIA_PATTERNS}
+
+    if report_type not in all_patterns:
         raise ValueError(
             f"Unknown report type: '{report_type}'. "
-            f"Available: {sorted(REPORT_PATTERNS.keys())}"
+            f"Available: {sorted(all_patterns.keys())}"
         )
 
-    pattern = REPORT_PATTERNS[report_type]
-    url = NSE_ARCHIVES + pattern.format(
+    pattern = all_patterns[report_type]
+
+    # Build URL — nsearchives patterns are relative, nseindia patterns are absolute
+    if pattern.startswith("http"):
+        url = pattern
+    else:
+        url = NSE_ARCHIVES + pattern
+
+    url = url.format(
         ddmmyy=dt.strftime("%d%m%y"),
         ddmmyyyy=dt.strftime("%d%m%Y"),
         yyyymmdd=dt.strftime("%Y%m%d"),
@@ -280,6 +298,7 @@ def _fetch_raw(report_type: str, date: str) -> tuple:
         YYYY=dt.strftime("%Y"),
     )
 
+    session = create_nse_session()
     resp = session.get(url, timeout=30)
     if resp.status_code != 200:
         raise RuntimeError(
