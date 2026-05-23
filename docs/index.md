@@ -6,100 +6,74 @@ nav_order: 1
 
 # nse-data
 
-**Python library to download market data from NSE India**
-
-Download historical index data, daily bhavcopy, security-wise delivery data, and market activity reports — all as clean pandas DataFrames.
-
----
-
-## Why nse-data?
-
-NSE India does not provide a public REST API. Getting market data requires navigating multiple websites, handling Cloudflare protection, managing session cookies, and parsing inconsistent file formats.
-
-`nse-data` handles all of that for you:
-
-- **One-line data access** — get any NSE dataset as a pandas DataFrame
-- **Cloudflare bypass** — automatically handles JS challenges on niftyindices.com
-- **Session management** — cookie warming for nseindia.com
-- **Clean output** — standardized column names, parsed dates, numeric types
-- **CLI included** — download data from the terminal without writing Python
-
----
-
-## Quick Install
+Download NSE India market data as **pandas DataFrames** or raw files to **local disk / S3**.
 
 ```bash
 pip install nse-data
 ```
 
-## Quick Example
+```python
+from nsedata import nse
+
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+```
+
+---
+
+## How It Works
+
+```
+nse.get(category, subcategory, dataset, date)
+          │           │           │        └── "2026-05-22" or "2026-05"
+          │           │           └── dataset key (e.g. "sec_bhavdata_full")
+          │           └── sub-section (e.g. "equities_sme", "equity")
+          └── top category ("capital_market", "derivatives", "debt", "egr")
+```
+
+All datasets are downloaded from `nsearchives.nseindia.com` — direct file URLs, no Cloudflare, works from AWS Lambda and any cloud.
+
+---
+
+## Dataset Categories
+
+| Category | Sub-section | Datasets | Description |
+|----------|------------|----------|-------------|
+| [Capital Market — Equities & SME](capital-market) | `equities_sme` | 26 | Daily prices, volatility, deals, master data |
+| [Capital Market — Indices](capital-market-indices) | `indices` | 2 | All-indices close, top movers |
+| [Capital Market — Mutual Fund](capital-market-mf) | `mutual_fund` | 1 | NSCCL annexures |
+| [Capital Market — SLB](capital-market-slb) | `slb` | 10 | Securities Lending & Borrowing |
+| [Derivatives — Equity F&O](derivatives-equity) | `equity` | 8 | F&O bhavcopy, contracts, ban list |
+| [Derivatives — Commodity](derivatives-commodity) | `commodity` | 3 | Commodity bhavcopy, contracts |
+| [Derivatives — Currency](derivatives-currency) | `currency` | 3 | CD bhavcopy, contracts, client positions |
+| [Derivatives — Interest Rate](derivatives-ird) | `interest_rate` | 9 | IRF, volatility, FPI/FII positions |
+| [Debt — Corporate](debt-corporate) | `corporate` | 13 | CB trades, settlements, SDT |
+| [Debt — Debt Segment](debt-segment) | `debt_segment` | 4 | WDM list, daily/weekly bundles |
+| [Debt — Tri-Party Repo](debt-trm) | `tri_party_repo` | 1 | TRM bhavcopy |
+| [EGR](egr) | `egr` | 1 | Electronic Gold Receipt bhavcopy |
+
+---
+
+## Quick Reference
 
 ```python
-from nsedata import indices, reports
+from nsedata import nse
 
-# NIFTY 50 historical OHLC data
-df = indices.get_historical("NIFTY 50", "01-Apr-2026", "15-May-2026")
+# List all datasets
+nse.list_datasets()
 
-# Daily bhavcopy with delivery data
-df = reports.get_sec_bhavdata("2026-04-17")
+# Filter by category
+nse.list_datasets(category="capital_market")
+
+# Get dataset info
+nse.get_config_info("capital_market", "equities_sme", "sec_bhavdata_full")
+
+# Download to S3 (IAM role — no credentials in Lambda)
+nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
+             s3_bucket="my-bucket", s3_prefix="raw/nse/")
 ```
 
 ---
 
-## Data Sources
+## Source
 
-| Source | Website | Data |
-|--------|---------|------|
-| NSE Indices | [niftyindices.com](https://niftyindices.com/reports/historical-data) | Historical Price Index, Total Return Index |
-| NSE Archives | [nsearchives.nseindia.com](https://www.nseindia.com/all-reports) | Bhavcopy, Security Bhavdata, Index Close, Market Activity |
-
----
-
-## Supported Indices
-
-All indices available on [niftyindices.com](https://niftyindices.com/reports/historical-data):
-
-### Broad Market
-- NIFTY 50, NIFTY NEXT 50, NIFTY 100, NIFTY 200, NIFTY 500, NIFTY MIDCAP 50, NIFTY MIDCAP 100
-
-### Sectoral
-- NIFTY BANK, NIFTY IT, NIFTY AUTO, NIFTY PHARMA, NIFTY FMCG, NIFTY METAL, NIFTY REALTY, NIFTY ENERGY, NIFTY INFRA, NIFTY PSE, NIFTY MEDIA
-
-### Thematic
-- NIFTY COMMODITIES, NIFTY CONSUMPTION, NIFTY CPSE, NIFTY FIN SERVICE, NIFTY GROWSECT 15, NIFTY100 QUALITY 30, NIFTY MIDCAP LIQ 15
-
-### Fixed Income
-- Nifty 8-13 yr G-Sec, Nifty 10 yr Benchmark G-Sec, Nifty 4-8 yr G-Sec Index
-
----
-
-## Architecture
-
-```
-nse-data (PyPI package)
-│
-├── nsedata.indices     → niftyindices.com (Cloudflare-protected)
-│   ├── get_historical()   Price Index OHLC
-│   └── get_tri()          Total Return Index
-│
-├── nsedata.reports     → nsearchives.nseindia.com
-│   ├── get_bhavcopy()        PR zip file
-│   ├── get_sec_bhavdata()    Full security bhavcopy
-│   ├── get_ind_close_all()   All index closing values
-│   ├── get_market_activity() Market activity report
-│   └── download_report()     Raw file download
-│
-└── nsedata.session     → Session management
-    ├── create_niftyindices_session()  Cloudflare bypass
-    └── create_nse_session()           Cookie warming
-```
-
----
-
-## Links
-
-- **PyPI**: [pypi.org/project/nse-data](https://pypi.org/project/nse-data/)
-- **GitHub**: [github.com/NikhilSuthar/nse-data](https://github.com/NikhilSuthar/nse-data)
-- **Issues**: [github.com/NikhilSuthar/nse-data/issues](https://github.com/NikhilSuthar/nse-data/issues)
-- **NSE India**: [nseindia.com](https://www.nseindia.com)
-- **Nifty Indices**: [niftyindices.com](https://niftyindices.com)
+All data from [nseindia.com/all-reports](https://www.nseindia.com/all-reports) → served via [nsearchives.nseindia.com](https://nsearchives.nseindia.com)
