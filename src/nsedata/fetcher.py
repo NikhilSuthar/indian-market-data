@@ -52,6 +52,15 @@ def _build_session() -> requests.Session:
     return session
 
 
+def _check_portal_only(cfg: DatasetConfig, dataset: str) -> None:
+    """Raise ValueError if a dataset requires NSE portal session."""
+    if getattr(cfg, "portal_only", False) or not cfg.url_pattern:
+        raise ValueError(
+            f"'{dataset}' requires NSE portal session and is not available via direct URL.\n"
+            f"These files must be downloaded manually from nseindia.com/all-reports"
+        )
+
+
 def _format_url(cfg: DatasetConfig, date_str: str, **kwargs) -> str:
     """
     Build the full URL from config pattern and date.
@@ -61,6 +70,7 @@ def _format_url(cfg: DatasetConfig, date_str: str, **kwargs) -> str:
         date_str: "YYYY-MM-DD" for daily, "YYYY-MM" for monthly
         **kwargs: extra params like snapshot=1 for C_VAR1
     """
+    _check_portal_only(cfg, cfg.name)
     pattern = cfg.url_pattern
     base = cfg.base_url if cfg.base_url else NSE_ARCHIVES
 
