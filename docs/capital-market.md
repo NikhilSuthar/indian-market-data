@@ -8,195 +8,248 @@ nav_order: 2
 
 **Category:** `capital_market` | **Sub-section:** `equities_sme`
 
-NSE portal path: All Reports → Capital Market → Equities
+NSE portal: [All Reports → Capital Market → Equities](https://www.nseindia.com/all-reports)
+
+---
+
+## Status Key
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ | Confirmed working — DataFrame + Download |
+| ⬇️ | Download only (no DataFrame — DAT/T01 format) |
+| 🕐 | T-1 only — available previous trading day (settlement files) |
+| ⚙️ | Requires extra param (e.g. settno) |
+| ⏭ | Portal-only — download from NSE website manually |
 
 ---
 
 ## Daily Datasets
 
-### Bhavcopy (PR) ZIP Bundle
-Full daily price bundle — ZIP containing 13 files: OHLC prices, corporate actions, announcements, ETF data, market cap, gainers/losers.
+### ✅ Bhavcopy (PR) Daily ZIP Bundle
+ZIP containing 13 files. `reports.get()` extracts the main `pr{date}.csv` (OHLC prices).
 
 ```python
-# Returns main pr{date}.csv as DataFrame (OHLC for all securities)
 df = nse.get("capital_market", "equities_sme", "bhavcopy_pr", "2026-05-22")
-
-# Download full 13-file ZIP to disk
 nse.download("capital_market", "equities_sme", "bhavcopy_pr", "2026-05-22", output_dir="./data")
 ```
-```bash
-nse-data get capital_market equities_sme bhavcopy_pr 2026-05-22
-nse-data dl  capital_market equities_sme bhavcopy_pr 2026-05-22 --out ./data
-```
-**File:** `PR{DDMMYY}.zip` → extracts `pr{DDMMYYYY}.csv`  
-**Columns:** `MKT, SECURITY, PREV_CL_PR, OPEN_PRICE, HIGH_PRICE, LOW_PRICE, CLOSE_PRICE, NET_TRDVAL, NET_TRDQTY, TRADES`
+`PR{DDMMYY}.zip` | 3,500+ rows × 14 cols
 
 ---
 
-### Securities Bhavcopy with Delivery (Full)
-**Recommended daily price file.** OHLC + delivery quantity/% for every security.
+### ✅ Securities Bhavcopy with Delivery (Full) — **Recommended**
+Most comprehensive daily price file. OHLC + delivery qty/% for every security.
 
 ```python
 df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
 df[df["SYMBOL"] == "RELIANCE"]
 ```
-```bash
-nse-data get capital_market equities_sme sec_bhavdata_full 2026-05-22
-```
-**File:** `sec_bhavdata_full_{DDMMYYYY}.csv`  
-**Columns:** `SYMBOL, SERIES, DATE1, PREV_CLOSE, OPEN_PRICE, HIGH_PRICE, LOW_PRICE, CLOSE_PRICE, AVG_PRICE, TTL_TRD_QNTY, TURNOVER_LACS, NO_OF_TRADES, DELIV_QTY, DELIV_PER`
+`sec_bhavdata_full_{DDMMYYYY}.csv` | 3,200+ rows × 15 cols
 
 ---
 
-### CM Bhavcopy (UDiFF / ISIN format)
-Modern ISIN-keyed bhavcopy. Preferred for new integrations — includes lot size, tick size, ISIN.
+### ✅ CM Bhavcopy (UDiFF / ISIN format)
+Modern ISIN-keyed bhavcopy. Preferred for new integrations.
 
 ```python
 df = nse.get("capital_market", "equities_sme", "bhav_udiff", "2026-05-22")
 ```
-```bash
-nse-data get capital_market equities_sme bhav_udiff 2026-05-22
-```
-**File:** `BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip`
+`BhavCopy_NSE_CM_0_0_0_{YYYYMMDD}_F_0000.csv.zip` | 3,374 rows × 34 cols
 
 ---
 
-### NSE CM Security Master
-ISIN, face value, series, lot size, issued capital for all securities. Reference for SYMBOL→ISIN lookup.
+### ✅ NSE CM Security Master
+ISIN, face value, series, lot size for all securities. Reference for SYMBOL→ISIN lookup.
 
 ```python
 df = nse.get("capital_market", "equities_sme", "security_master", "2026-05-22")
 df[df["TckrSymb"] == "RELIANCE"]
 ```
-```bash
-nse-data get capital_market equities_sme security_master 2026-05-22
-```
-**File:** `NSE_CM_security_{DDMMYYYY}.csv.gz` (GZIP → decompressed in memory)  
-**~35,000 rows × 120 cols**
+`NSE_CM_security_{DDMMYYYY}.csv.gz` | 35,000+ rows × 120 cols
 
 ---
 
-### Market Activity Report
-Daily market summary: turnover, advances/declines, circuit hits.
+### ✅ Market Activity Report
+Daily market summary: turnover, advances/declines.
 
 ```python
 df = nse.get("capital_market", "equities_sme", "market_activity", "2026-05-22")
 ```
-**File:** `MA{DDMMYY}.csv`
+`MA{DDMMYY}.csv`
 
 ---
 
-### CM Security Volatility (CMVOLT)
+### ✅ CM Security Volatility (CMVOLT)
 Per-security annualized and daily volatility for VaR margin.
 
 ```python
 df = nse.get("capital_market", "equities_sme", "cmvolt", "2026-05-22")
 ```
-**File:** `CMVOLT_{DDMMYYYY}.CSV`  
-**Columns:** `Date, Symbol, Underlying Close Price, Prev Day Close, Log Returns, Prev Volatility, Daily Volatility, Annualised Volatility`
+`CMVOLT_{DDMMYYYY}.CSV` | 4,818 rows × 8 cols
 
 ---
 
-### Short Selling Report
-Per-security short-sold quantity by members.
+### ✅ Short Selling Report
 
 ```python
 df = nse.get("capital_market", "equities_sme", "short_selling", "2026-05-22")
 ```
-**File:** `shortselling_{DDMMYYYY}.csv`
+`shortselling_{DDMMYYYY}.csv` | 85 rows × 4 cols
 
 ---
 
-### Multiple Trade Orders (MTO)
-Delivery qty vs traded qty per security. Input for delivery % computation.
-
-```python
-df = nse.get("capital_market", "equities_sme", "mto", "2026-05-22")
-```
-**File:** `MTO_{DDMMYYYY}.DAT` (fixed-width, best-effort parse)
-
----
-
-### 52-Week High/Low
-Securities hitting new 52-week high or low (adjusted for corporate actions).
-
-```python
-df = nse.get("capital_market", "equities_sme", "52wk_high_low", "2026-05-22")
-```
-**File:** `CM_52_wk_High_low_{DDMMYYYY}.csv` (skips 2 disclaimer rows)
-
----
-
-### Block Deals / Bulk Deals
-Disclosed deals (static files, updated daily).
+### ✅ Block Deals / Bulk Deals (static files, updated daily)
 
 ```python
 df = nse.get("capital_market", "equities_sme", "block_deals", "2026-05-22")
 df = nse.get("capital_market", "equities_sme", "bulk_deals", "2026-05-22")
 ```
-**Files:** `block.csv`, `bulk.csv`
+`block.csv` | `bulk.csv`
 
 ---
 
-### Index P/E, P/B & Dividend Yield
-Daily P/E, P/B and dividend yield per index constituent.
+### ✅ Index P/E, P/B & Dividend Yield
 
 ```python
 df = nse.get("capital_market", "equities_sme", "pe", "2026-05-22")
 ```
-**File:** `PE_{DDMMYY}.csv`
+`PE_{DDMMYY}.csv` | 2,181 rows × 3 cols
 
 ---
 
-### Regional Indices / Regional Indices Secondary
-Daily regional and sectoral index values with surveillance flags.
+### ✅ Regional Indices / Regional Indices Secondary
 
 ```python
 df = nse.get("capital_market", "equities_sme", "reg_ind",  "2026-05-22")
 df = nse.get("capital_market", "equities_sme", "reg1_ind", "2026-05-22")
 ```
+`REG_IND{DDMMYY}.csv` / `REG1_IND{DDMMYY}.csv` | 2,935 rows
 
 ---
 
-### SME Platform EOD / SME Price Bands
+### ✅ SME Platform EOD / SME Price Bands
 
 ```python
 df = nse.get("capital_market", "equities_sme", "sme",       "2026-05-22")
 df = nse.get("capital_market", "equities_sme", "sme_bands", "2026-05-22")
 ```
+`sme{DDMMYYYY}.csv` | 442 rows × 14 cols
 
 ---
 
-### Other Daily Datasets
-
-| Dataset Key | Description | File |
-|-------------|-------------|------|
-| `eq_band_changes` | Price band reclassifications | `eq_band_changes_{DDMMYYYY}.csv` |
-| `sec_list` | Current security list | `sec_list_{DDMMYYYY}.csv` |
-| `series_change` | Series reclassifications | `series_change.csv` |
-| `mf_var` | MF units VaR for collateral | `MF_VAR_{DDMMYYYY}.csv` |
-| `appsec_collval` | Approved security collateral valuation | `APPSEC_COLLVAL_{DDMMYYYY}.csv` |
-| `csqr` | Client Segregation Quarterly Report | `CSQR_M_{DDMMYYYY}.csv` |
-| `c_stt` | Securities Transaction Tax | `C_STT_{DDMMYYYY}.csv` |
-| `c_stt_ind` | STT indicator per security | `C_STT_IND_{DDMMYYYY}.csv` |
-| `cm_latency` | CM latency statistics | `CM_Latency_stats{DDMMYYYY}.csv` |
-| `fcm_bc` | FCM Interim Bhavcopy (DAT) | `FCM_INTRM_BC{DDMMYYYY}.DAT` |
-| `corpbond` | Corporate bond EOD (from PR ZIP) | extracted from `PR{DDMMYY}.zip` |
-| `mrg_trading` | Margin trading facility | `mrg_trading_{DDMMYY}.zip` |
-| `auction_buy` | Auction buy results | `AUB_{settno}_{DDMMYYYY}.csv` |
-
-### Download-Only (no DataFrame)
+### ✅ Equity Price Band Changes / Security List / Series Change
 
 ```python
-# VaR Margin File — 6 intraday snapshots (DAT format)
-nse.download("capital_market", "equities_sme", "cvar1", "2026-05-22",
-             snapshot=1, output_dir="./data")  # snapshot=1..6
+df = nse.get("capital_market", "equities_sme", "eq_band_changes", "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "sec_list",        "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "series_change",   "2026-05-22")
 ```
 
-### Monthly Datasets
+---
+
+### ✅ Mutual Fund VaR / APPSEC Collateral Valuation / C_STT / C_STT_IND
 
 ```python
-# C_CATG — Security categorisation for VaR
-nse.download("capital_market", "equities_sme", "c_catg", "2026-05",
-             output_dir="./data")
+df = nse.get("capital_market", "equities_sme", "mf_var",        "2026-05-22")  # 7,037 rows
+df = nse.get("capital_market", "equities_sme", "appsec_collval","2026-05-22")  # 948 rows
+df = nse.get("capital_market", "equities_sme", "c_stt",         "2026-05-22")  # 12,397 rows
+df = nse.get("capital_market", "equities_sme", "c_stt_ind",     "2026-05-22")  # 1,067 rows
 ```
+
+---
+
+### ✅ FCM Interim Bhavcopy (DAT — best-effort parse)
+
+```python
+df = nse.get("capital_market", "equities_sme", "fcm_bc", "2026-05-22")
+# Or download raw DAT:
+nse.download("capital_market", "equities_sme", "fcm_bc", "2026-05-22", output_dir="./data")
+```
+`FCM_INTRM_BC{DDMMYYYY}.DAT` | 3,373 rows × 17 cols
+
+---
+
+### ⬇️ VaR Margin File (C_VAR1) — 6 intraday snapshots
+
+```python
+# Download only — DAT format, snapshot 1–6
+for snap in range(1, 7):
+    nse.download("capital_market", "equities_sme", "cvar1", "2026-05-22",
+                 snapshot=snap, output_dir="./data")
+```
+`C_VAR1_{DDMMYYYY}_{1..6}.DAT`
+
+---
+
+### ✅ Corporate Bond (from PR ZIP)
+
+```python
+df = nse.get("capital_market", "equities_sme", "corpbond", "2026-05-22")
+```
+Extracted from `PR{DDMMYY}.zip` | 128 rows × 15 cols
+
+---
+
+### 🕐 CM Latency Statistics (T-1)
+Only published the next trading day.
+
+```python
+df = nse.get("capital_market", "equities_sme", "cm_latency", "2026-05-21")  # use T-1 date
+```
+
+---
+
+### 🕐 Margin Trading Facility Report (T-1 / intermittent)
+
+```python
+nse.download("capital_market", "equities_sme", "mrg_trading", "2026-05-20", output_dir="./data")
+```
+`mrg_trading_{DDMMYY}.zip`
+
+---
+
+### ⚙️ Auction Buy File (requires settno)
+Settlement number changes daily. Get it from NSE website.
+
+```python
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22", settno="2026094")
+```
+`AUB_{YYYYSETTNO}_{DDMMYYYY}.csv`
+
+---
+
+### ⚙️ CSQR (requires settno)
+
+```python
+df = nse.get("capital_market", "equities_sme", "csqr", "2026-05-22", settno="2026093")
+```
+`CSQR_M{YYYYSETTNO}_{DDMMYYYY}.csv` | 13,000+ rows
+
+---
+
+### ⬇️ Daily Settlement Statistics (DOC — download only)
+
+```python
+nse.download("capital_market", "equities_sme", "daily_settlement_doc", "2026-05-22", output_dir="./data")
+```
+
+---
+
+## Monthly Datasets
+
+### ✅ CM Security Categorisation (C_CATG)
+
+```python
+df = nse.get("capital_market", "equities_sme", "c_catg", "2026-05")
+```
+`C_CATG_{MON}{YYYY}.T01` | 13,580 rows
+
+---
+
+## Portal-Only (⏭ no direct archive URL)
+
+Download manually from [nseindia.com/all-reports](https://www.nseindia.com/all-reports):
+
+| Dataset | Description |
+|---------|-------------|
+| `52wk_high_low` | 52-Week High/Low (portal API) |

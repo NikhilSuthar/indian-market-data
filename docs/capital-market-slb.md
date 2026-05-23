@@ -8,79 +8,86 @@ nav_order: 4
 
 **Category:** `capital_market` | **Sub-section:** `slb`
 
-NSE portal path: All Reports → Capital Market → Securities Lending and Borrowing
+NSE portal: [All Reports → Capital Market → SLB](https://www.nseindia.com/all-reports)
 
 ---
 
 ## Daily Datasets
 
-### SLB Eligible Securities List
-Securities eligible for lending/borrowing with eligibility type flags.
+### ✅ SLB Eligible Securities List — 29,000+ rows
 
 ```python
 df = nse.get("capital_market", "slb", "slb_elg_sec", "2026-05-22")
 ```
-**File:** `SLB_ELG_SEC_{DDMMYYYY}.csv`  
-**Columns:** `Sr.No., Symbol, Series, Normal Eligibility, Recall Eligibility, Repay Eligibility, Market Type`
+`SLB_ELG_SEC_{DDMMYYYY}.csv` | 29,093 rows × 7 cols
 
 ---
 
-### SLB Open Positions
-Outstanding positions at member/client level.
+### ✅ SLB Open Positions — 559 rows
 
 ```python
 df = nse.get("capital_market", "slb", "slb_openpos", "2026-05-22")
 ```
-**File:** `slb_openpos_{DDMMYYYY}.csv`
+`slb_openpos_{DDMMYYYY}.csv` | 559 rows × 4 cols
 
 ---
 
-### SLB Foreclosure Report
-Foreclosure events with corporate action details.
+### ✅ SLB Foreclosure Report — 11 rows
 
 ```python
 df = nse.get("capital_market", "slb", "slb_foreclosure", "2026-05-22")
 ```
-**File:** `Forclosure_SLB_{YYYYMMDD}.CSV`
+`Forclosure_SLB_{YYYYMMDD}.CSV` | 11 rows × 13 cols
 
 ---
 
-### SLB Bhavcopy (SLBM_BC) — Download Only
-Daily SLB trade summary. Fixed-width DAT.
+### ⬇️ SLB Bhavcopy (SLBM_BC) — Download only (DAT)
 
 ```python
 nse.download("capital_market", "slb", "slb_bc", "2026-05-22", output_dir="./data")
 ```
-**File:** `SLBM_BC_{DDMMYYYY}.DAT`
+`SLBM_BC_{DDMMYYYY}.DAT`
 
 ---
 
-### SLB VaR Margin File — Download Only
+### ⬇️ SLB VaR Margin File — Download only (DAT)
 
 ```python
 nse.download("capital_market", "slb", "slb_var", "2026-05-22", output_dir="./data")
 ```
-**File:** `C_VAR1_SLB_{DDMMYYYY}_1.DAT`
+`C_VAR1_SLB_{DDMMYYYY}_1.DAT`
 
 ---
 
-## Weekly / Monthly Datasets
+## Monthly Datasets
 
-### SLB Positions / Transactions (Excel)
+### ✅ SLB Monthly Position Limits (4 files)
+
 ```python
-df = nse.get("capital_market", "slb", "slb_positions",    "2026-05-22")
-df = nse.get("capital_market", "slb", "slb_transactions",  "2026-05-22")
+df = nse.get("capital_market", "slb", "slb_cli",  "2026-05")  # Client limits — 1,048 rows
+df = nse.get("capital_market", "slb", "slb_fopl", "2026-05")  # Fund-of-pool — 1,048 rows
+df = nse.get("capital_market", "slb", "slb_mpl",  "2026-05")  # Member limits — 1,048 rows
+df = nse.get("capital_market", "slb", "slb_ppl",  "2026-05")  # Pool limits   — 1,048 rows
 ```
-**Files:** `slbs_positions_{DDMMYYYY}.xls`, `slbs_transactions_{DDMMYYYY}.xls`
+Files: `slbs_{cli/fopl/mpl/ppl}_{Mon}{YYYY}.csv`
 
 ---
 
-### Monthly Position Limits
+### ✅ SLB Transaction Data (Monthly) — 326 rows
+Note: Current month may be delayed; previous month is always available.
 
 ```python
-df = nse.get("capital_market", "slb", "slb_cli",  "2026-05")  # Client limits
-df = nse.get("capital_market", "slb", "slb_fopl", "2026-05")  # Fund-of-pool limits
-df = nse.get("capital_market", "slb", "slb_mpl",  "2026-05")  # Member limits
-df = nse.get("capital_market", "slb", "slb_ppl",  "2026-05")  # Pool limits
-df = nse.get("capital_market", "slb", "slb_transaction_data", "2026-05")  # Monthly transactions
+df = nse.get("capital_market", "slb", "slb_transaction_data", "2026-04")  # previous month
 ```
+`SLB_Transaction_Data_{Mon}{YYYY}.csv` | 326 rows × 6 cols
+
+---
+
+## Portal-Only (⏭ no direct archive URL)
+
+Download manually from [nseindia.com/all-reports](https://www.nseindia.com/all-reports):
+
+| Dataset | Description |
+|---------|-------------|
+| `slb_positions` | SLB Positions (Weekly/Monthly XLS) |
+| `slb_transactions` | SLB Transactions (Weekly/Monthly XLS) |

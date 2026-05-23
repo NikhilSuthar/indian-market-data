@@ -8,42 +8,50 @@ nav_order: 9
 
 **Category:** `debt` | **Sub-section:** `corporate`
 
-NSE portal path: All Reports → Debt → Corporate Segment
+NSE portal: [All Reports → Debt → Corporate Bond Market](https://www.nseindia.com/all-reports)
 
 ---
 
-All corporate bond settlement files share the same column structure:
-`ISIN, Description, Trade Date, Quantity, Nominal Value, Weighted Average Price, Weighted Average Yield`
+> **Note on timing:** Settlement files (cbm_*, sdt_*, cp_*, cd_*, gsec_*) are published on T-1 (previous trading day). Use yesterday's date for these.
+
+---
+
+### ✅ CB Daily Trades — same-day availability
 
 ```python
-# CB Daily Trades
 df = nse.get("debt", "corporate", "cbm_trd", "2026-05-22")
+```
+`cbm_trd{YYYYMMDD}.csv` | 511 rows × 8 cols
 
-# Settlement lists
-df = nse.get("debt", "corporate", "cbm_list_man",      "2026-05-22")  # Mandatory
-df = nse.get("debt", "corporate", "cbm_list_non_man",  "2026-05-22")  # Non-mandatory
-df = nse.get("debt", "corporate", "cbm_fail",          "2026-05-22")  # Fails
-df = nse.get("debt", "corporate", "cbm_unlist_man",    "2026-05-22")  # Unlisted mandatory
-df = nse.get("debt", "corporate", "cbm_unlist_non_man","2026-05-22")  # Unlisted non-mandatory
+---
 
-# SDT (Settlement Direct Trades)
-df = nse.get("debt", "corporate", "sdt_fail",         "2026-05-22")
-df = nse.get("debt", "corporate", "sdt_list_man",     "2026-05-22")
-df = nse.get("debt", "corporate", "sdt_list_non_man", "2026-05-22")
-df = nse.get("debt", "corporate", "sdt_unlist_man",   "2026-05-22")
-df = nse.get("debt", "corporate", "sdt_unlist_non_man","2026-05-22")
+### ✅ Corporate Bond Monthly Report — same-day
 
-# Settlement order reports
-df = nse.get("debt", "corporate", "cp_settlement",    "2026-05-22")  # Commercial Paper
-df = nse.get("debt", "corporate", "cd_settlement",    "2026-05-22")  # Convertible Debenture
-df = nse.get("debt", "corporate", "gsec_settlement",  "2026-05-22")  # G-Sec
-
-# Monthly corporate bond report
+```python
 df = nse.get("debt", "corporate", "corporate_bond_report", "2026-05-22")
 ```
+`Corporate_bond_report_{DD-Mon-YYYY}.csv` | 3,618 rows × 25 cols
 
-```bash
-nse-data get debt corporate cbm_trd 2026-05-22
-nse-data get debt corporate cbm_list_man 2026-05-22
-nse-data get debt corporate gsec_settlement 2026-05-22
+---
+
+### 🕐 Settlement Lists — T-1 (previous trading day)
+
+```python
+# Use T-1 date (e.g. May 21 for May 22 run)
+t1_date = "2026-05-21"
+df = nse.get("debt", "corporate", "cbm_list_man",      t1_date)
+df = nse.get("debt", "corporate", "cbm_list_non_man",  t1_date)
+df = nse.get("debt", "corporate", "cbm_fail",          t1_date)
+df = nse.get("debt", "corporate", "cbm_unlist_man",    t1_date)
+df = nse.get("debt", "corporate", "cbm_unlist_non_man",t1_date)
+df = nse.get("debt", "corporate", "sdt_fail",          t1_date)
+df = nse.get("debt", "corporate", "sdt_list_man",      t1_date)
+df = nse.get("debt", "corporate", "sdt_list_non_man",  t1_date)
+df = nse.get("debt", "corporate", "sdt_unlist_man",    t1_date)
+df = nse.get("debt", "corporate", "sdt_unlist_non_man",t1_date)
+df = nse.get("debt", "corporate", "cp_settlement",     t1_date)
+df = nse.get("debt", "corporate", "cd_settlement",     t1_date)
+df = nse.get("debt", "corporate", "gsec_settlement",   t1_date)
 ```
+
+All return: `ISIN, Description, Trade Date, Quantity, Nominal Value, Weighted Average Price, Weighted Average Yield`

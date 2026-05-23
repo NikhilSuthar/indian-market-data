@@ -202,6 +202,13 @@ def download_dataset(cat, sub, dataset, date_str, month_str, out_dir, logger):
                    "", "Portal-only — must be downloaded manually from nseindia.com/all-reports")
         return None
 
+    # Skip datasets that require extra params not available in bulk download
+    # (settno changes daily — user must provide it explicitly)
+    if "{settno}" in cfg.url_pattern:
+        logger.log(cat, sub, dataset, "-", "-", "SKIP",
+                   "", "Requires settlement number (settno) — use nse.download() with settno=<YYYYNNN> param")
+        return None
+
     freq = cfg.frequency
 
     # Determine date param

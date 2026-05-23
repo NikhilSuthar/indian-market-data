@@ -87,6 +87,7 @@ def _format_url(cfg: DatasetConfig, date_str: str, **kwargs) -> str:
             "{yyyy}":      dt.strftime("%Y"),
             "{mm}":        dt.strftime("%m"),
             "{DD-Mon-YYYY}": dt.strftime("%d-%b-%Y"),
+            "{DD-MON-YYYY}": dt.strftime("%d-%b-%Y").upper(),  # e.g. 22-MAY-2026
             "{ddMon-YYYY}":  dt.strftime("%d-%b-%Y"),
             "{dd-Mon-YYYY}": dt.strftime("%d-%b-%Y"),
         }
@@ -160,7 +161,9 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
 
     elif fmt in ("zip_csv", "zip"):
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
-            csv_files = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+            # Filter: CSV files only, exclude directory entries (end with /)
+            csv_files = [n for n in zf.namelist()
+                         if n.lower().endswith(".csv") and not n.endswith("/")]
             if not csv_files:
                 raise RuntimeError(f"No CSV files found in ZIP. Contents: {zf.namelist()}")
 
@@ -179,7 +182,8 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
 
     elif fmt == "zip_xlsx":
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
-            xlsx_files = [n for n in zf.namelist() if n.lower().endswith((".xlsx", ".xls"))]
+            xlsx_files = [n for n in zf.namelist()
+                          if n.lower().endswith((".xlsx", ".xls")) and not n.endswith("/")]
             if not xlsx_files:
                 raise RuntimeError(f"No Excel files in ZIP. Contents: {zf.namelist()}")
             xlsx_bytes = zf.read(xlsx_files[0])

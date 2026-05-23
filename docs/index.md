@@ -8,72 +8,73 @@ nav_order: 1
 
 Download NSE India market data as **pandas DataFrames** or raw files to **local disk / S3**.
 
+Works from **AWS Lambda**, **Snowflake**, and any cloud environment.
+
 ```bash
 pip install nse-data
 ```
 
-```python
-from nsedata import nse
+---
 
-df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
-```
+## Status Summary
+
+**83 datasets confirmed working** from actual Lambda + local run (May 2026):
+
+| Status | Count | Description |
+|--------|-------|-------------|
+| ✅ Download + DataFrame | 59 | Full support — download to disk + parse as DataFrame |
+| ⬇️ Download only | 8 | DAT/LST/DOC formats — download raw file |
+| 🕐 T-1 (previous day) | 16 | Settlement files — available next trading day |
+| ⚙️ Needs extra param | 2 | Requires `settno` (settlement number) |
+| ⏭ Portal-only | 8 | No direct archive URL — download from NSE website |
 
 ---
 
-## How It Works
+## Quick Start
 
-```
-nse.get(category, subcategory, dataset, date)
-          │           │           │        └── "2026-05-22" or "2026-05"
-          │           │           └── dataset key (e.g. "sec_bhavdata_full")
-          │           └── sub-section (e.g. "equities_sme", "equity")
-          └── top category ("capital_market", "derivatives", "debt", "egr")
-```
+```python
+from nsedata import nse
 
-All datasets are downloaded from `nsearchives.nseindia.com` — direct file URLs, no Cloudflare, works from AWS Lambda and any cloud.
+# DataFrame
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
+df = nse.get("derivatives", "equity", "fo_bhav_udiff", "2026-05-22")
+
+# Download to disk
+nse.download("capital_market", "equities_sme", "bhavcopy_pr", "2026-05-22", output_dir="./data")
+
+# Download to S3 (IAM role — no credentials needed)
+nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
+             s3_bucket="my-bucket", s3_prefix="raw/nse/")
+
+# T-1 datasets — use previous trading day
+df = nse.get("debt", "corporate", "cbm_list_man", "2026-05-21")
+
+# List all datasets
+nse.list_datasets()
+```
 
 ---
 
 ## Dataset Categories
 
-| Category | Sub-section | Datasets | Description |
-|----------|------------|----------|-------------|
-| [Capital Market — Equities & SME](capital-market) | `equities_sme` | 26 | Daily prices, volatility, deals, master data |
-| [Capital Market — Indices](capital-market-indices) | `indices` | 2 | All-indices close, top movers |
-| [Capital Market — Mutual Fund](capital-market-mf) | `mutual_fund` | 1 | NSCCL annexures |
-| [Capital Market — SLB](capital-market-slb) | `slb` | 10 | Securities Lending & Borrowing |
-| [Derivatives — Equity F&O](derivatives-equity) | `equity` | 8 | F&O bhavcopy, contracts, ban list |
-| [Derivatives — Commodity](derivatives-commodity) | `commodity` | 3 | Commodity bhavcopy, contracts |
-| [Derivatives — Currency](derivatives-currency) | `currency` | 3 | CD bhavcopy, contracts, client positions |
-| [Derivatives — Interest Rate](derivatives-ird) | `interest_rate` | 9 | IRF, volatility, FPI/FII positions |
-| [Debt — Corporate](debt-corporate) | `corporate` | 13 | CB trades, settlements, SDT |
-| [Debt — Debt Segment](debt-segment) | `debt_segment` | 4 | WDM list, daily/weekly bundles |
-| [Debt — Tri-Party Repo](debt-trm) | `tri_party_repo` | 1 | TRM bhavcopy |
-| [EGR](egr) | `egr` | 1 | Electronic Gold Receipt bhavcopy |
-
----
-
-## Quick Reference
-
-```python
-from nsedata import nse
-
-# List all datasets
-nse.list_datasets()
-
-# Filter by category
-nse.list_datasets(category="capital_market")
-
-# Get dataset info
-nse.get_config_info("capital_market", "equities_sme", "sec_bhavdata_full")
-
-# Download to S3 (IAM role — no credentials in Lambda)
-nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
-             s3_bucket="my-bucket", s3_prefix="raw/nse/")
-```
+| Category | Sub-section | Datasets | Docs |
+|----------|------------|---------|------|
+| Capital Market | [Equities & SME](capital-market) | 32 | Daily prices, volatility, deals, master data |
+| Capital Market | [Indices](capital-market-indices) | 2 | All-indices close, top movers |
+| Capital Market | [Mutual Fund](capital-market-mf) | 1 | NSCCL annexures |
+| Capital Market | [SLB](capital-market-slb) | 12 | Securities Lending & Borrowing |
+| Derivatives | [Equity F&O](derivatives-equity) | 8 | F&O bhavcopy, contracts, ban list |
+| Derivatives | [Commodity](derivatives-commodity) | 3 | Commodity bhavcopy, contracts |
+| Derivatives | [Currency](derivatives-currency) | 3 | CD bhavcopy, contracts |
+| Derivatives | [Interest Rate](derivatives-ird) | 9 | IRF, volatility, FPI/FII positions |
+| Debt | [Corporate](debt-corporate) | 15 | CB trades, settlements (T-1) |
+| Debt | [Debt Segment](debt-segment) | 4 | WDM daily/weekly bundles |
+| Debt | [Tri-Party Repo](debt-trm) | 1 | TRM bhavcopy |
+| EGR | [EGR](egr) | 1 | Electronic Gold Receipt bhavcopy |
 
 ---
 
 ## Source
 
-All data from [nseindia.com/all-reports](https://www.nseindia.com/all-reports) → served via [nsearchives.nseindia.com](https://nsearchives.nseindia.com)
+All data from [nseindia.com/all-reports](https://www.nseindia.com/all-reports) served via [nsearchives.nseindia.com](https://nsearchives.nseindia.com) — direct file downloads, no Cloudflare.

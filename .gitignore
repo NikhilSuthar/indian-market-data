@@ -1,8 +1,8 @@
 # Internal reference data (not part of package)
 .data/
-
+.lambda_layer
 # Lambda layer — ignore entire folder (scripts managed separately)
-.lambda_layer/
+
 
 # Python
 __pycache__/
