@@ -45,7 +45,6 @@ REPORT_PATTERNS = {
     "pr": "/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
     "sec_bhavdata_full": "/products/content/sec_bhavdata_full_{ddmmyyyy}.csv",
     "bhav_udiff": "/content/cm/BhavCopy_NSE_CM_0_0_0_{yyyymmdd}_F_0000.csv.zip",
-    "sme": "/archives/sme/sme{ddmmyyyy}.csv",
 
     # ===== Capital Market: Indices =====
     "ind_close_all": "/content/indices/ind_close_all_{ddmmyyyy}.csv",
@@ -150,9 +149,10 @@ def get(report_type: str, date: str) -> pd.DataFrame:
             df = pd.read_csv(io.BytesIO(zf.read(target)))
     elif url.endswith(".DAT") or url.endswith(".T01"):
         df = pd.read_csv(io.StringIO(content.decode("utf-8", errors="replace")),
-                         sep=None, engine="python")
+                         sep=None, engine="python", on_bad_lines="skip")
     else:
-        df = pd.read_csv(io.StringIO(content.decode("utf-8", errors="replace")))
+        df = pd.read_csv(io.StringIO(content.decode("utf-8", errors="replace")),
+                         on_bad_lines="skip")
 
     df.columns = [c.strip() for c in df.columns]
     return df
