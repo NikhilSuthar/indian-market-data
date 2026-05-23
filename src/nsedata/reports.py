@@ -49,8 +49,6 @@ REPORT_PATTERNS = {
 
     # ===== Capital Market: Indices =====
     "ind_close_all": "/content/indices/ind_close_all_{ddmmyyyy}.csv",
-    "pe": "/archives/equities/mkt/PE_{ddmmyy}.csv",
-    "reg_ind": "/archives/equities/mkt/REG_IND{ddmmyy}.csv",
 
     # ===== Capital Market: Activity & Deals =====
     "market_activity": "/archives/equities/mkt/MA{ddmmyy}.csv",
@@ -58,7 +56,6 @@ REPORT_PATTERNS = {
 
     # ===== Capital Market: Reference & Master =====
     "security_master": "/content/cm/NSE_CM_security_{ddmmyyyy}.csv.gz",
-    "cm_52wk": "/content/equities/CM_52_wk_High_low_{ddmmyyyy}.csv",
 
     # ===== Capital Market: Risk & Margin =====
     "cmvolt": "/archives/nsccl/volt/CMVOLT_{ddmmyyyy}.CSV",
@@ -67,39 +64,23 @@ REPORT_PATTERNS = {
     # ===== Derivatives: Equity F&O =====
     "fo_secban": "/archives/fo/sec_ban/fo_secban_{ddmmyyyy}.csv",
     "fovolt": "/archives/nsccl/volt/FOVOLT_{ddmmyyyy}.csv",
-    "fo_sett": "/archives/nsccl/fao/FOSett_prce_{ddmmyyyy}.csv",
     "fo_bhav_udiff": "/content/fo/BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "fo_contract": "/content/fo/NSE_FO_contract_{ddmmyyyy}.csv.gz",
 
     # ===== Derivatives: Commodity =====
-    "co_volt": "/archives/nsccl/volt/CO_VOLT_{ddmmyyyy}.csv",
     "co_bhav_udiff": "/content/com/BhavCopy_NSE_CO_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "co_contract": "/content/com/NSE_COM_contract_{ddmmyyyy}.csv.gz",
 
     # ===== Derivatives: Currency =====
-    "x_volt": "/archives/nsccl/volt/X_VOLT_{ddmmyyyy}.CSV",
-    "cd_sett": "/archives/nsccl/cd/CDSett_prce_{ddmmyyyy}.csv",
-    "cd_bhav_udiff": "/content/cd/BhavCopy_NSE_CD_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "cd_contract": "/content/cd/NSE_CD_contract_{ddmmyyyy}.csv.gz",
-
-    # ===== Debt =====
-    "trm_bc": "/archives/trep/TRM_BC{ddmmyyyy}.csv",
 }
 
-# Reports hosted on www.nseindia.com (different base URL, need portal session)
-# These are PDFs/monthly reports — not on nsearchives
-_NSEINDIA_PATTERNS = {
-    "index_dashboard_pdf": "https://www.nseindia.com/reports/indices/Index_Dashboard_{MON}{YYYY}.pdf",
-    "fi_index_dashboard_pdf": "https://www.nseindia.com/reports/indices/Index_Dashboard_FixedIncome_{MON}{YYYY}.pdf",
-    "passive_fund_pdf": "https://www.nseindia.com/reports/indices/NiftyPassiveFundReport-{mon}{YYYY}-B2B-HR.pdf",
-    "riskometer_pdf": "https://www.nseindia.com/reports/indices/NSE_Indices_Riskometer_{YYYY}-{mm}.pdf",
-}
+# Reports that require NSE portal API (not direct archive URLs)
+# These will be supported in a future version via /api/reports endpoint
+_NSEINDIA_PATTERNS = {}
 
-# Report types that are binary/non-parseable (PDF, DAT, T01)
-_BINARY_TYPES = {
-    "index_dashboard_pdf", "fi_index_dashboard_pdf",
-    "passive_fund_pdf", "riskometer_pdf",
-}
+# Report types that are binary/non-parseable
+_BINARY_TYPES = set()
 
 _DAT_TYPES = {"mto"}
 
