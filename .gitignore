@@ -1,9 +1,8 @@
 # Internal reference data (not part of package)
 .data/
 
-# Lambda layer — ignore build artifacts and ZIPs, but keep scripts
-.lambda_layer/layer_build/
-.lambda_layer/*.zip
+# Lambda layer — ignore entire folder (scripts managed separately)
+.lambda_layer/
 
 # Python
 __pycache__/
