@@ -253,3 +253,126 @@ def get_config_info(category: str, subcategory: str, dataset: str) -> dict:
         "frequency": cfg.frequency,
         "columns": cfg.columns,
     }
+
+
+# ─── niftyindices.com — Historical Index + TRI ────────────────────────────
+
+def get_historical_index(
+    index_name: str,
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """
+    Fetch historical Price Index (OHLC) from niftyindices.com.
+
+    Date format: "dd-Mon-yyyy" e.g. "01-Apr-2026"
+
+    NOTE: niftyindices.com uses Cloudflare protection. Works reliably from
+    residential IPs. May be blocked from AWS Lambda / cloud IPs.
+    If blocked from Lambda, fetch locally → upload to S3 → Lambda reads from S3.
+
+    Args:
+        index_name: Index name e.g. "NIFTY 50", "NIFTY BANK"
+                    Or shorthand: "nifty50", "niftybank", "niftyit"
+        start_date: "dd-Mon-yyyy" e.g. "01-Apr-2026"
+        end_date:   "dd-Mon-yyyy" e.g. "30-Apr-2026"
+
+    Returns:
+        DataFrame: Index Name, Date, Open, High, Low, Close
+
+    Example:
+        >>> from nsedata import nse
+        >>> df = nse.get_historical_index("NIFTY 50", "01-Jan-2026", "31-Mar-2026")
+        >>> df = nse.get_historical_index("nifty50", "01-Jan-2026", "31-Mar-2026")
+    """
+    from nsedata.niftyindices import get_historical
+    return get_historical(index_name, start_date, end_date)
+
+
+def get_tri(
+    index_name: str,
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """
+    Fetch Total Return Index (TRI) from niftyindices.com.
+
+    TRI = Price Index + reinvested dividends. Essential for AMC benchmarking.
+
+    Date format: "dd-Mon-yyyy" e.g. "01-Apr-2026"
+
+    NOTE: niftyindices.com uses Cloudflare protection. Works reliably from
+    residential IPs. May be blocked from AWS Lambda / cloud IPs.
+
+    Args:
+        index_name: Index name e.g. "NIFTY 50", "NIFTY BANK"
+                    Or shorthand: "nifty50", "niftybank"
+        start_date: "dd-Mon-yyyy"
+        end_date:   "dd-Mon-yyyy"
+
+    Returns:
+        DataFrame: Index Name, Date, Total Returns Index, Net Total Return Index
+
+    Columns:
+        Total Returns Index    — Gross TRI (pre-tax dividend reinvestment)
+        Net Total Return Index — Net TRI (post-15%-tax dividend reinvestment)
+
+    Example:
+        >>> from nsedata import nse
+        >>> df = nse.get_tri("NIFTY 50", "01-Jan-2026", "31-Mar-2026")
+        >>> df = nse.get_tri("niftybank", "01-Apr-2026", "30-Apr-2026")
+    """
+    from nsedata.niftyindices import get_tri as _get_tri
+    return _get_tri(index_name, start_date, end_date)
+
+
+def derive_tri(
+    price_df: pd.DataFrame,
+    dividends: pd.DataFrame = None,
+    base_date: str = None,
+    base_value: float = 1000.0,
+) -> pd.DataFrame:
+    """
+    Derive an approximate TRI from price index data.
+
+    Use this when niftyindices.com is unavailable (e.g. from Lambda).
+    Provide actual dividend records for accuracy, or it uses a 1.5%
+    annual yield estimate.
+
+    Formula:
+        TRI(t) = TRI(t-1) × (Price(t) + Div(t)) / Price(t-1)
+
+    Args:
+        price_df:   DataFrame from get_historical_index() or ind_close_all()
+                    Must have Date and Close (or Closing Index Value) columns.
+        dividends:  Optional DataFrame with Date and Dividend columns.
+                    Use corporate action records (bc{date}.csv from PR bundle).
+        base_date:  Starting date (default: first date in price_df)
+        base_value: Starting TRI value (default: 1000)
+
+    Returns:
+        DataFrame: Date, Close, Price_Return, Div_Return, Total_Return, Derived_TRI
+
+    Example:
+        >>> price_df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
+        >>> nifty = price_df[price_df["Index Name"] == "Nifty 50"].rename(
+        ...     columns={"Closing Index Value": "Close"})
+        >>> tri_df = nse.derive_tri(nifty)
+    """
+    from nsedata.niftyindices import derive_tri as _derive_tri
+    # Handle ind_close_all column naming
+    if "Closing Index Value" in price_df.columns and "Close" not in price_df.columns:
+        price_df = price_df.rename(columns={"Closing Index Value": "Close"})
+    return _derive_tri(price_df, dividends, base_date, base_value)
+
+
+def list_index_names() -> pd.DataFrame:
+    """
+    List all available index names for get_historical_index() and get_tri().
+
+    Returns:
+        DataFrame: shorthand, full_name
+    """
+    from nsedata.niftyindices import list_indices
+    rows = list_indices()
+    return pd.DataFrame(rows, columns=["shorthand", "full_name"])
