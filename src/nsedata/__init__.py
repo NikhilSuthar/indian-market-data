@@ -17,7 +17,7 @@ Quick Start:
                                   s3_bucket="my-bucket", s3_prefix="nse/")
 """
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from nsedata.reports import (
     REPORT_PATTERNS,

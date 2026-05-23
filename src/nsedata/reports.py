@@ -41,37 +41,84 @@ NSE_ARCHIVES = "https://nsearchives.nseindia.com"
 #   {YYYY}       → 2026
 # ---------------------------------------------------------------------------
 REPORT_PATTERNS = {
-    # ===== Capital Market: Prices =====
+    # ===== Capital Market: Prices (CONFIRMED WORKING v0.3.2) =====
     "pr": "/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
     "sec_bhavdata_full": "/products/content/sec_bhavdata_full_{ddmmyyyy}.csv",
     "bhav_udiff": "/content/cm/BhavCopy_NSE_CM_0_0_0_{yyyymmdd}_F_0000.csv.zip",
 
-    # ===== Capital Market: Indices =====
+    # ===== Capital Market: Indices (CONFIRMED WORKING v0.3.2) =====
     "ind_close_all": "/content/indices/ind_close_all_{ddmmyyyy}.csv",
 
-    # ===== Capital Market: Activity & Deals =====
+    # ===== Capital Market: Activity & Deals (CONFIRMED WORKING v0.3.2) =====
     "market_activity": "/archives/equities/mkt/MA{ddmmyy}.csv",
     "short_selling": "/archives/equities/shortSelling/shortselling_{ddmmyyyy}.csv",
 
-    # ===== Capital Market: Reference & Master =====
+    # ===== Capital Market: Reference & Master (CONFIRMED WORKING v0.3.2) =====
     "security_master": "/content/cm/NSE_CM_security_{ddmmyyyy}.csv.gz",
 
-    # ===== Capital Market: Risk & Margin =====
+    # ===== Capital Market: Risk & Margin (CONFIRMED WORKING v0.3.2) =====
     "cmvolt": "/archives/nsccl/volt/CMVOLT_{ddmmyyyy}.CSV",
     "mto": "/archives/equities/mto/MTO_{ddmmyyyy}.DAT",
 
-    # ===== Derivatives: Equity F&O =====
+    # ===== Derivatives: Equity F&O (CONFIRMED WORKING v0.3.2) =====
     "fo_secban": "/archives/fo/sec_ban/fo_secban_{ddmmyyyy}.csv",
     "fovolt": "/archives/nsccl/volt/FOVOLT_{ddmmyyyy}.csv",
     "fo_bhav_udiff": "/content/fo/BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "fo_contract": "/content/fo/NSE_FO_contract_{ddmmyyyy}.csv.gz",
 
-    # ===== Derivatives: Commodity =====
+    # ===== Derivatives: Commodity (CONFIRMED WORKING v0.3.2) =====
     "co_bhav_udiff": "/content/com/BhavCopy_NSE_CO_0_0_0_{yyyymmdd}_F_0000.csv.zip",
     "co_contract": "/content/com/NSE_COM_contract_{ddmmyyyy}.csv.gz",
 
-    # ===== Derivatives: Currency =====
+    # ===== Derivatives: Currency (CONFIRMED WORKING v0.3.2) =====
     "cd_contract": "/content/cd/NSE_CD_contract_{ddmmyyyy}.csv.gz",
+
+    # ===== NEW in v0.4.0 — Capital Market: Indices =====
+    "pe": "/archives/equities/mkt/PE_{ddmmyy}.csv",
+    "reg_ind": "/archives/equities/mkt/REG_IND{ddmmyy}.csv",
+    "reg1_ind": "/archives/equities/mkt/REG1_IND{ddmmyy}.csv",
+
+    # ===== NEW in v0.4.0 — Capital Market: Deals & Activity =====
+    "block_deals": "/content/equities/block.csv",
+    "bulk_deals": "/content/equities/bulk.csv",
+    "eq_band_changes": "/archives/equities/eq_band_changes_{ddmmyyyy}.csv",
+    "sec_list": "/archives/equities/sec_list_{ddmmyyyy}.csv",
+    "appsec_collval": "/archives/nsccl/collval/APPSEC_COLLVAL_{ddmmyyyy}.csv",
+    "mf_var": "/archives/nsccl/mf_var/MF_VAR_{ddmmyyyy}.csv",
+    "c_stt_ind": "/archives/nsccl/stt/C_STT_IND_{ddmmyyyy}.csv",
+    "csqr": "/archives/nsccl/csqr/CSQR_M_{ddmmyyyy}.csv",
+    "ael": "/archives/nsccl/ael/ael_{ddmmyyyy}.csv",
+
+    # ===== NEW in v0.4.0 — Derivatives: Equity F&O =====
+    "fo_sett": "/archives/nsccl/fao/FOSett_prce_{ddmmyyyy}.csv",
+    "fo_spdcontract": "/content/fo/NSE_FO_spdcontract_{ddmmyyyy}.csv.gz",
+    "fao_participant_oi": "/archives/fo/fao_participant_oi_{ddmmyyyy}.csv",
+    "fao_participant_vol": "/archives/fo/fao_participant_vol_{ddmmyyyy}.csv",
+    "ewpl": "/archives/fo/EWPL_{ddmmyyyy}.CSV",
+    "ncloi": "/archives/fo/ncloi_{ddmmyyyy}.csv",
+    "combineoi_deleq": "/archives/fo/combineoi_deleq_{ddmmyyyy}.csv",
+    "fo_daily": "/content/historical/DERIVATIVES/{YYYY}/{MON}/fo{ddmmyyyy}bhav.csv.zip",
+
+    # ===== NEW in v0.4.0 — Derivatives: Commodity =====
+    "co_volt": "/archives/nsccl/volt/CO_VOLT_{ddmmyyyy}.csv",
+    "co_sett": "/archives/nsccl/com/CO_sett_prce_{ddmmyyyy}.csv",
+    "co_spdcontract": "/content/com/NSE_COM_spdcontract_{ddmmyyyy}.csv.gz",
+
+    # ===== NEW in v0.4.0 — Derivatives: Currency =====
+    "x_volt": "/archives/nsccl/volt/X_VOLT_{ddmmyyyy}.CSV",
+    "cd_sett": "/archives/nsccl/cd/CDSett_prce_{ddmmyyyy}.csv",
+    "cd_spdcontract": "/content/cd/NSE_CD_spdcontract_{ddmmyyyy}.csv.gz",
+    "cd_bhav_udiff": "/content/cd/BhavCopy_NSE_CD_0_0_0_{yyyymmdd}_F_0000.csv.zip",
+
+    # ===== NEW in v0.4.0 — Debt =====
+    "trm_bc": "/archives/trep/TRM_BC{ddmmyyyy}.csv",
+
+    # ===== NEW in v0.4.0 — Clearing/Risk: DAT/fixed-width =====
+    "cvar1": "/archives/nsccl/var/C_VAR1_{ddmmyyyy}_1.DAT",
+    "fcm_bc": "/archives/nsccl/fcm/FCM_INTRM_BC{ddmmyyyy}.DAT",
+    "slbm_bc": "/archives/nsccl/slb/SLBM_BC_{ddmmyyyy}.DAT",
+    "c_catg": "/archives/nsccl/cs/C_CATG_{MON}{YYYY}.T01",
+    "slb_var": "/archives/nsccl/slb/C_VAR1_SLB_{ddmmyyyy}_1.DAT",
 }
 
 # Reports that require NSE portal API (not direct archive URLs)
@@ -151,8 +198,16 @@ def get(report_type: str, date: str) -> pd.DataFrame:
         df = pd.read_csv(io.StringIO(content.decode("utf-8", errors="replace")),
                          sep=None, engine="python", on_bad_lines="skip")
     else:
-        df = pd.read_csv(io.StringIO(content.decode("utf-8", errors="replace")),
-                         on_bad_lines="skip")
+        # Handle potential encoding issues (some NSE files use latin-1)
+        for enc in ("utf-8", "latin-1", "cp1252"):
+            try:
+                text = content.decode(enc)
+                break
+            except UnicodeDecodeError:
+                continue
+        else:
+            text = content.decode("utf-8", errors="replace")
+        df = pd.read_csv(io.StringIO(text), on_bad_lines="skip")
 
     df.columns = [c.strip() for c in df.columns]
     return df
