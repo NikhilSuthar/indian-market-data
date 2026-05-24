@@ -186,7 +186,7 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
                 return pd.to_datetime(int(m.group(1)), unit="ms")
             return pd.NaT
         df["Date"] = df["Date"].apply(_parse_net_date)
-        df["Date"] = df["Date"].dt.strftime("%d-%b-%Y")  # e.g. "22-May-2026"
+        df["Date"] = df["Date"].dt.strftime("%d-%b-%Y %H:%M")  # e.g. "22-May-2026 18:03"
 
     # Reorder columns sensibly
     preferred_order = ["Commodity", "Unit", "Location", "Spot Price (Rs.)", "Up/Down", "Date"]
