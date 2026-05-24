@@ -17,13 +17,13 @@ Installs `nse-data` + `mcx-data` together.
 ## Option 2 — NSE only
 
 ```bash
-pip install nse-data
+pip install nse-archives
 
 # With S3 support
-pip install nse-data[s3]
+pip install nse-archives[s3]
 
 # With Cloudflare bypass (for niftyindices.com TRI)
-pip install nse-data[cloudflare]
+pip install nse-archives[cloudflare]
 ```
 
 ## Option 3 — MCX only

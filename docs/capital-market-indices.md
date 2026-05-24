@@ -54,7 +54,7 @@ Historical OHLC and TRI come from `niftyindices.com` — a separate source.
 
 ### Install cloudscraper
 ```bash
-pip install nse-data[cloudflare]   # adds cloudscraper
+pip install nse-archives[cloudflare]   # adds cloudscraper
 # or: pip install cloudscraper
 ```
 

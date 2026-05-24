@@ -7,7 +7,7 @@ nav_order: 3
 # Python API — NSE
 
 ```bash
-pip install nse-data
+pip install nse-archives
 ```
 
 ---

@@ -22,7 +22,7 @@ pip install indian-market-data
 Install individually or together:
 
 ```bash
-pip install nse-data            # NSE only
+pip install nse-archives            # NSE only
 pip install mcx-data            # MCX only
 pip install indian-market-data  # Both
 ```

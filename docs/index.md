@@ -12,7 +12,7 @@ Works from **AWS Lambda**, **Snowflake**, and any cloud environment — no brows
 
 ```bash
 pip install indian-market-data     # NSE + MCX together
-pip install nse-data               # NSE only
+pip install nse-archives               # NSE only
 pip install mcx-data               # MCX only
 ```
 

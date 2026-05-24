@@ -1,6 +1,6 @@
-# nse-data
+# nse-archives
 
-[![PyPI version](https://badge.fury.io/py/nse-data.svg)](https://pypi.org/project/nse-data/)
+[![PyPI version](https://badge.fury.io/py/nse-archives.svg)](https://pypi.org/project/nse-archives/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -9,15 +9,16 @@ Download NSE India market data as **pandas DataFrames** or raw files to **local 
 **Full Documentation → [NikhilSuthar.github.io/indian-market-data](https://NikhilSuthar.github.io/indian-market-data)**
 
 Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo — also see [`mcx-data`](https://pypi.org/project/mcx-data/).
+
 ---
 
 ## Installation
 
 ```bash
-pip install nse-data
+pip install nse-archives
 
 # With S3 support
-pip install nse-data[s3]
+pip install nse-archives[s3]
 ```
 
 ## Quick Start
