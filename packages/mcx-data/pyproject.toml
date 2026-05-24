@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mcx-data"
 version = "0.1.0"
-description = "Download MCX India commodity futures market data as pandas DataFrames — bhavcopy, futures, options. Works on AWS Lambda and Snowflake."
+description = "Download MCX India commodity market data as pandas DataFrames — spot prices (recent + archive), futures bhavcopy. Works on AWS Lambda."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -30,6 +30,7 @@ dependencies = [
     "requests>=2.31.0",
     "pandas>=2.0.0",
     "openpyxl>=3.1.0",
+    "curl-cffi>=0.7.0",
 ]
 
 [project.optional-dependencies]
@@ -40,10 +41,10 @@ dev = ["pytest", "pytest-cov", "ruff"]
 mcx-data = "mcxdata.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/NikhilSuthar/nse-data"
-Documentation = "https://NikhilSuthar.github.io/nse-data/mcx"
-Repository = "https://github.com/NikhilSuthar/nse-data"
-"Bug Tracker" = "https://github.com/NikhilSuthar/nse-data/issues"
+Homepage = "https://github.com/NikhilSuthar/indian-market-data"
+Documentation = "https://NikhilSuthar.github.io/indian-market-data"
+Repository = "https://github.com/NikhilSuthar/indian-market-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/indian-market-data/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

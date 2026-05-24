@@ -1,10 +1,15 @@
 name: Publish mcx-data
 
+# Triggers:
+#   - Push tag  mcx-v*          → publish to PyPI (production)
+#   - Manual dispatch           → publish to TestPyPI or PyPI (your choice)
+#
+# For TestPyPI: use workflow_dispatch manually from GitHub Actions tab
+
 on:
   push:
-    branches: ["release/*"]
-    paths: ["packages/mcx-data/**"]
-    tags: ["mcx-v*"]
+    tags:
+      - "mcx-v*"          # e.g. mcx-v0.1.0 → triggers PyPI publish
   workflow_dispatch:
     inputs:
       target:
@@ -39,8 +44,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.ref, 'refs/heads/release/') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
     environment:
       name: testpypi
       url: https://test.pypi.org/project/mcx-data/

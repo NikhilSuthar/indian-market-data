@@ -243,7 +243,7 @@ def lambda_handler(event, context):
         time.sleep(0.3)
 
     # ─── VaR snapshots 1-6 ───────────────────────────────────────────────
-    if download_all_flag:
+    if download_all_flag and not tri_only:
         for snap in range(1, 7):
             _do_download("capital_market", "equities_sme", "cvar1", date,
                          bucket, prefix, results, snapshot=snap)

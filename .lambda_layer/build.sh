@@ -1,11 +1,11 @@
 #!/bin/bash
-# Build Lambda Layer for nse-data v0.9.0
+# Build Lambda Layer for nse-data + mcx-data
 #
 # Usage:
 #   cd .lambda_layer
 #   chmod +x build.sh
-#   ./build.sh            # standard (requests, pandas, openpyxl)
-#   ./build.sh --full     # + cloudscraper (for TRI / niftyindices.com)
+#   ./build.sh            # standard (requests, pandas, openpyxl + html5lib + lxml)
+#   ./build.sh --full     # + cloudscraper (for TRI / niftyindices.com + MCX WAF bypass)
 #   ./build.sh --s3       # + boto3 (for S3 uploads)
 #   ./build.sh --all      # + cloudscraper + boto3
 #
@@ -29,11 +29,14 @@ for arg in "$@"; do
     esac
 done
 
-VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/src'); from nsedata import __version__; print(__version__)" 2>/dev/null || echo "0.6.0")
+NSE_VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/src'); from nsedata import __version__; print(__version__)" 2>/dev/null || echo "0.9.1")
+MCX_VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/packages/mcx-data/src'); from mcxdata import __version__; print(__version__)" 2>/dev/null || echo "0.1.0")
 
-echo "=== Building Lambda Layer for nse-data v$VERSION ==="
-echo "  cloudscraper (TRI support): $INCLUDE_CLOUDSCRAPER"
-echo "  boto3 (S3 support):         $INCLUDE_BOTO3"
+echo "=== Building Lambda Layer ==="
+echo "  nse-data v$NSE_VERSION"
+echo "  mcx-data v$MCX_VERSION"
+echo "  cloudscraper (TRI + MCX WAF): $INCLUDE_CLOUDSCRAPER"
+echo "  boto3 (S3 support):           $INCLUDE_BOTO3"
 echo ""
 
 # Clean previous
@@ -41,7 +44,7 @@ sudo rm -rf "$BUILD_DIR" 2>/dev/null || rm -rf "$BUILD_DIR"
 rm -f "$SCRIPT_DIR/$ZIP_NAME"
 mkdir -p "$BUILD_DIR/python"
 
-echo "Step 1/4: Installing core dependencies (requests, pandas, openpyxl)..."
+echo "Step 1/5: Installing core dependencies (requests, pandas, openpyxl)..."
 pip install \
     --target "$BUILD_DIR/python" \
     --upgrade \
@@ -49,25 +52,36 @@ pip install \
     "pandas>=2.0.0" \
     "openpyxl>=3.1.0"
 
+echo "Step 2/5: Installing MCX dependencies (curl-cffi for Chrome TLS impersonation)..."
+pip install \
+    --target "$BUILD_DIR/python" \
+    --upgrade \
+    "curl-cffi>=0.7.0"
+
 if [ "$INCLUDE_CLOUDSCRAPER" = true ]; then
-    echo "Step 2/4: Installing cloudscraper (for TRI / niftyindices.com)..."
+    echo "Step 3/5: Installing cloudscraper (for TRI / niftyindices.com + MCX Akamai bypass)..."
     pip install --target "$BUILD_DIR/python" --upgrade cloudscraper
 else
-    echo "Step 2/4: Skipping cloudscraper (use --full to include)"
+    echo "Step 3/5: Skipping cloudscraper (use --full to include)"
 fi
 
 if [ "$INCLUDE_BOTO3" = true ]; then
-    echo "Step 3/4: Installing boto3 (for S3 uploads)..."
+    echo "Step 4/5: Installing boto3 (for S3 uploads)..."
     pip install --target "$BUILD_DIR/python" --upgrade boto3
 else
-    echo "Step 3/4: Skipping boto3 — Lambda runtime already provides it"
+    echo "Step 4/5: Skipping boto3 — Lambda runtime already provides it"
 fi
 
-echo "Step 4/4: Installing nse-data from local source..."
+echo "Step 5/5: Installing nse-data + mcx-data from local source..."
 pip install \
     --target "$BUILD_DIR/python" \
     --no-deps \
     "$PROJECT_ROOT"
+
+pip install \
+    --target "$BUILD_DIR/python" \
+    --no-deps \
+    "$PROJECT_ROOT/packages/mcx-data"
 
 # Cleanup to reduce layer size
 echo ""
@@ -99,6 +113,7 @@ SIZE=$(du -sh "$SCRIPT_DIR/$ZIP_NAME" | cut -f1)
 echo ""
 echo "======================================================"
 echo "  Done! nse-data-lambda-layer.zip ($SIZE)"
+echo "  nse-data v$NSE_VERSION + mcx-data v$MCX_VERSION"
 echo "======================================================"
 echo ""
 echo "Upload to AWS:"
@@ -106,7 +121,7 @@ echo "  aws lambda publish-layer-version \\"
 echo "    --layer-name nse-data \\"
 echo "    --zip-file fileb://$SCRIPT_DIR/$ZIP_NAME \\"
 echo "    --compatible-runtimes python3.12 python3.13 \\"
-echo "    --description 'nse-data v$VERSION + pandas + openpyxl + requests'"
+echo "    --description 'nse-data v$NSE_VERSION + mcx-data v$MCX_VERSION + pandas + openpyxl + html5lib + lxml'"
 echo ""
 echo "Update Lambda function to use new layer version:"
 echo "  aws lambda update-function-configuration \\"
