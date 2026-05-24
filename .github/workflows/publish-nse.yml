@@ -1,17 +1,13 @@
 name: Publish nse-data
 
 # Triggers:
-#   - Push tag  nse-v*          → publish to PyPI (production)
+#   - Push tag  nse-v*          → build + publish to PyPI + create GitHub Release
 #   - Manual dispatch           → publish to TestPyPI or PyPI (your choice)
-#
-# Branch strategy:
-#   develop → merge when ready → tag nse-v0.9.0 → PyPI publish
-#   For TestPyPI: use workflow_dispatch manually
 
 on:
   push:
     tags:
-      - "nse-v*"          # e.g. nse-v0.9.0 → triggers PyPI publish
+      - "nse-v*"          # e.g. nse-v1.0.0
   workflow_dispatch:
     inputs:
       target:
@@ -22,7 +18,8 @@ on:
         options: [testpypi, pypi]
 
 permissions:
-  contents: read
+  contents: write   # needed to create GitHub Releases
+  id-token: write
 
 jobs:
   build:
@@ -60,14 +57,11 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Download dist artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: nse-data-dist
           path: dist/
-
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
@@ -84,11 +78,56 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Download dist artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: nse-data-dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Create GitHub Release — nse-data
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/nse-v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
         with:
           name: nse-data-dist
           path: dist/
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "nse-data ${{ github.ref_name }}"
+          body: |
+            ## nse-data ${{ github.ref_name }}
+
+            Python library to download NSE India market data as pandas DataFrames.
+
+            **86+ datasets** across equities, F&O, debt, indices, SLB, IRD, EGR.
+            Works on AWS Lambda and Snowflake.
+
+            ### Install
+            ```bash
+            pip install nse-data==${{ github.ref_name }}
+            ```
+
+            ### What's included
+            - Capital Market: Equities & SME (32), Indices (2), Mutual Fund (1), SLB (12)
+            - Derivatives: Equity F&O (8), Commodity (3), Currency (3), Interest Rate (9)
+            - Debt: Corporate (15), Debt Segment (4), Tri-Party Repo (1)
+            - EGR (1)
+            - Historical Index + TRI from niftyindices.com
+
+            ### Links
+            - [PyPI](https://pypi.org/project/nse-data/)
+            - [Documentation](https://NikhilSuthar.github.io/indian-market-data)
+            - [Changelog](https://github.com/NikhilSuthar/indian-market-data/blob/main/CHANGELOG.md)
+          files: dist/*
+          draft: false
+          prerelease: false

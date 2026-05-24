@@ -1,8 +1,13 @@
 name: Publish indian-market-data (umbrella)
 
+# Triggers:
+#   - Push tag  v*              → build + publish to PyPI + create GitHub Release
+#   - Manual dispatch           → publish to TestPyPI or PyPI
+
 on:
   push:
-    tags: ["v*"]   # tag like v0.9.0 publishes umbrella
+    tags:
+      - "v*"              # e.g. v1.0.0
   workflow_dispatch:
     inputs:
       target:
@@ -13,7 +18,8 @@ on:
         options: [testpypi, pypi]
 
 permissions:
-  contents: read
+  contents: write
+  id-token: write
 
 jobs:
   build:
@@ -37,7 +43,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
     environment:
       name: testpypi
       url: https://test.pypi.org/project/indian-market-data/
@@ -70,3 +76,54 @@ jobs:
           name: umbrella-dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Create GitHub Release — indian-market-data
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: umbrella-dist
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "indian-market-data ${{ github.ref_name }}"
+          body: |
+            ## indian-market-data ${{ github.ref_name }}
+
+            Umbrella package for NSE + MCX India market data as pandas DataFrames.
+            Installs both `nse-data` and `mcx-data`.
+
+            ### Install
+            ```bash
+            pip install indian-market-data==${{ github.ref_name }}
+            ```
+
+            ### Includes
+            - `nse-data 1.0.0` — 86+ NSE datasets (equities, F&O, debt, indices, EGR)
+            - `mcx-data 1.0.0` — MCX commodity spot prices (28 commodities)
+
+            ### Quick Start
+            ```python
+            from nsedata import nse
+            from mcxdata import mcx
+
+            df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+            df = mcx.get_spot_recent(commodity="GOLD")
+            ```
+
+            ### Links
+            - [PyPI](https://pypi.org/project/indian-market-data/)
+            - [Documentation](https://NikhilSuthar.github.io/indian-market-data)
+          files: dist/*
+          draft: false
+          prerelease: false

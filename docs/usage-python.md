@@ -1,174 +1,212 @@
 ---
 layout: default
-title: Python API
+title: Python API — NSE
 nav_order: 3
 ---
 
-# Python API
+# Python API — NSE
 
-## Indices Module
-
-Source: [niftyindices.com/reports/historical-data](https://niftyindices.com/reports/historical-data)
-
-### get_historical — Price Index (OHLC)
-
-```python
-from nsedata import indices
-
-df = indices.get_historical("NIFTY 50", "01-Apr-2026", "15-Apr-2026")
-print(df)
+```bash
+pip install nse-data
 ```
-
-Output:
-
-| Index Name | Date | Open | High | Low | Close |
-|-----------|------|------|------|-----|-------|
-| NIFTY 50 | 2026-04-01 | 23410.50 | 23562.80 | 23385.15 | 23519.35 |
-| NIFTY 50 | 2026-04-02 | 23540.00 | 23648.90 | 23472.60 | 23612.45 |
-| NIFTY 50 | 2026-04-03 | 23625.10 | 23710.55 | 23558.30 | 23689.70 |
-
-**Parameters:**
-- `index_name` (str) — Index name exactly as shown on niftyindices.com (e.g. `"NIFTY 50"`, `"NIFTY BANK"`, `"Nifty Auto"`)
-- `start_date` (str) — Start date in `dd-Mon-yyyy` format (e.g. `"01-Apr-2026"`)
-- `end_date` (str) — End date in `dd-Mon-yyyy` format (e.g. `"15-May-2026"`)
-
-**Returns:** `pandas.DataFrame` with columns: `Index Name`, `Date`, `Open`, `High`, `Low`, `Close`
 
 ---
 
-### get_tri — Total Return Index
+## Quick Start
 
 ```python
-from nsedata import indices
+from nsedata import nse
 
-df = indices.get_tri("NIFTY 50", "01-Apr-2026", "15-Apr-2026")
-print(df)
+# Daily prices
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+
+# F&O
+df = nse.get("derivatives", "equity", "fo_bhav_udiff", "2026-05-22")
+
+# Monthly
+df = nse.get("capital_market", "equities_sme", "c_catg", "2026-05")
+
+# Historical TRI from niftyindices.com
+df = nse.get_tri("NIFTY 50", "01-Jan-2026", "31-Mar-2026")
 ```
-
-Output:
-
-| Index Name | Date | Total Returns Index | Net Total Return Index |
-|-----------|------|--------------------|-----------------------|
-| NIFTY 50 | 2026-04-01 | 38245.62 | 35812.48 |
-| NIFTY 50 | 2026-04-02 | 38312.85 | 35875.30 |
-
-**Parameters:** Same as `get_historical`
-
-**Returns:** `pandas.DataFrame` with columns: `Index Name`, `Date`, `Total Returns Index`, `Net Total Return Index`
 
 ---
 
-## Reports Module
-
-Source: [nseindia.com/all-reports](https://www.nseindia.com/all-reports) → [nsearchives.nseindia.com](https://nsearchives.nseindia.com)
-
-All report functions take a date in `YYYY-MM-DD` format.
-
-### get_bhavcopy — Price Record (PR file)
+## `nse.get()` — DataFrame
 
 ```python
-from nsedata import reports
-
-df = reports.get_bhavcopy("2026-04-17")
-print(df.head())
+nse.get(category, subcategory, dataset, date, **kwargs) → pd.DataFrame
 ```
 
-Downloads the PR zip file from NSE archives and extracts the CSV. Contains OHLC data for all traded securities.
+| Parameter | Type | Example |
+|-----------|------|---------|
+| `category` | str | `"capital_market"`, `"derivatives"`, `"debt"`, `"egr"` |
+| `subcategory` | str | `"equities_sme"`, `"equity"`, `"corporate"` |
+| `dataset` | str | `"sec_bhavdata_full"`, `"fo_secban"` |
+| `date` | str | `"2026-05-22"` (daily) or `"2026-05"` (monthly) |
 
-**Key columns:** `SYMBOL`, `SERIES`, `OPEN_PRICE`, `HIGH_PRICE`, `LOW_PRICE`, `CLOSE_PRICE`, `NET_TRDVAL`, `NET_TRDQTY`
+**Examples:**
+
+```python
+from nsedata import nse
+
+# ── Capital Market ───────────────────────────────────────────────
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "bhavcopy_pr",        "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "bhav_udiff",         "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "security_master",    "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "cmvolt",             "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "market_activity",    "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "short_selling",      "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "mto",                "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "block_deals",        "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "bulk_deals",         "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "pe",                 "2026-05-22")
+
+# Settlement number auto-calculated — no extra param needed
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "csqr",        "2026-05-22")
+
+# Monthly
+df = nse.get("capital_market", "equities_sme", "c_catg", "2026-05")
+
+# ── Indices ──────────────────────────────────────────────────────
+df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
+df = nse.get("capital_market", "indices", "top_movers",    "2026-05-22")
+
+# ── F&O ──────────────────────────────────────────────────────────
+df = nse.get("derivatives", "equity", "fo_bhav_udiff", "2026-05-22")
+df = nse.get("derivatives", "equity", "fo_contract",   "2026-05-22")
+df = nse.get("derivatives", "equity", "fo_secban",     "2026-05-22")
+df = nse.get("derivatives", "equity", "fovolt",        "2026-05-22")
+
+# ── Commodity Derivatives ────────────────────────────────────────
+df = nse.get("derivatives", "commodity", "co_bhav_udiff", "2026-05-22")
+df = nse.get("derivatives", "commodity", "co_contract",   "2026-05-22")
+
+# ── Interest Rate Derivatives ────────────────────────────────────
+df = nse.get("derivatives", "interest_rate", "irf_bhavcopy", "2026-05-22")
+df = nse.get("derivatives", "interest_rate", "i_volt",        "2026-05-22")
+df = nse.get("derivatives", "interest_rate", "fpi_long",      "2026-05-22")
+
+# ── Debt ─────────────────────────────────────────────────────────
+# T-1 datasets — use previous trading day
+df = nse.get("debt", "corporate", "cbm_trd",              "2026-05-21")
+df = nse.get("debt", "corporate", "cbm_list_man",         "2026-05-21")
+df = nse.get("debt", "corporate", "corporate_bond_report","2026-05-21")
+df = nse.get("debt", "debt_segment", "dly_bundle",        "2026-05-22")
+df = nse.get("debt", "tri_party_repo", "trm_bc",          "2026-05-22")
+
+# ── EGR ──────────────────────────────────────────────────────────
+df = nse.get("egr", "egr", "egr_bc", "2026-05-22")
+
+# ── VaR snapshots (download-only, snapshot 1–6) ──────────────────
+nse.download("capital_market", "equities_sme", "cvar1", "2026-05-22",
+             snapshot=1, output_dir="./data")
+```
 
 ---
 
-### get_sec_bhavdata — Full Security Bhavcopy with Delivery
+## `nse.download()` — Save to Disk or S3
 
 ```python
-from nsedata import reports
-
-df = reports.get_sec_bhavdata("2026-04-17")
-
-# Filter for a specific stock
-reliance = df[df["SYMBOL"] == "RELIANCE"]
-print(reliance)
+nse.download(category, subcategory, dataset, date,
+             output_dir=".", s3_bucket=None, s3_prefix="",
+             **kwargs) → str
 ```
 
-**Key columns:** `SYMBOL`, `SERIES`, `DATE1`, `PREV_CLOSE`, `OPEN_PRICE`, `HIGH_PRICE`, `LOW_PRICE`, `CLOSE_PRICE`, `LAST_PRICE`, `AVG_PRICE`, `TTL_TRD_QNTY`, `TURNOVER_LACS`, `NO_OF_TRADES`, `DELIV_QTY`, `DELIV_PER`
+Returns local file path or `"s3://bucket/key"`.
+
+```python
+from nsedata import nse
+
+# Save to local folder
+path = nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
+                    output_dir="./data")
+# → "./data/sec_bhavdata_full_22052026.csv"
+
+# Save to S3 (Lambda with IAM role — no credentials needed)
+uri = nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
+                   s3_bucket="my-bucket", s3_prefix="raw/nse/equity/")
+# → "s3://my-bucket/raw/nse/equity/sec_bhavdata_full_22052026.csv"
+```
 
 ---
 
-### get_ind_close_all — All Index Closing Values
+## `nse.list_datasets()` — Discover datasets
 
 ```python
-from nsedata import reports
-
-df = reports.get_ind_close_all("2026-04-17")
-
-# Filter for NIFTY 50
-nifty = df[df["Index Name"] == "Nifty 50"]
-print(nifty)
+df = nse.list_datasets()
+df = nse.list_datasets(category="derivatives")
 ```
 
-**Key columns:** `Index Name`, `Index Date`, `Open Index Value`, `High Index Value`, `Low Index Value`, `Closing Index Value`, `Points Change`, `Change(%)`, `Volume`, `Turnover (Rs. Cr.)`, `P/E`, `P/B`, `Div Yield`
+Returns DataFrame: `category, subcategory, dataset, name, frequency, df_supported, format`
 
 ---
 
-### get_market_activity — Market Activity Report
+## Historical Index + TRI (niftyindices.com)
 
 ```python
-from nsedata import reports
+from nsedata import nse
 
-df = reports.get_market_activity("2026-04-17")
-print(df)
+# Price Index (OHLC)
+df = nse.get_historical_index("NIFTY 50",    "01-Jan-2026", "31-Mar-2026")
+df = nse.get_historical_index("NIFTY BANK",  "01-Jan-2026", "31-Mar-2026")
+df = nse.get_historical_index("NIFTY IT",    "01-Jan-2026", "31-Mar-2026")
+
+# Total Return Index
+df = nse.get_tri("NIFTY 50",    "01-Jan-2026", "31-Mar-2026")
+df = nse.get_tri("NIFTY BANK",  "01-Jan-2026", "31-Mar-2026")
 ```
 
-**Key columns:** `Category`, `No. of Trades`, `Traded Qty (Lacs)`, `Traded Value (Rs. Crores)`
+**Date format:** `"DD-Mon-YYYY"` e.g. `"01-Jan-2026"`, `"31-Mar-2026"`
+
+**Available indices (30):** NIFTY 50, NIFTY NEXT 50, NIFTY 100, NIFTY 200, NIFTY 500, NIFTY MIDCAP 50/100/150, NIFTY SMALLCAP 50/100/250, NIFTY BANK, NIFTY IT, NIFTY AUTO, NIFTY PHARMA, NIFTY FMCG, NIFTY METAL, NIFTY ENERGY, NIFTY REALTY, NIFTY MEDIA, NIFTY PSE, NIFTY PSU BANK, NIFTY PVT BANK, NIFTY FIN SERVICE, NIFTY OIL & GAS, NIFTY INFRA, NIFTY MNC, NIFTY CONSUMPTION, NIFTY SERVICES, NIFTY COMMODITIES
+
+> **Note:** Works from residential IPs. Lambda IPs also work — Cloudflare does not block Lambda.
 
 ---
 
-### download_report — Save Raw File to Disk
+## Settlement Number (auto-calculated)
+
+`auction_buy` and `csqr` datasets use a settlement number in the filename. It is **auto-calculated** from the date — no extra param needed:
 
 ```python
-from nsedata.reports import download_report
+# Auto-calculate (recommended)
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22")
 
-# Download raw file without parsing
-path = download_report("sec_bhavdata_full", "2026-04-17", output_dir="./data")
-print(f"Saved to: {path}")
+# Override manually if needed
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22",
+             settno="2026094")
+
+# Inspect settlement number for any date
+info = nse.get_settlement_number("2026-05-22")
+# → "2026094"
 ```
 
-**Parameters:**
-- `report_type` (str) — One of: `"pr"`, `"sec_bhavdata_full"`, `"ind_close_all"`, `"market_activity"`, `"bhav_copy"`
-- `date` (str) — Date in `YYYY-MM-DD` format
-- `output_dir` (str) — Directory to save the file (default: current directory)
-
-**Returns:** `pathlib.Path` to the saved file
-
----
-
-## Date Formats
-
-| Module | Format | Example |
-|--------|--------|---------|
-| `indices` | `dd-Mon-yyyy` | `"01-Apr-2026"`, `"15-May-2026"` |
-| `reports` | `YYYY-MM-DD` | `"2026-04-17"` |
-
-The different formats match what the underlying NSE websites expect.
+Formula: `YYYY` + 3-digit count of NSE trading days from Jan 1 (May 22 2026 = 94th → `2026094`)
 
 ---
 
 ## Error Handling
 
-All functions raise `RuntimeError` on HTTP errors:
-
 ```python
-from nsedata import reports
+from nsedata import nse
 
 try:
-    df = reports.get_bhavcopy("2026-04-19")  # Saturday — no data
+    df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-24")
 except RuntimeError as e:
-    print(f"Failed: {e}")
-    # Failed: Failed to download PR file: HTTP 403 for ...
+    print(f"Download failed: {e}")
+    # RuntimeError: HTTP 404 — file not available (weekend/holiday)
+
+try:
+    df = nse.get("capital_market", "equities_sme", "cvar1", "2026-05-22")
+except ValueError as e:
+    print(f"Format error: {e}")
+    # ValueError: use download() for DAT format datasets
 ```
 
 Common errors:
-- **HTTP 403** — NSE blocked the request (rate limiting or non-trading day)
-- **HTTP 404** — File not available for that date
-- **Timeout** — NSE server slow to respond
+- `RuntimeError: HTTP 404` — not a trading day or file not yet published
+- `RuntimeError: HTTP 403` — NSE rate-limiting (retry after a few seconds)
+- `ValueError` — wrong dataset key or download-only format

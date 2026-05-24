@@ -1,108 +1,97 @@
 ---
 layout: default
 title: CLI Reference
-nav_order: 4
+nav_order: 5
 ---
 
-# Command Line Interface
+# CLI Reference
 
-After installing `nse-data`, the `nse-data` command is available in your terminal.
+Both packages install CLI commands after `pip install`.
+
+---
+
+## nse-data CLI
 
 ```bash
 nse-data --help
 ```
 
-## Commands
-
-### `nse-data indices` — Download Historical Index Data
+### `nse-data get` — Print dataset as DataFrame
 
 ```bash
-nse-data indices --index "NIFTY 50" --from "01-Apr-2026" --to "15-May-2026"
+nse-data get <category> <subcategory> <dataset> <date>
 ```
 
-**Options:**
+```bash
+nse-data get capital_market equities_sme sec_bhavdata_full 2026-05-22
+nse-data get capital_market indices ind_close_all 2026-05-22
+nse-data get derivatives equity fo_secban 2026-05-22
+nse-data get debt corporate cbm_trd 2026-05-21
+```
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--index` | Yes | Index name (e.g. `"NIFTY 50"`, `"NIFTY BANK"`) |
-| `--type` | No | `price` (default) or `tri` |
-| `--from` | Yes | Start date in `dd-Mon-yyyy` format |
-| `--to` | Yes | End date in `dd-Mon-yyyy` format |
-| `--out` | No | Output CSV path (auto-generated if omitted) |
-
-**Examples:**
+### `nse-data download` — Save to disk
 
 ```bash
-# Price Index OHLC
-nse-data indices --index "NIFTY 50" --from "01-Apr-2026" --to "15-May-2026"
-# → Saves: NIFTY_50_01-Apr-2026_to_15-May-2026.csv
+nse-data download <category> <subcategory> <dataset> <date> [--out DIR]
+```
 
-# Total Return Index
-nse-data indices --index "NIFTY BANK" --type tri --from "01-Jan-2026" --to "31-Mar-2026"
-# → Saves: NIFTY_BANK_TRI_01-Jan-2026_to_31-Mar-2026.csv
+```bash
+nse-data download capital_market equities_sme sec_bhavdata_full 2026-05-22
+nse-data download capital_market equities_sme sec_bhavdata_full 2026-05-22 --out ./data
+```
 
-# Custom output path
-nse-data indices --index "Nifty IT" --from "01-Apr-2026" --to "15-Apr-2026" --out ./data/nifty_it.csv
+### `nse-data list` — List all datasets
+
+```bash
+nse-data list
+nse-data list --category derivatives
+nse-data list --category capital_market --subcategory equities_sme
 ```
 
 ---
 
-### `nse-data reports` — Download Daily Reports
+## mcx-data CLI
 
 ```bash
-nse-data reports --type bhavcopy --date 2026-04-17
+mcx-data --help
 ```
 
-**Options:**
-
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--type` | Yes | Report type (see below) |
-| `--date` | Yes | Date in `YYYY-MM-DD` format |
-| `--out` | No | Output CSV path (auto-generated if omitted) |
-
-**Report types:**
-
-| Type | Description | Output filename |
-|------|-------------|-----------------|
-| `bhavcopy` | PR bhavcopy zip (all securities) | `bhavcopy_2026-04-17.csv` |
-| `sec_bhavdata` | Full bhavcopy with delivery data | `sec_bhavdata_2026-04-17.csv` |
-| `ind_close_all` | All index closing values | `ind_close_all_2026-04-17.csv` |
-| `market_activity` | Market activity summary | `market_activity_2026-04-17.csv` |
-
-**Examples:**
+### `mcx-data spot-recent` — Today's spot prices
 
 ```bash
-# Bhavcopy
-nse-data reports --type bhavcopy --date 2026-04-17
-
-# Security-wise data with delivery
-nse-data reports --type sec_bhavdata --date 2026-04-17
-
-# All index closing values
-nse-data reports --type ind_close_all --date 2026-04-17
-
-# Market activity
-nse-data reports --type market_activity --date 2026-04-17
-
-# Custom output path
-nse-data reports --type sec_bhavdata --date 2026-04-17 --out ./data/bhav.csv
+mcx-data spot-recent
+mcx-data spot-recent --commodity GOLD
+mcx-data spot-recent --commodity SILVER --out ./data
 ```
 
----
+### `mcx-data spot-archive` — Historical spot prices
 
-## Output
-
-The CLI prints a preview of the data to stdout and saves the full dataset as CSV:
-
+```bash
+mcx-data spot-archive --from 01/05/2026 --to 22/05/2026 --commodity GOLD
+mcx-data spot-archive --from 2026-01-01 --to 2026-05-22 --commodity CRUDEOIL --out ./data
 ```
-$ nse-data reports --type sec_bhavdata --date 2026-04-17
-Downloaded: sec_bhavdata for 2026-04-17 (1842 rows)
- SYMBOL SERIES  OPEN_PRICE  HIGH_PRICE  LOW_PRICE  CLOSE_PRICE ...
-RELIANCE     EQ     2490.00     2518.75    2478.30      2512.45 ...
-     TCS     EQ     3850.00     3878.90    3835.60      3865.20 ...
-    INFY     EQ     1565.00     1582.40    1558.20      1575.60 ...
-...
 
-Saved: sec_bhavdata_2026-04-17.csv
+**Save to S3:**
+```bash
+mcx-data spot-archive \
+  --from 01/05/2026 --to 22/05/2026 \
+  --commodity GOLD \
+  --s3-bucket my-bucket --s3-prefix raw/mcx/
+```
+
+### `mcx-data list` — List datasets
+
+```bash
+mcx-data list
+```
+
+### `mcx-data commodities` — List available commodities
+
+```bash
+mcx-data commodities
+# ALUMINI, ALUMINIUM, CARDAMOM, COPPER, COTTON, COTTONOIL,
+# CPO, CRUDEOIL, CRUDEOILM, ELECDMBL, GOLD, GOLDGUINEA,
+# GOLDM, GOLDPETAL, GOLDTEN, KAPAS, LEAD, LEADMINI,
+# MENTHAOIL, NATGASMINI, NATURALGAS, NICKEL, SILVER, SILVERM,
+# SILVERMIC, STEELREBAR, ZINC, ZINCMINI
 ```

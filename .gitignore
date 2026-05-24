@@ -4,8 +4,8 @@
 # Downloaded NSE data (local test runs)
 NSE_Data/
 NSE_Data_v*/
-.lambda_layer
-# Lambda layer — ignore entire folder (scripts managed separately)
+.lambda_layer/
+# Lambda layer — entire folder excluded from git (ZIP + scripts managed locally)
 
 
 # Python

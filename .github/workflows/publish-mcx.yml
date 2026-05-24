@@ -1,15 +1,13 @@
 name: Publish mcx-data
 
 # Triggers:
-#   - Push tag  mcx-v*          → publish to PyPI (production)
+#   - Push tag  mcx-v*          → build + publish to PyPI + create GitHub Release
 #   - Manual dispatch           → publish to TestPyPI or PyPI (your choice)
-#
-# For TestPyPI: use workflow_dispatch manually from GitHub Actions tab
 
 on:
   push:
     tags:
-      - "mcx-v*"          # e.g. mcx-v0.1.0 → triggers PyPI publish
+      - "mcx-v*"          # e.g. mcx-v1.0.0
   workflow_dispatch:
     inputs:
       target:
@@ -20,7 +18,8 @@ on:
         options: [testpypi, pypi]
 
 permissions:
-  contents: read
+  contents: write
+  id-token: write
 
 jobs:
   build:
@@ -77,3 +76,47 @@ jobs:
           name: mcx-data-dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: Create GitHub Release — mcx-data
+    needs: publish-pypi
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/mcx-v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mcx-data-dist
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "mcx-data ${{ github.ref_name }}"
+          body: |
+            ## mcx-data ${{ github.ref_name }}
+
+            Python library to download MCX India commodity spot market data as pandas DataFrames.
+            Works on AWS Lambda via `curl_cffi` Chrome TLS impersonation (bypasses Akamai WAF).
+
+            ### Install
+            ```bash
+            pip install mcx-data==${{ github.ref_name }}
+            ```
+
+            ### What's included
+            - `get_spot_recent()` — today's spot prices for all 28 commodities
+            - `get_spot_archive()` — historical spot prices by commodity + date range
+            - Date column: `YYYY-MM-DD HH:MM:SS` (UTC)
+            - 28 commodities: GOLD, SILVER, CRUDEOIL, NATURALGAS, COPPER, ALUMINIUM, and more
+
+            ### Links
+            - [PyPI](https://pypi.org/project/mcx-data/)
+            - [Documentation](https://NikhilSuthar.github.io/indian-market-data/mcx-spot)
+          files: dist/*
+          draft: false
+          prerelease: false
