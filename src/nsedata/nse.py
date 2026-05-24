@@ -376,3 +376,26 @@ def list_index_names() -> pd.DataFrame:
     from nsedata.niftyindices import list_indices
     rows = list_indices()
     return pd.DataFrame(rows, columns=["shorthand", "full_name"])
+
+
+def get_settlement_number(date: str) -> str:
+    """
+    Get the NSE settlement number for a given trading date.
+
+    Settlement number = YYYY + 3-digit count of NSE trading days from Jan 1.
+    This is used internally by auction_buy and csqr datasets.
+
+    Args:
+        date: "YYYY-MM-DD" e.g. "2026-05-22"
+
+    Returns:
+        str: Settlement number e.g. "2026094"
+
+    Example:
+        >>> nse.get_settlement_number("2026-05-22")
+        '2026094'
+        >>> nse.get_settlement_number("2026-04-17")
+        '2026070'
+    """
+    from nsedata.calendar import get_settno_str
+    return get_settno_str(date)

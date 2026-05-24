@@ -111,9 +111,16 @@ def _format_url(cfg: DatasetConfig, date_str: str, **kwargs) -> str:
     for placeholder, value in replacements.items():
         pattern = pattern.replace(placeholder, value)
 
-    # Handle settlement number (special case for AUB)
+    # Handle settlement number (special case for AUB and CSQR)
     if "{settno}" in pattern:
-        settno = kwargs.get("settno", "")
+        settno = kwargs.get("settno")
+        if not settno:
+            # Auto-compute from date
+            try:
+                from nsedata.calendar import get_settno_str
+                settno = get_settno_str(date_str)
+            except Exception:
+                settno = ""
         pattern = pattern.replace("{settno}", str(settno))
 
     return base + pattern if not pattern.startswith("http") else pattern

@@ -271,7 +271,8 @@ REGISTRY = {
 
             "auction_buy": DatasetConfig(
                 name="Auction Buy File",
-                description="Auction-buy session results. Requires settlement number (settno) param e.g. settno='2026094'.",
+                description="Auction-buy session results. Settlement number (settno) is auto-calculated from the date. "
+                            "You can also override: settno='{YYYYNNN}' e.g. '2026094'.",
                 url_pattern="/content/nsccl/AUB_{settno}_{ddmmyyyy}.csv",
                 file_pattern="AUB_{settno}_{ddmmyyyy}.csv",
                 file_format="csv",
@@ -316,8 +317,8 @@ REGISTRY = {
 
             "csqr": DatasetConfig(
                 name="Client Segregation Quarterly Report (CSQR)",
-                description="Client-level collateral segregation. Requires settlement number param (settno) e.g. settno='2026093'. "
-                            "Settlement number changes daily. No header row.",
+                description="Client-level collateral segregation. Settlement number (settno) is auto-calculated from the date. "
+                            "You can also override: settno='{YYYYNNN}'. No header row.",
                 url_pattern="/archives/equities/csqr/CSQR_M{settno}_{ddmmyyyy}.csv",
                 file_pattern="CSQR_M{settno}_{ddmmyyyy}.csv",
                 file_format="csv",

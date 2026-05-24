@@ -208,22 +208,33 @@ nse.download("capital_market", "equities_sme", "mrg_trading", "2026-05-20", outp
 
 ---
 
-### ⚙️ Auction Buy File (requires settno)
-Settlement number changes daily. Get it from NSE website.
+### ⚙️ Auction Buy File — auto settlement number
+Settlement number (`settno`) is **auto-calculated** from the date. You can also override it.
 
 ```python
+# Auto-calculate settno (recommended)
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22")
+
+# Or provide it explicitly (settno = YYYY + NSE trading day count from Jan 1)
 df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22", settno="2026094")
 ```
-`AUB_{YYYYSETTNO}_{DDMMYYYY}.csv`
+`AUB_{YYYYNNN}_{DDMMYYYY}.csv` | 144 rows
+
+Settlement number formula: `YYYY` + 3-digit count of NSE trading days from Jan 1 (e.g. May 22 2026 = 94th trading day → `2026094`).
 
 ---
 
-### ⚙️ CSQR (requires settno)
+### ⚙️ CSQR — auto settlement number
+Same auto-calculation as auction_buy.
 
 ```python
-df = nse.get("capital_market", "equities_sme", "csqr", "2026-05-22", settno="2026093")
+# Auto-calculate settno (recommended)
+df = nse.get("capital_market", "equities_sme", "csqr", "2026-05-22")
+
+# Or provide explicitly
+df = nse.get("capital_market", "equities_sme", "csqr", "2026-05-22", settno="2026094")
 ```
-`CSQR_M{YYYYSETTNO}_{DDMMYYYY}.csv` | 13,000+ rows
+`CSQR_M{YYYYNNN}_{DDMMYYYY}.csv` | 13,000+ rows
 
 ---
 

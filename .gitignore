@@ -1,5 +1,9 @@
 # Internal reference data (not part of package)
 .data/
+
+# Downloaded NSE data (local test runs)
+NSE_Data/
+NSE_Data_v*/
 .lambda_layer
 # Lambda layer — ignore entire folder (scripts managed separately)
 

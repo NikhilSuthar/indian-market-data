@@ -1,40 +1,57 @@
 """
-AWS Lambda function — nse-data v0.6.0
-======================================
-Downloads NSE datasets to S3 using the new hierarchical API:
-    nse.download(category, subcategory, dataset, date, s3_bucket=..., s3_prefix=...)
+AWS Lambda function — nse-data
+================================
+Downloads all NSE datasets to S3 using the same folder structure
+as local downloads (.data/NSE Data Download-Sample).
+
+S3 Structure mirrors local:
+    s3://bucket/nse-data/
+    ├── Capital Market/
+    │   ├── Equities & SME/
+    │   │   ├── Daily/       ← sec_bhavdata_full, cmvolt, ...
+    │   │   └── Monthly/     ← C_CATG_MAY2026.T01
+    │   ├── Indices/Daily/
+    │   ├── Mutual Fund/Daily/
+    │   └── Securities Lending & Borrowing/Daily|Monthly/
+    ├── Derivatives/
+    │   ├── Equity Derivative/Daily|Monthly/
+    │   ├── Commodity Derivative/Daily|Monthly/
+    │   ├── Currency Derivative/Daily/
+    │   └── Interest Rate Derivative/Daily/
+    ├── Debt/
+    │   ├── Corporate Segment/Daily/
+    │   ├── Debt Segment/Daily/
+    │   └── Tri-Party Repo/Daily/
+    └── EGR/EGR/Daily/
 
 Runtime:  Python 3.12+
-Layer:    nse-data-lambda-layer.zip
-Memory:   512 MB (pandas needs headroom for large files)
+Layer:    nse-data-lambda-layer.zip (nse-data + pandas + requests + openpyxl)
+Memory:   512 MB
 Timeout:  300 seconds
 
 Environment Variables:
-    S3_BUCKET   — Target S3 bucket (required)
-    S3_PREFIX   — Key prefix, default: "nse-data/"
+    S3_BUCKET    — Target S3 bucket (required)
+    S3_PREFIX    — Root prefix, default: "nse-data/"
 
-IAM Policy required (attach to Lambda execution role):
+IAM Policy required on Lambda execution role:
     { "Effect": "Allow", "Action": ["s3:PutObject"],
       "Resource": "arn:aws:s3:::YOUR-BUCKET/nse-data/*" }
 
 Event examples:
-    # Download defaults (5 core datasets)
-    { "date": "2026-05-22", "bucket": "my-bucket" }
+    # Download all datasets
+    { "date": "2026-05-22", "month": "2026-05", "bucket": "my-bucket", "download_all": true }
 
-    # Download all supported daily datasets
-    { "date": "2026-05-22", "bucket": "my-bucket", "download_all": true }
+    # Download defaults only (5 core datasets)
+    { "date": "2026-05-22", "bucket": "my-bucket" }
 
     # Specific datasets
     { "date": "2026-05-22", "bucket": "my-bucket",
-      "datasets": [
-        ["capital_market", "equities_sme", "sec_bhavdata_full"],
-        ["capital_market", "indices", "ind_close_all"],
-        ["derivatives", "equity", "fo_bhav_udiff"]
-      ]}
+      "datasets": [["capital_market", "equities_sme", "sec_bhavdata_full"],
+                   ["capital_market", "indices", "ind_close_all"]] }
 
-    # Monthly datasets
-    { "date": "2026-05-22", "month": "2026-05", "bucket": "my-bucket",
-      "download_all": true }
+    # Test TRI from niftyindices.com (tests if Cloudflare allows Lambda IP)
+    { "date": "2026-05-22", "bucket": "my-bucket", "test_tri": true,
+      "tri_index": "NIFTY 50", "tri_start": "01-May-2026", "tri_end": "22-May-2026" }
 """
 
 import json
@@ -45,18 +62,34 @@ from datetime import datetime
 from nsedata import nse
 from nsedata.registry import get_config
 
-# ─── Default datasets (confirmed working from Lambda) ────────────────────────
-DEFAULT_DATASETS = [
-    ("capital_market", "equities_sme", "sec_bhavdata_full"),
-    ("capital_market", "indices",      "ind_close_all"),
-    ("capital_market", "equities_sme", "cmvolt"),
-    ("derivatives",    "equity",       "fo_secban"),
-    ("capital_market", "equities_sme", "security_master"),
-]
+# ─── Folder mapping — mirrors local download structure ───────────────────────
+FOLDER_MAP = {
+    ("capital_market", "equities_sme"):  ("Capital Market", "Equities & SME"),
+    ("capital_market", "indices"):       ("Capital Market", "Indices"),
+    ("capital_market", "mutual_fund"):   ("Capital Market", "Mutual Fund"),
+    ("capital_market", "slb"):           ("Capital Market", "Securities Lending & Borrowing"),
+    ("derivatives",    "equity"):        ("Derivatives",    "Equity Derivative"),
+    ("derivatives",    "commodity"):     ("Derivatives",    "Commodity Derivative"),
+    ("derivatives",    "currency"):      ("Derivatives",    "Currency Derivative"),
+    ("derivatives",    "interest_rate"): ("Derivatives",    "Interest Rate Derivative"),
+    ("debt",           "corporate"):     ("Debt",           "Corporate Segment"),
+    ("debt",           "debt_segment"):  ("Debt",           "Debt Segment"),
+    ("debt",           "tri_party_repo"):("Debt",           "Tri-Party Repo"),
+    ("egr",            "egr"):           ("EGR",            "EGR"),
+}
 
-# ─── All daily datasets (91 total in registry) ───────────────────────────────
-ALL_DAILY_DATASETS = [
-    # Capital Market — Equities & SME
+FREQ_FOLDER = {
+    "Daily": "Daily", "Monthly": "Monthly",
+    "Weekly/Monthly": "Weekly", "Monthly (static)": "Monthly",
+    "Daily (static)": "Daily", "Daily (6 intraday snapshots)": "Daily",
+    "Archive/Daily": "Daily", "Weekly": "Weekly",
+    "Monthly (static file, always current)": "Monthly",
+}
+
+# ─── All confirmed working datasets (from local + Lambda test run) ────────────
+# Daily datasets
+ALL_DAILY = [
+    # Capital Market — Equities & SME (confirmed working)
     ("capital_market", "equities_sme", "bhavcopy_pr"),
     ("capital_market", "equities_sme", "sec_bhavdata_full"),
     ("capital_market", "equities_sme", "bhav_udiff"),
@@ -65,7 +98,6 @@ ALL_DAILY_DATASETS = [
     ("capital_market", "equities_sme", "cmvolt"),
     ("capital_market", "equities_sme", "short_selling"),
     ("capital_market", "equities_sme", "mto"),
-    ("capital_market", "equities_sme", "52wk_high_low"),
     ("capital_market", "equities_sme", "block_deals"),
     ("capital_market", "equities_sme", "bulk_deals"),
     ("capital_market", "equities_sme", "pe"),
@@ -78,23 +110,23 @@ ALL_DAILY_DATASETS = [
     ("capital_market", "equities_sme", "series_change"),
     ("capital_market", "equities_sme", "mf_var"),
     ("capital_market", "equities_sme", "appsec_collval"),
-    ("capital_market", "equities_sme", "csqr"),
     ("capital_market", "equities_sme", "c_stt"),
     ("capital_market", "equities_sme", "c_stt_ind"),
-    ("capital_market", "equities_sme", "cm_latency"),
     ("capital_market", "equities_sme", "fcm_bc"),
     ("capital_market", "equities_sme", "corpbond"),
-    ("capital_market", "equities_sme", "mrg_trading"),
-    # C_VAR1 snapshots 1-6 (download only)
-    # ("capital_market", "equities_sme", "cvar1"),  # needs snapshot=1..6
+    ("capital_market", "equities_sme", "daily_settlement_doc"),
     # Capital Market — Indices
     ("capital_market", "indices", "ind_close_all"),
     ("capital_market", "indices", "top_movers"),
+    # Capital Market — Mutual Fund
+    ("capital_market", "mutual_fund", "nsccl_cm_ann_mf"),
     # Capital Market — SLB
     ("capital_market", "slb", "slb_elg_sec"),
     ("capital_market", "slb", "slb_openpos"),
     ("capital_market", "slb", "slb_foreclosure"),
-    # Derivatives — Equity
+    ("capital_market", "slb", "slb_bc"),
+    ("capital_market", "slb", "slb_var"),
+    # Derivatives — Equity F&O
     ("derivatives", "equity", "fo_bhav_udiff"),
     ("derivatives", "equity", "fo_contract"),
     ("derivatives", "equity", "fo_secban"),
@@ -103,7 +135,6 @@ ALL_DAILY_DATASETS = [
     ("derivatives", "commodity", "co_bhav_udiff"),
     ("derivatives", "commodity", "co_contract"),
     # Derivatives — Currency
-    ("derivatives", "currency", "cd_bhav_udiff"),
     ("derivatives", "currency", "cd_contract"),
     # Derivatives — Interest Rate
     ("derivatives", "interest_rate", "irf_bhavcopy"),
@@ -112,7 +143,10 @@ ALL_DAILY_DATASETS = [
     ("derivatives", "interest_rate", "ewpl"),
     ("derivatives", "interest_rate", "fpi_long"),
     ("derivatives", "interest_rate", "fii_long"),
-    # Debt — Corporate
+    ("derivatives", "interest_rate", "tenure_symbol_map"),
+    ("derivatives", "interest_rate", "irf_cli_oi"),
+    ("derivatives", "interest_rate", "irf_tm_oi"),
+    # Debt — Corporate (use T-1 date for settlement files)
     ("debt", "corporate", "cbm_trd"),
     ("debt", "corporate", "cbm_list_man"),
     ("debt", "corporate", "cbm_list_non_man"),
@@ -128,15 +162,18 @@ ALL_DAILY_DATASETS = [
     ("debt", "corporate", "cd_settlement"),
     ("debt", "corporate", "gsec_settlement"),
     ("debt", "corporate", "corporate_bond_report"),
-    # Debt — Debt Segment
-    ("debt", "debt_segment", "wdmlist"),
+    # Debt — Segment
     ("debt", "debt_segment", "dly_bundle"),
     # Debt — Tri-Party Repo
     ("debt", "tri_party_repo", "trm_bc"),
+    # EGR
+    ("egr", "egr", "egr_bc"),
 ]
 
-ALL_MONTHLY_DATASETS = [
+# Monthly datasets
+ALL_MONTHLY = [
     ("capital_market", "equities_sme", "c_catg"),
+    ("capital_market", "mutual_fund",  "nsccl_cm_ann_mf"),
     ("capital_market", "slb", "slb_cli"),
     ("capital_market", "slb", "slb_fopl"),
     ("capital_market", "slb", "slb_mpl"),
@@ -147,16 +184,23 @@ ALL_MONTHLY_DATASETS = [
     ("derivatives", "equity", "tmopl"),
     ("derivatives", "equity", "fo_impact_cost"),
     ("derivatives", "commodity", "payinpayout"),
-    ("debt", "debt_segment", "accrued_interest"),
+]
+
+# Default (5 most important for quick run)
+DEFAULT_DATASETS = [
+    ("capital_market", "equities_sme", "sec_bhavdata_full"),
+    ("capital_market", "indices",      "ind_close_all"),
+    ("capital_market", "equities_sme", "cmvolt"),
+    ("derivatives",    "equity",       "fo_secban"),
+    ("capital_market", "equities_sme", "security_master"),
 ]
 
 
 def lambda_handler(event, context):
     """Main Lambda handler."""
 
-    # Parse input
-    date  = event.get("date")
-    month = event.get("month") or (date[:7] if date else None)  # auto-derive YYYY-MM from date
+    date   = event.get("date")
+    month  = event.get("month") or (date[:7] if date else None)
     bucket = event.get("bucket") or os.environ.get("S3_BUCKET")
     prefix = event.get("prefix") or os.environ.get("S3_PREFIX", "nse-data/")
 
@@ -165,38 +209,52 @@ def lambda_handler(event, context):
     if not bucket:
         return {"statusCode": 400, "body": "Missing 'bucket' or S3_BUCKET env var"}
 
-    download_all = event.get("download_all", False)
-    specific     = event.get("datasets")  # list of [cat, sub, dataset]
+    download_all_flag = event.get("download_all", False)
+    specific          = event.get("datasets")
+    test_tri          = event.get("test_tri", False)
 
     # Determine which datasets to download
     if specific:
         daily_list   = [(c, s, d) for c, s, d in specific if not _is_monthly(c, s, d)]
         monthly_list = [(c, s, d) for c, s, d in specific if _is_monthly(c, s, d)]
-    elif download_all:
-        daily_list   = ALL_DAILY_DATASETS
-        monthly_list = ALL_MONTHLY_DATASETS
+    elif download_all_flag:
+        daily_list   = ALL_DAILY
+        monthly_list = ALL_MONTHLY
     else:
         daily_list   = DEFAULT_DATASETS
         monthly_list = []
 
-    results = {"uploaded": [], "failed": [], "date": date, "month": month, "bucket": bucket}
+    results = {
+        "uploaded": [], "failed": [],
+        "date": date, "month": month, "bucket": bucket,
+    }
 
-    # ─── Download daily datasets ──────────────────────────────────────────
+    # ─── Daily datasets ───────────────────────────────────────────────────
     for cat, sub, ds in daily_list:
         _do_download(cat, sub, ds, date, bucket, prefix, results)
         time.sleep(0.3)
 
-    # ─── Download VaR snapshots (6 intraday) ──────────────────────────────
-    if download_all:
+    # ─── VaR snapshots 1-6 ───────────────────────────────────────────────
+    if download_all_flag:
         for snap in range(1, 7):
             _do_download("capital_market", "equities_sme", "cvar1", date,
                          bucket, prefix, results, snapshot=snap)
-            time.sleep(0.3)
+            time.sleep(0.2)
 
-    # ─── Download monthly datasets ─────────────────────────────────────────
+    # ─── Monthly datasets ─────────────────────────────────────────────────
     for cat, sub, ds in monthly_list:
         _do_download(cat, sub, ds, month, bucket, prefix, results)
         time.sleep(0.3)
+
+    # ─── TRI test (niftyindices.com — tests Cloudflare) ───────────────────
+    if test_tri:
+        tri_result = _test_tri(
+            event.get("tri_index", "NIFTY 50"),
+            event.get("tri_start", f"01-{_month_name(date)}-{date[:4]}"),
+            event.get("tri_end",   _to_ddmonyyyy(date)),
+            bucket, prefix,
+        )
+        results["tri_test"] = tri_result
 
     results["summary"] = {
         "total":    len(results["uploaded"]) + len(results["failed"]),
@@ -204,27 +262,99 @@ def lambda_handler(event, context):
         "failed":   len(results["failed"]),
     }
 
-    print(f"=== Summary: {results['summary']['uploaded']} uploaded, "
+    print(f"=== {results['summary']['uploaded']} uploaded, "
           f"{results['summary']['failed']} failed ===")
 
     return {"statusCode": 200, "body": json.dumps(results, default=str)}
 
 
-def _is_monthly(cat, sub, ds):
-    try:
-        cfg = get_config(cat, sub, ds)
-        return cfg.date_type == "monthly"
-    except Exception:
-        return False
+def _s3_path(cat, sub, cfg, prefix, date_val):
+    """Build S3 key prefix matching local folder structure."""
+    folder = FOLDER_MAP.get((cat, sub), (cat.title(), sub.title()))
+    freq   = FREQ_FOLDER.get(cfg.frequency, "Daily")
+    return f"{prefix}{folder[0]}/{folder[1]}/{freq}/"
 
 
 def _do_download(cat, sub, ds, date_val, bucket, prefix, results, **kwargs):
-    s3_key_prefix = f"{prefix}{date_val}/{cat}/{sub}/"
+    """Download one dataset to S3."""
+    # Skip portal-only and settno-required datasets
+    try:
+        cfg = get_config(cat, sub, ds)
+    except Exception:
+        return
+
+    if getattr(cfg, "portal_only", False) or not cfg.url_pattern:
+        return  # silently skip
+
+    if "{settno}" in cfg.url_pattern:
+        return  # settno not known automatically
+
+    s3_prefix = _s3_path(cat, sub, cfg, prefix, date_val)
+
     try:
         uri = nse.download(cat, sub, ds, date_val,
-                           s3_bucket=bucket, s3_prefix=s3_key_prefix, **kwargs)
+                           s3_bucket=bucket, s3_prefix=s3_prefix, **kwargs)
         results["uploaded"].append({"dataset": f"{cat}/{sub}/{ds}", "s3_uri": uri})
         print(f"✓ {cat}/{sub}/{ds} → {uri.split('/')[-1]}")
     except Exception as e:
         results["failed"].append({"dataset": f"{cat}/{sub}/{ds}", "error": str(e)[:80]})
-        print(f"✗ {cat}/{sub}/{ds}: {str(e)[:70]}")
+        print(f"✗ {cat}/{sub}/{ds}: {str(e)[:60]}")
+
+
+def _test_tri(index_name, start_date, end_date, bucket, prefix):
+    """
+    Test TRI download from niftyindices.com.
+    This tests whether Cloudflare blocks Lambda's IP.
+    Returns dict with status.
+    """
+    print(f"\n=== TRI Test: {index_name} from {start_date} to {end_date} ===")
+    try:
+        df = nse.get_tri(index_name, start_date, end_date)
+        rows = len(df)
+        print(f"✓ TRI: {rows} rows — Cloudflare NOT blocking Lambda IP")
+
+        # Save to S3
+        import io
+        csv_bytes = df.to_csv(index=False).encode("utf-8")
+        import boto3
+        s3_key = f"{prefix}niftyindices/{index_name.replace(' ', '_')}_TRI_{start_date}_to_{end_date}.csv"
+        boto3.client("s3").put_object(Bucket=bucket, Key=s3_key, Body=csv_bytes)
+
+        return {
+            "status": "SUCCESS",
+            "cloudflare_blocked": False,
+            "rows": rows,
+            "s3_uri": f"s3://{bucket}/{s3_key}",
+            "message": "Cloudflare is NOT blocking Lambda IP — TRI works from Lambda",
+        }
+    except Exception as e:
+        err = str(e)
+        blocked = "Cloudflare" in err or "timeout" in err.lower() or "403" in err
+        print(f"✗ TRI: {err[:80]}")
+        return {
+            "status": "FAILED",
+            "cloudflare_blocked": blocked,
+            "error": err[:200],
+            "message": (
+                "Cloudflare IS blocking Lambda IP — use local machine or NAT Gateway"
+                if blocked else
+                f"TRI failed (not Cloudflare): {err[:100]}"
+            ),
+        }
+
+
+def _is_monthly(cat, sub, ds):
+    try:
+        return get_config(cat, sub, ds).date_type == "monthly"
+    except Exception:
+        return False
+
+
+def _month_name(date_str):
+    """'2026-05-22' → 'May'"""
+    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%b")
+
+
+def _to_ddmonyyyy(date_str):
+    """'2026-05-22' → '22-May-2026'"""
+    return datetime.strptime(date_str, "%Y-%m-%d").strftime("%d-%b-%Y")

@@ -25,8 +25,9 @@ pip install nse-data
 | ✅ Download + DataFrame | 59 | Full support — download to disk + parse as DataFrame |
 | ⬇️ Download only | 8 | DAT/LST/DOC formats — download raw file |
 | 🕐 T-1 (previous day) | 16 | Settlement files — available next trading day |
-| ⚙️ Needs extra param | 2 | Requires `settno` (settlement number) |
 | ⏭ Portal-only | 8 | No direct archive URL — download from NSE website |
+
+> **Note:** `auction_buy` and `csqr` previously required a `settno` param. Settlement number is now **auto-calculated** from the date — no extra params needed.
 
 ---
 
@@ -40,15 +41,22 @@ df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22"
 df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
 df = nse.get("derivatives", "equity", "fo_bhav_udiff", "2026-05-22")
 
+# T-1 datasets — use previous trading day
+df = nse.get("debt", "corporate", "cbm_list_man", "2026-05-21")
+
+# auction_buy and csqr — settno auto-calculated, no extra params needed
+df = nse.get("capital_market", "equities_sme", "auction_buy", "2026-05-22")
+df = nse.get("capital_market", "equities_sme", "csqr", "2026-05-22")
+
+# Inspect settlement number for any date
+nse.get_settlement_number("2026-05-22")  # → "2026094"
+
 # Download to disk
 nse.download("capital_market", "equities_sme", "bhavcopy_pr", "2026-05-22", output_dir="./data")
 
 # Download to S3 (IAM role — no credentials needed)
 nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
              s3_bucket="my-bucket", s3_prefix="raw/nse/")
-
-# T-1 datasets — use previous trading day
-df = nse.get("debt", "corporate", "cbm_list_man", "2026-05-21")
 
 # List all datasets
 nse.list_datasets()
