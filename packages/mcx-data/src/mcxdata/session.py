@@ -80,9 +80,12 @@ def _build_session() -> Tuple[object, str]:
 
 
 def _warmup(session, stype: str) -> None:
-    """GET the MCX spot page to acquire cookies before making API calls."""
+    """
+    GET the MCX spot page to acquire session cookies.
+    Also call the recent endpoint once to fully warm up the session state.
+    """
     try:
         session.get(MCX_SPOT_PAGE, timeout=15)
-        time.sleep(0.5)
+        time.sleep(1.5)  # Akamai needs time to recognise the session
     except Exception:
-        pass  # Warmup failure is non-fatal
+        pass

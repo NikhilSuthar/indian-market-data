@@ -35,6 +35,6 @@ Quick Start:
 See: https://NikhilSuthar.github.io/indian-market-data
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from mcxdata import mcx

@@ -82,37 +82,50 @@ def fetch_archive(from_date: str, to_date: str,
 def _post(url: str, body: str) -> dict:
     """
     POST to MCX backpage endpoint. Returns parsed JSON dict.
-    Retries once with a fresh session on 403.
+
+    Retry strategy on 403:
+      - Attempt 1: retry after 3s with same session (cookies preserved)
+      - Attempt 2: rebuild session (fresh warmup) and retry after 5s
+    Never destroy cookies on first 403 — Akamai uses session state.
     """
     session, stype = get_session()
 
-    for attempt in range(2):
+    for attempt in range(3):
         try:
             if stype == "curl_cffi":
-                r = session.post(url, data=body, headers=_POST_HEADERS, timeout=20)
+                r = session.post(url, data=body, headers=_POST_HEADERS, timeout=25)
             else:
                 session.headers.update(_POST_HEADERS)
-                r = session.post(url, data=body, timeout=20)
+                r = session.post(url, data=body, timeout=25)
 
-            if r.status_code == 403 and attempt == 0:
-                # WAF block — reset session (new cookies) and retry
-                reset_session()
-                session, stype = get_session()
-                continue
+            if r.status_code == 403:
+                if attempt == 0:
+                    # First 403 — same session, just wait longer
+                    time.sleep(3)
+                    continue
+                elif attempt == 1:
+                    # Second 403 — rebuild session with fresh warmup
+                    reset_session()
+                    time.sleep(5)
+                    session, stype = get_session()
+                    continue
+                else:
+                    raise RuntimeError(f"HTTP 403: {url} (Akamai WAF blocking — ensure curl_cffi is installed)")
 
             if r.status_code != 200:
                 raise RuntimeError(f"HTTP {r.status_code}: {url}")
 
             return r.json()
 
+        except RuntimeError:
+            raise
         except Exception as e:
-            if attempt == 0:
-                reset_session()
-                session, stype = get_session()
+            if attempt < 2:
+                time.sleep(2)
                 continue
             raise
 
-    raise RuntimeError(f"Failed after 2 attempts: {url}")
+    raise RuntimeError(f"Failed after 3 attempts: {url}")
 
 
 def _parse_response(raw: dict) -> pd.DataFrame:
