@@ -7,7 +7,7 @@ nav_order: 1
 # Indian Market Data
 
 <p align="center">
-  <img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" height="100"/>
+  <img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" height="50"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" height="150"/>
 </p>
