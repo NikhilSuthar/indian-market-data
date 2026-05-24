@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Python API — NSE
-nav_order: 3
+nav_order: 1
+parent: NSE India
 ---
 
 # Python API — NSE

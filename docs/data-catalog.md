@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Data Catalog
-nav_order: 6
+nav_order: 2
+parent: Reference
 ---
 
 # NSE Data Catalog

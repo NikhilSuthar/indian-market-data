@@ -4,6 +4,11 @@ remote_theme: just-the-docs/just-the-docs
 url: "https://NikhilSuthar.github.io/indian-market-data"
 baseurl: "/indian-market-data"
 
+# Enable both light and dark theme toggle
+color_scheme: light
+# just-the-docs supports a toggle — users can switch via the sun/moon icon
+# Set default here; the toggle is built-in to just-the-docs
+
 aux_links:
   "GitHub":
     - "https://github.com/NikhilSuthar/indian-market-data"
@@ -11,12 +16,32 @@ aux_links:
     - "https://pypi.org/project/nse-archives/"
   "PyPI: mcx-data":
     - "https://pypi.org/project/mcx-data/"
+  "PyPI: indian-market-data":
+    - "https://pypi.org/project/indian-market-data/"
 
 aux_links_new_tab: true
 
-footer_content: "MIT License. Data from <a href='https://www.nseindia.com'>NSE India</a> and <a href='https://www.mcxindia.com'>MCX India</a>."
+footer_content: "MIT License. Data from <a href='https://www.nseindia.com'>NSE India</a> and <a href='https://www.mcxindia.com'>MCX India</a>. &nbsp;|&nbsp; <a href='https://github.com/NikhilSuthar/indian-market-data'>View on GitHub</a>"
 
 search_enabled: true
+search:
+  heading_level: 3
+  previews: 3
+
 back_to_top: true
-back_to_top_text: "Back to top"
-color_scheme: light
+back_to_top_text: "↑ Back to top"
+
+# Navigation
+nav_sort: order   # use nav_order from front-matter
+
+# callouts
+callouts:
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+  tip:
+    title: Tip
+    color: green

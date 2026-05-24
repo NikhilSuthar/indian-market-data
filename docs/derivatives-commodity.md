@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Derivatives — Commodity
-nav_order: 6
+nav_order: 8
+parent: NSE India
 ---
 
 # Derivatives — Commodity

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Capital Market — SLB
-nav_order: 4
+nav_order: 6
+parent: NSE India
 ---
 
 # Capital Market — Securities Lending & Borrowing

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Derivatives — Currency
-nav_order: 7
+nav_order: 9
+parent: NSE India
 ---
 
 # Derivatives — Currency

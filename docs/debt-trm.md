@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Debt — Tri-Party Repo
-nav_order: 11
+nav_order: 13
+parent: NSE India
 ---
 
 # Debt — Tri-Party Repo

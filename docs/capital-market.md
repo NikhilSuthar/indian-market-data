@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Capital Market — Equities & SME
-nav_order: 2
+nav_order: 4
+parent: NSE India
 ---
 
 # Capital Market — Equities & SME

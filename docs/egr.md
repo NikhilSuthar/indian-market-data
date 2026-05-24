@@ -1,7 +1,8 @@
 ---
 layout: default
 title: EGR
-nav_order: 12
+nav_order: 14
+parent: NSE India
 ---
 
 # EGR — Electronic Gold Receipt

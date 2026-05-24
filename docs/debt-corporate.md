@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Debt — Corporate Segment
-nav_order: 9
+nav_order: 11
+parent: NSE India
 ---
 
 # Debt — Corporate Segment

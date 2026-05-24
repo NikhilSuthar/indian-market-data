@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Publishing to PyPI
-nav_order: 7
+title: Deploy Guide
+nav_order: 1
+parent: AWS Lambda
 ---
 
 # Publishing to PyPI

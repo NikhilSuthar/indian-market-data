@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Dataset Catalog
-nav_order: 6
+nav_order: 3
+parent: Reference
 ---
 
 # Complete Dataset Catalog

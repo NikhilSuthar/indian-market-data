@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Derivatives — Equity F&O
-nav_order: 5
+nav_order: 7
+parent: NSE India
 ---
 
 # Derivatives — Equity F&O

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Capital Market — Indices
-nav_order: 3
+nav_order: 5
+parent: NSE India
 ---
 
 # Capital Market — Indices

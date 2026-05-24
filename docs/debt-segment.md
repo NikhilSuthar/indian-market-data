@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Debt — Debt Segment
-nav_order: 10
+nav_order: 12
+parent: NSE India
 ---
 
 # Debt — Debt Segment (WDM)

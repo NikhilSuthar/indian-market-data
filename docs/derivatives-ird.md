@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Derivatives — Interest Rate
-nav_order: 8
+nav_order: 10
+parent: NSE India
 ---
 
 # Derivatives — Interest Rate

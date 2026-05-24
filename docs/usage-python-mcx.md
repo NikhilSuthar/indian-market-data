@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Python API — MCX
-nav_order: 4
+nav_order: 1
+parent: MCX India
 ---
 
 # Python API — MCX

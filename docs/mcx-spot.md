@@ -1,7 +1,8 @@
 ---
 layout: default
-title: MCX — Spot Market
-nav_order: 20
+title: Spot Market
+nav_order: 2
+parent: MCX India
 ---
 
 # MCX — Spot Market Prices

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Data Sources
-nav_order: 5
+nav_order: 1
+parent: Reference
 ---
 
 # Data Sources & NSE Links
