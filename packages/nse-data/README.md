@@ -6,8 +6,9 @@
 
 Download NSE India market data as **pandas DataFrames** or raw files to **local disk / S3**. Works from AWS Lambda, Snowflake, or any cloud environment.
 
-**Full Documentation → [NikhilSuthar.github.io/nse-data](https://NikhilSuthar.github.io/nse-data)**
+**Full Documentation → [NikhilSuthar.github.io/indian-market-data](https://NikhilSuthar.github.io/indian-market-data)**
 
+Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo — also see [`mcx-data`](https://pypi.org/project/mcx-data/).
 ---
 
 ## Installation

@@ -1,31 +1,37 @@
 """
-indian-market-data — Umbrella package for NSE and MCX India market data.
+indian-market-data — NSE + MCX India market data as pandas DataFrames.
 
-Download NSE bhavcopy, Nifty indices, F&O, equity, debt, commodity, currency
-derivatives as pandas DataFrames. Installs and re-exports both nse-data and mcx-data.
+Umbrella package that installs and re-exports both nse-data and mcx-data.
 Works on AWS Lambda and Snowflake.
 
-Keywords: nse, mcx, nifty, india, bhavcopy, nse-india, mcx-india, stock-market,
-commodity, equity, derivatives, market-data, financial-data, pandas, nifty50,
-nseindia, trading, historical-data, aws-lambda, s3, snowflake
-
-Usage:
+Quick Start:
     from indianmarketdata import nse, mcx
 
-    # NSE data
+    # NSE — 91 datasets: equities, F&O, debt, indices, EGR
     df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+    df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
+    df = nse.get_tri("NIFTY 50", "01-Jan-2026", "31-Mar-2026")
 
-    # MCX data (coming soon)
-    df = mcx.get("commodity", "bhavcopy", "2026-05-22")
+    # MCX — commodity spot prices
+    df = mcx.get_spot_recent()                                           # all 28 commodities
+    df = mcx.get_spot_recent(commodity="GOLD")                          # single commodity
+    df = mcx.get_spot_archive("2026-05-01", "2026-05-22", commodity="GOLD")
 
-Or use packages individually:
+    # Download to S3
+    nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22",
+                 s3_bucket="my-bucket", s3_prefix="raw/nse/")
+    mcx.download("spot", "market", "spot_recent",
+                 s3_bucket="my-bucket", s3_prefix="raw/mcx/")
+
+Or use individually:
     from nsedata import nse      # pip install nse-data
     from mcxdata import mcx      # pip install mcx-data
+
+See: https://NikhilSuthar.github.io/indian-market-data
 """
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 
-# Re-export both sub-packages
 try:
     from nsedata import nse
 except ImportError:

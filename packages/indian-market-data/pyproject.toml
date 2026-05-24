@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "indian-market-data"
-version = "0.9.0"
-description = "Umbrella package for NSE and MCX India market data — download NSE bhavcopy, Nifty indices, F&O, MCX commodity futures as pandas DataFrames. AWS Lambda ready."
+version = "0.9.1"
+description = "NSE + MCX India market data as pandas DataFrames — bhavcopy, Nifty indices, F&O, commodity spot prices. AWS Lambda ready."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -27,7 +27,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "nse-data>=0.9.0",
+    "nse-data>=0.9.1",
     "mcx-data>=0.1.0",
 ]
 
@@ -38,10 +38,10 @@ all = ["boto3>=1.28.0", "cloudscraper>=1.2.71"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.urls]
-Homepage = "https://github.com/NikhilSuthar/nse-data"
-Documentation = "https://NikhilSuthar.github.io/nse-data"
-Repository = "https://github.com/NikhilSuthar/nse-data"
-"Bug Tracker" = "https://github.com/NikhilSuthar/nse-data/issues"
+Homepage = "https://github.com/NikhilSuthar/indian-market-data"
+Documentation = "https://NikhilSuthar.github.io/indian-market-data"
+Repository = "https://github.com/NikhilSuthar/indian-market-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/indian-market-data/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

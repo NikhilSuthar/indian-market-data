@@ -1,23 +1,59 @@
 # mcx-data
 
-Python library to download market data from MCX India — commodity futures bhavcopy and reports.
+[![PyPI version](https://badge.fury.io/py/mcx-data.svg)](https://pypi.org/project/mcx-data/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Status:** Under construction. MCX dataset URLs are being verified.
+Download **MCX India** commodity spot market data as pandas DataFrames. Works from **AWS Lambda** and any cloud environment.
 
-## Installation
+**Full Documentation → [NikhilSuthar.github.io/indian-market-data/mcx-spot](https://NikhilSuthar.github.io/indian-market-data/mcx-spot)**
+
+Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo — also see [`nse-data`](https://pypi.org/project/nse-data/).
 
 ```bash
 pip install mcx-data
 ```
 
-## Part of india-market-data
+## Quick Start
 
-This package is part of the [india-market-data](https://github.com/NikhilSuthar/india-market-data) monorepo.
+```python
+from mcxdata import mcx
 
-- **NSE data:** `pip install nse-data`
-- **MCX data:** `pip install mcx-data`
-- **Both:** `pip install india-market-data`
+# Today's spot prices — all 28 commodities
+df = mcx.get_spot_recent()
+
+# Single commodity
+df = mcx.get_spot_recent(commodity="GOLD")
+
+# Historical (requires specific commodity)
+df = mcx.get_spot_archive("2026-05-01", "2026-05-22", commodity="GOLD")
+df = mcx.get_spot_archive("2026-05-01", "2026-05-22", commodity="SILVER")
+
+# Download to S3
+mcx.download("spot", "market", "spot_recent",
+             s3_bucket="my-bucket", s3_prefix="raw/mcx/")
+
+# Available commodities (28)
+mcx.list_commodities()
+```
+
+## Datasets
+
+| Dataset | Description | Date Param |
+|---------|-------------|-----------|
+| `spot_recent` | Today's spot prices — all 28 commodities | None |
+| `spot_archive` | Historical spot prices by commodity + date range | `from_date`, `to_date` |
+
+## Available Commodities (28)
+
+`ALUMINI, ALUMINIUM, CARDAMOM, COPPER, COTTON, COTTONOIL, CPO, CRUDEOIL, CRUDEOILM, ELECDMBL, GOLD, GOLDGUINEA, GOLDM, GOLDPETAL, GOLDTEN, KAPAS, LEAD, LEADMINI, MENTHAOIL, NATGASMINI, NATURALGAS, NICKEL, SILVER, SILVERM, SILVERMIC, STEELREBAR, ZINC, ZINCMINI`
+
+## Notes
+
+- MCX archive requires a **specific commodity** — `"ALL"` returns empty (MCX API limitation)
+- Uses `curl-cffi` Chrome TLS impersonation to bypass MCX Akamai WAF
+- Lambda IPs are generally unblocked — works reliably on AWS
 
 ## License
 
-MIT
+MIT — data from [MCX India](https://www.mcxindia.com).

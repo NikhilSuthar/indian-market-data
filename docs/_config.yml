@@ -1,16 +1,20 @@
-title: nse-data
-description: Download NSE India market data as pandas DataFrames
+title: Indian Market Data
+description: Download NSE and MCX India market data as pandas DataFrames — bhavcopy, indices, F&O, commodity futures. Works on AWS Lambda.
 remote_theme: just-the-docs/just-the-docs
-url: "https://NikhilSuthar.github.io/nse-data"
-baseurl: "/nse-data"
+url: "https://NikhilSuthar.github.io/indian-market-data"
+baseurl: "/indian-market-data"
 
 aux_links:
-  "View on GitHub":
-    - "https://github.com/NikhilSuthar/nse-data"
+  "GitHub":
+    - "https://github.com/NikhilSuthar/indian-market-data"
+  "PyPI: nse-data":
+    - "https://pypi.org/project/nse-data/"
+  "PyPI: mcx-data":
+    - "https://pypi.org/project/mcx-data/"
 
 aux_links_new_tab: true
 
-footer_content: "MIT License. Data sourced from <a href='https://www.nseindia.com'>NSE India</a>."
+footer_content: "MIT License. Data from <a href='https://www.nseindia.com'>NSE India</a> and <a href='https://www.mcxindia.com'>MCX India</a>."
 
 search_enabled: true
 back_to_top: true
