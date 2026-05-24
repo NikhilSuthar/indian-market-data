@@ -1,0 +1,18 @@
+title: nse-data
+description: Download NSE India market data as pandas DataFrames
+remote_theme: just-the-docs/just-the-docs
+url: "https://NikhilSuthar.github.io/nse-data"
+baseurl: "/nse-data"
+
+aux_links:
+  "View on GitHub":
+    - "https://github.com/NikhilSuthar/nse-data"
+
+aux_links_new_tab: true
+
+footer_content: "MIT License. Data sourced from <a href='https://www.nseindia.com'>NSE India</a>."
+
+search_enabled: true
+back_to_top: true
+back_to_top_text: "Back to top"
+color_scheme: light

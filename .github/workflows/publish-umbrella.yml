@@ -1,11 +1,8 @@
-# Legacy publish workflow — replaced by publish-nse.yml, publish-mcx.yml, publish-umbrella.yml
-# Kept for backward compatibility — triggers nse-data TestPyPI on release/* branch push
-
-name: Publish nse-data (legacy trigger)
+name: Publish india-market-data (umbrella)
 
 on:
   push:
-    branches: ["release/*"]
+    tags: ["v*"]   # tag like v0.9.0 publishes umbrella
   workflow_dispatch:
     inputs:
       target:
@@ -20,7 +17,7 @@ permissions:
 
 jobs:
   build:
-    name: Build nse-data
+    name: Build india-market-data
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,42 +25,35 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install build
-      # Build from packages/nse-data if it exists, else fallback to root
-      - run: |
-          if [ -f packages/nse-data/pyproject.toml ]; then
-            cd packages/nse-data && python -m build
-            cp -r dist ../../dist
-          else
-            python -m build
-          fi
+      - run: python -m build
+        working-directory: packages/india-market-data
       - uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: umbrella-dist
+          path: packages/india-market-data/dist/
 
   publish-testpypi:
-    name: Publish to TestPyPI
+    name: Publish india-market-data → TestPyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.ref, 'refs/heads/release/') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
     environment:
       name: testpypi
-      url: https://test.pypi.org/project/nse-data/
+      url: https://test.pypi.org/project/india-market-data/
     permissions:
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: umbrella-dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
-    name: Publish to PyPI
+    name: Publish india-market-data → PyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
@@ -71,12 +61,12 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
     environment:
       name: pypi
-      url: https://pypi.org/project/nse-data/
+      url: https://pypi.org/project/india-market-data/
     permissions:
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: umbrella-dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
