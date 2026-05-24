@@ -4,6 +4,8 @@
 # Downloaded NSE data (local test runs)
 NSE_Data/
 NSE_Data_v*/
+mcx_test_output/
+samples/mcx_test_output/
 .lambda_layer/*.zip
 # Lambda layer ZIP excluded (large binary — build locally with build.sh)
 # Scripts and function code ARE tracked (see .lambda_layer/)

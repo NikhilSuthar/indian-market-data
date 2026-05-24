@@ -3,7 +3,7 @@
 <p align="center">
   <img src="docs/assets/nse.jpg" alt="NSE India" height="120"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/mcx.png" alt="MCX India" height="120"/>
+  <img src="docs/assets/mcx.png" alt="MCX India" height="180"/>
 </p>
 
 <p align="center">
