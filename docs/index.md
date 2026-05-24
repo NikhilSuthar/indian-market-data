@@ -28,7 +28,7 @@ pip install mcx-data               # MCX only
 
 | Package | PyPI | Datasets | Exchange |
 |---------|------|----------|----------|
-| `nse-data` | [pypi.org/project/nse-data](https://pypi.org/project/nse-data/) | 91 | NSE India — equities, F&O, debt, indices, EGR |
+| `nse-archives` | [pypi.org/project/nse-archives](https://pypi.org/project/nse-archives/) | 91 | NSE India — equities, F&O, debt, indices, EGR |
 | `mcx-data` | [pypi.org/project/mcx-data](https://pypi.org/project/mcx-data/) | 2 | MCX India — commodity spot prices |
 | `indian-market-data` | [pypi.org/project/indian-market-data](https://pypi.org/project/indian-market-data/) | All | Umbrella — installs both |
 

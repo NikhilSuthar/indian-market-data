@@ -18,7 +18,7 @@ Download **MCX India** commodity spot market data as pandas DataFrames. Works fr
 
 **Full Documentation → [NikhilSuthar.github.io/indian-market-data/mcx-spot](https://NikhilSuthar.github.io/indian-market-data/mcx-spot)**
 
-Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo — also see [`nse-data`](https://pypi.org/project/nse-data/).
+Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo — also see [`nse-archives`](https://pypi.org/project/nse-archives/).
 
 ```bash
 pip install mcx-data

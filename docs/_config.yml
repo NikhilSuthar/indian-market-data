@@ -7,8 +7,8 @@ baseurl: "/indian-market-data"
 aux_links:
   "GitHub":
     - "https://github.com/NikhilSuthar/indian-market-data"
-  "PyPI: nse-data":
-    - "https://pypi.org/project/nse-data/"
+  "PyPI: nse-archives":
+    - "https://pypi.org/project/nse-archives/"
   "PyPI: mcx-data":
     - "https://pypi.org/project/mcx-data/"
 

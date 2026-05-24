@@ -134,7 +134,7 @@ Or with explicit URL:
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ```
 
-After upload, verify at: `https://test.pypi.org/project/nse-data/`
+After upload, verify at: `https://test.pypi.org/project/nse-archives/`
 
 ---
 
@@ -184,7 +184,7 @@ Once TestPyPI testing passes, upload to production:
 twine upload dist/*
 ```
 
-After upload, verify at: `https://pypi.org/project/nse-data/`
+After upload, verify at: `https://pypi.org/project/nse-archives/`
 
 ### Post-release
 
