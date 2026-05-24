@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nse-data"
-version = "0.9.0"
+version = "0.9.1"
 description = "Download NSE India market data as pandas DataFrames — bhavcopy, indices, F&O, equity, debt, commodity, currency derivatives. Works on AWS Lambda and Snowflake."
 readme = "README.md"
 license = "MIT"
@@ -42,11 +42,11 @@ dev = ["pytest", "pytest-cov", "ruff"]
 nse-data = "nsedata.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/NikhilSuthar/nse-data"
-Documentation = "https://NikhilSuthar.github.io/nse-data"
-Repository = "https://github.com/NikhilSuthar/nse-data"
-"Bug Tracker" = "https://github.com/NikhilSuthar/nse-data/issues"
-Changelog = "https://github.com/NikhilSuthar/nse-data/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/NikhilSuthar/indian-market-data"
+Documentation = "https://NikhilSuthar.github.io/indian-market-data"
+Repository = "https://github.com/NikhilSuthar/indian-market-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/indian-market-data/issues"
+Changelog = "https://github.com/NikhilSuthar/indian-market-data/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
