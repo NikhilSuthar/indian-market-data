@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nse-data"
-version = "0.9.1"
+version = "1.0.0"
 description = "Python library to download market data from NSE India — 91 datasets across equities, derivatives, debt and more"
 readme = "README.md"
 license = "MIT"

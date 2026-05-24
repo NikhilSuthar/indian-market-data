@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcx-data"
-version = "0.1.5"
+version = "1.0.0"
 description = "Download MCX India commodity market data as pandas DataFrames — spot prices (recent + archive), futures bhavcopy. Works on AWS Lambda."
 readme = "README.md"
 license = "MIT"
@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["mcx", "mcx-data", "mcx-india", "commodity", "futures", "options", "gold", "silver", "crude-oil", "natural-gas", "india", "market-data", "financial-data", "pandas", "bhavcopy", "trading", "historical-data"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",

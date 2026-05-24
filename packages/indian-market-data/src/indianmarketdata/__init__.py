@@ -30,7 +30,7 @@ Or use individually:
 See: https://NikhilSuthar.github.io/indian-market-data
 """
 
-__version__ = "0.9.1"
+__version__ = "1.0.0"
 
 try:
     from nsedata import nse

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "indian-market-data"
-version = "0.9.1"
+version = "1.0.0"
 description = "NSE + MCX India market data as pandas DataFrames — bhavcopy, Nifty indices, F&O, commodity spot prices. AWS Lambda ready."
 readme = "README.md"
 license = "MIT"
@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["nse", "mcx", "nifty", "india", "bhavcopy", "nse-india", "mcx-india", "stock-market", "commodity", "equity", "derivatives", "market-data", "financial-data", "pandas", "nifty50", "nseindia", "trading", "historical-data", "aws-lambda", "s3", "snowflake"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
@@ -27,8 +27,8 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "nse-data>=0.9.1",
-    "mcx-data>=0.1.0",
+    "nse-data>=1.0.0",
+    "mcx-data>=1.0.0",
 ]
 
 [project.optional-dependencies]
