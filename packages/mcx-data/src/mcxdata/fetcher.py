@@ -16,6 +16,7 @@ Response format:
 
 import json
 import io
+import time
 from typing import Optional
 
 import pandas as pd
