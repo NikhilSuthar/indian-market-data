@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build Lambda Layer for nse-data v0.6.0
+# Build Lambda Layer for nse-data v0.9.0
 #
 # Usage:
 #   cd .lambda_layer

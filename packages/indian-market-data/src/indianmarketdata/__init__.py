@@ -1,10 +1,16 @@
 """
-india-market-data — Umbrella package for NSE and MCX India market data.
+indian-market-data — Umbrella package for NSE and MCX India market data.
 
-Installs and re-exports both nse-data and mcx-data.
+Download NSE bhavcopy, Nifty indices, F&O, equity, debt, commodity, currency
+derivatives as pandas DataFrames. Installs and re-exports both nse-data and mcx-data.
+Works on AWS Lambda and Snowflake.
+
+Keywords: nse, mcx, nifty, india, bhavcopy, nse-india, mcx-india, stock-market,
+commodity, equity, derivatives, market-data, financial-data, pandas, nifty50,
+nseindia, trading, historical-data, aws-lambda, s3, snowflake
 
 Usage:
-    from indiamarketdata import nse, mcx
+    from indianmarketdata import nse, mcx
 
     # NSE data
     df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")

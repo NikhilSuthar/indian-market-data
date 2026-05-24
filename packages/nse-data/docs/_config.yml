@@ -1,5 +1,5 @@
-title: nse-data
-description: Download NSE India market data as pandas DataFrames
+title: "nse-data — NSE India Market Data Python Library"
+description: "Download NSE India market data as pandas DataFrames. Bhavcopy, Nifty indices, F&O, equity, debt, SLB. Works on AWS Lambda and Snowflake."
 remote_theme: just-the-docs/just-the-docs
 url: "https://NikhilSuthar.github.io/nse-data"
 baseurl: "/nse-data"

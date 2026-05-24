@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mcx-data"
 version = "0.1.0"
-description = "Python library to download market data from MCX India — commodity futures bhavcopy and reports"
+description = "Download MCX India commodity futures market data as pandas DataFrames — bhavcopy, futures, options. Works on AWS Lambda and Snowflake."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [
     {name = "Nikhil Suthar", email = "nikhil.suthar@lumiq.ai"},
 ]
-keywords = ["mcx", "commodity", "india", "futures", "market", "bhavcopy", "trading"]
+keywords = ["mcx", "mcx-data", "mcx-india", "commodity", "futures", "options", "gold", "silver", "crude-oil", "natural-gas", "india", "market-data", "financial-data", "pandas", "bhavcopy", "trading", "historical-data"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Financial and Insurance Industry",
@@ -40,10 +40,10 @@ dev = ["pytest", "pytest-cov", "ruff"]
 mcx-data = "mcxdata.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/NikhilSuthar/india-market-data"
-Documentation = "https://NikhilSuthar.github.io/india-market-data/mcx"
-Repository = "https://github.com/NikhilSuthar/india-market-data"
-"Bug Tracker" = "https://github.com/NikhilSuthar/india-market-data/issues"
+Homepage = "https://github.com/NikhilSuthar/nse-data"
+Documentation = "https://NikhilSuthar.github.io/nse-data/mcx"
+Repository = "https://github.com/NikhilSuthar/nse-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/nse-data/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -1,4 +1,4 @@
-name: Publish india-market-data (umbrella)
+name: Publish indian-market-data (umbrella)
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build:
-    name: Build india-market-data
+    name: Build indian-market-data
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,21 +26,21 @@ jobs:
           python-version: "3.12"
       - run: pip install build
       - run: python -m build
-        working-directory: packages/india-market-data
+        working-directory: packages/indian-market-data
       - uses: actions/upload-artifact@v4
         with:
           name: umbrella-dist
-          path: packages/india-market-data/dist/
+          path: packages/indian-market-data/dist/
 
   publish-testpypi:
-    name: Publish india-market-data → TestPyPI
+    name: Publish indian-market-data → TestPyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
     environment:
       name: testpypi
-      url: https://test.pypi.org/project/india-market-data/
+      url: https://test.pypi.org/project/indian-market-data/
     permissions:
       id-token: write
     steps:
@@ -53,7 +53,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
-    name: Publish india-market-data → PyPI
+    name: Publish indian-market-data → PyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
@@ -61,7 +61,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
     environment:
       name: pypi
-      url: https://pypi.org/project/india-market-data/
+      url: https://pypi.org/project/indian-market-data/
     permissions:
       id-token: write
     steps:

@@ -110,6 +110,8 @@ ALL_DAILY = [
     ("capital_market", "equities_sme", "series_change"),
     ("capital_market", "equities_sme", "mf_var"),
     ("capital_market", "equities_sme", "appsec_collval"),
+    ("capital_market", "equities_sme", "auction_buy"),    # settno auto-calculated
+    ("capital_market", "equities_sme", "csqr"),           # settno auto-calculated
     ("capital_market", "equities_sme", "c_stt"),
     ("capital_market", "equities_sme", "c_stt_ind"),
     ("capital_market", "equities_sme", "fcm_bc"),
@@ -212,9 +214,15 @@ def lambda_handler(event, context):
     download_all_flag = event.get("download_all", False)
     specific          = event.get("datasets")
     test_tri          = event.get("test_tri", False)
+    tri_only          = event.get("tri_only", False)  # download ONLY TRI, skip all NSE datasets
 
     # Determine which datasets to download
-    if specific:
+    if tri_only:
+        # Skip all NSE datasets — only run TRI test
+        daily_list   = []
+        monthly_list = []
+        test_tri     = True  # force TRI test on
+    elif specific:
         daily_list   = [(c, s, d) for c, s, d in specific if not _is_monthly(c, s, d)]
         monthly_list = [(c, s, d) for c, s, d in specific if _is_monthly(c, s, d)]
     elif download_all_flag:
@@ -248,13 +256,55 @@ def lambda_handler(event, context):
 
     # ─── TRI test (niftyindices.com — tests Cloudflare) ───────────────────
     if test_tri:
-        tri_result = _test_tri(
-            event.get("tri_index", "NIFTY 50"),
-            event.get("tri_start", f"01-{_month_name(date)}-{date[:4]}"),
-            event.get("tri_end",   _to_ddmonyyyy(date)),
-            bucket, prefix,
-        )
-        results["tri_test"] = tri_result
+        import boto3
+        import time as _time
+
+        # All indices to download TRI for (when no specific index passed)
+        ALL_TRI_INDICES = [
+            # Broad Market
+            "NIFTY 50", "NIFTY NEXT 50", "NIFTY 100", "NIFTY 200",
+            "NIFTY 500", "NIFTY MIDCAP 50", "NIFTY MIDCAP 100",
+            "NIFTY MIDCAP 150", "NIFTY SMALLCAP 50", "NIFTY SMALLCAP 100",
+            "NIFTY SMALLCAP 250",
+            # Sectoral
+            "NIFTY BANK", "NIFTY IT", "NIFTY AUTO", "NIFTY PHARMA",
+            "NIFTY FMCG", "NIFTY METAL", "NIFTY ENERGY", "NIFTY REALTY",
+            "NIFTY MEDIA", "NIFTY PSE", "NIFTY PSU BANK", "NIFTY PVT BANK",
+            "NIFTY FIN SERVICE", "NIFTY OIL & GAS", "NIFTY INFRA",
+            "NIFTY MNC", "NIFTY CONSUMPTION", "NIFTY SERVICES",
+            "NIFTY COMMODITIES",
+        ]
+
+        # If specific index requested, only do that one; else do all
+        indices_to_run = [event["tri_index"]] if event.get("tri_index") else ALL_TRI_INDICES
+
+        tri_start = event.get("tri_start", f"01-{_month_name(date)}-{date[:4]}")
+        tri_end   = event.get("tri_end",   _to_ddmonyyyy(date))
+
+        tri_results = {"uploaded": [], "failed": []}
+
+        for idx_name in indices_to_run:
+            r = _download_tri(idx_name, tri_start, tri_end, bucket, prefix)
+            if r["status"] == "SUCCESS":
+                tri_results["uploaded"].append({"index": idx_name, "s3_uri": r["s3_uri"]})
+                print(f"✓ TRI {idx_name}: {r['rows']} rows → {r['s3_uri'].split('/')[-1]}")
+            else:
+                tri_results["failed"].append({"index": idx_name, "error": r.get("error","")[:60]})
+                print(f"✗ TRI {idx_name}: {r.get('error','')[:60]}")
+                # If Cloudflare blocks, stop trying — all will fail
+                if r.get("cloudflare_blocked"):
+                    print("Cloudflare blocking detected — stopping TRI downloads")
+                    break
+            _time.sleep(2)  # polite delay for niftyindices.com
+
+        tri_results["summary"] = {
+            "total": len(indices_to_run),
+            "uploaded": len(tri_results["uploaded"]),
+            "failed": len(tri_results["failed"]),
+        }
+        results["tri_results"] = tri_results
+        print(f"\n=== TRI: {tri_results['summary']['uploaded']} uploaded, "
+              f"{tri_results['summary']['failed']} failed ===")
 
     results["summary"] = {
         "total":    len(results["uploaded"]) + len(results["failed"]),
@@ -286,9 +336,6 @@ def _do_download(cat, sub, ds, date_val, bucket, prefix, results, **kwargs):
     if getattr(cfg, "portal_only", False) or not cfg.url_pattern:
         return  # silently skip
 
-    if "{settno}" in cfg.url_pattern:
-        return  # settno not known automatically
-
     s3_prefix = _s3_path(cat, sub, cfg, prefix, date_val)
 
     try:
@@ -301,45 +348,45 @@ def _do_download(cat, sub, ds, date_val, bucket, prefix, results, **kwargs):
         print(f"✗ {cat}/{sub}/{ds}: {str(e)[:60]}")
 
 
-def _test_tri(index_name, start_date, end_date, bucket, prefix):
-    """
-    Test TRI download from niftyindices.com.
-    This tests whether Cloudflare blocks Lambda's IP.
-    Returns dict with status.
-    """
-    print(f"\n=== TRI Test: {index_name} from {start_date} to {end_date} ===")
+def _download_tri(index_name, start_date, end_date, bucket, prefix):
+    """Download TRI for one index and save to S3. Returns status dict."""
     try:
-        df = nse.get_tri(index_name, start_date, end_date)
-        rows = len(df)
-        print(f"✓ TRI: {rows} rows — Cloudflare NOT blocking Lambda IP")
+        # Price index
+        df_price = nse.get_historical_index(index_name, start_date, end_date)
+        # TRI
+        df_tri = nse.get_tri(index_name, start_date, end_date)
 
-        # Save to S3
-        import io
-        csv_bytes = df.to_csv(index=False).encode("utf-8")
         import boto3
-        s3_key = f"{prefix}niftyindices/{index_name.replace(' ', '_')}_TRI_{start_date}_to_{end_date}.csv"
-        boto3.client("s3").put_object(Bucket=bucket, Key=s3_key, Body=csv_bytes)
+        s3_client = boto3.client("s3")
+        safe_name = index_name.replace(" ", "_").replace("&", "and")
+
+        # Upload price
+        price_key = f"{prefix}niftyindices/price/{safe_name}_price_{start_date}_to_{end_date}.csv"
+        s3_client.put_object(
+            Bucket=bucket, Key=price_key,
+            Body=df_price.to_csv(index=False).encode("utf-8")
+        )
+
+        # Upload TRI
+        tri_key = f"{prefix}niftyindices/tri/{safe_name}_TRI_{start_date}_to_{end_date}.csv"
+        s3_client.put_object(
+            Bucket=bucket, Key=tri_key,
+            Body=df_tri.to_csv(index=False).encode("utf-8")
+        )
 
         return {
             "status": "SUCCESS",
             "cloudflare_blocked": False,
-            "rows": rows,
-            "s3_uri": f"s3://{bucket}/{s3_key}",
-            "message": "Cloudflare is NOT blocking Lambda IP — TRI works from Lambda",
+            "rows": len(df_tri),
+            "s3_uri": f"s3://{bucket}/{tri_key}",
         }
     except Exception as e:
         err = str(e)
         blocked = "Cloudflare" in err or "timeout" in err.lower() or "403" in err
-        print(f"✗ TRI: {err[:80]}")
         return {
             "status": "FAILED",
             "cloudflare_blocked": blocked,
             "error": err[:200],
-            "message": (
-                "Cloudflare IS blocking Lambda IP — use local machine or NAT Gateway"
-                if blocked else
-                f"TRI failed (not Cloudflare): {err[:100]}"
-            ),
         }
 
 

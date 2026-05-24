@@ -1,15 +1,15 @@
-# india-market-data
+# indian-market-data
 
-Umbrella package for NSE and MCX India market data.
+Umbrella package for NSE and MCX India market data — download NSE bhavcopy, Nifty indices, F&O, MCX commodity futures as pandas DataFrames. AWS Lambda ready.
 
 ```bash
-pip install india-market-data
+pip install indian-market-data
 ```
 
 Installs both `nse-data` and `mcx-data`.
 
 ```python
-from indiamarketdata import nse, mcx
+from indianmarketdata import nse, mcx
 
 # NSE data
 df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
@@ -28,7 +28,7 @@ df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
 
 ## Documentation
 
-[NikhilSuthar.github.io/india-market-data](https://NikhilSuthar.github.io/india-market-data)
+[NikhilSuthar.github.io/nse-data](https://NikhilSuthar.github.io/nse-data)
 
 ## License
 

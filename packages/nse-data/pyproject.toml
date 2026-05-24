@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nse-data"
 version = "0.9.0"
-description = "Python library to download market data from NSE India — 91 datasets across equities, derivatives, debt and more"
+description = "Download NSE India market data as pandas DataFrames — bhavcopy, indices, F&O, equity, debt, commodity, currency derivatives. Works on AWS Lambda and Snowflake."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [
     {name = "Nikhil Suthar", email = "nikhil.suthar@lumiq.ai"},
 ]
-keywords = ["nse", "nifty", "india", "stock", "market", "indices", "bhavcopy", "trading"]
+keywords = ["nse", "nse-data", "nse-india", "nifty", "bhavcopy", "nifty50", "nse-bhavcopy", "india", "stock-market", "equity", "f&o", "derivatives", "indices", "market-data", "financial-data", "pandas", "lambda", "s3", "snowflake", "nseindia", "nsearchives", "trading", "historical-data"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",

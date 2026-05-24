@@ -1,6 +1,7 @@
-# india-market-data
+<!-- Topics: nse mcx nifty india bhavcopy stock-market commodity financial-data pandas aws-lambda -->
+# indian-market-data
 
-Monorepo for India financial market data packages.
+Monorepo for India financial market data packages — download NSE bhavcopy, Nifty indices, F&O, equity, debt, MCX commodity futures as pandas DataFrames. Works on AWS Lambda and Snowflake.
 
 ## Packages
 
@@ -8,7 +9,7 @@ Monorepo for India financial market data packages.
 |---------|------|-------------|
 | [nse-data](packages/nse-data/) | [![PyPI](https://badge.fury.io/py/nse-data.svg)](https://pypi.org/project/nse-data/) | NSE India — equities, F&O, debt, indices (91 datasets) |
 | [mcx-data](packages/mcx-data/) | [![PyPI](https://badge.fury.io/py/mcx-data.svg)](https://pypi.org/project/mcx-data/) | MCX India — commodity futures (coming soon) |
-| [india-market-data](packages/india-market-data/) | [![PyPI](https://badge.fury.io/py/india-market-data.svg)](https://pypi.org/project/india-market-data/) | Umbrella — installs both |
+| [indian-market-data](packages/indian-market-data/) | [![PyPI](https://badge.fury.io/py/indian-market-data.svg)](https://pypi.org/project/indian-market-data/) | Umbrella — installs both |
 
 ## Install
 
@@ -18,16 +19,18 @@ pip install nse-data        # NSE only
 pip install mcx-data        # MCX only (coming soon)
 
 # Umbrella (both)
-pip install india-market-data
+pip install indian-market-data
 ```
 
 ## Quick Start
 
 ```python
-from indiamarketdata import nse, mcx
+from indianmarketdata import nse, mcx
 
-# NSE data
+# NSE bhavcopy
 df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+
+# Nifty indices
 df = nse.get("capital_market", "indices", "ind_close_all", "2026-05-22")
 
 # NSE TRI (niftyindices.com)
@@ -40,7 +43,7 @@ nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22"
 
 ## Documentation
 
-[NikhilSuthar.github.io/india-market-data](https://NikhilSuthar.github.io/india-market-data)
+[NikhilSuthar.github.io/nse-data](https://NikhilSuthar.github.io/nse-data)
 
 ## Release Tags
 
@@ -48,7 +51,7 @@ nse.download("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22"
 |-----|----------|
 | `nse-v0.9.0` | Publish `nse-data` to PyPI |
 | `mcx-v0.1.0` | Publish `mcx-data` to PyPI |
-| `v0.9.0` | Publish `india-market-data` umbrella to PyPI |
+| `v0.9.0` | Publish `indian-market-data` umbrella to PyPI |
 | `release/*` branch | Publish all three to TestPyPI |
 
 ## License
