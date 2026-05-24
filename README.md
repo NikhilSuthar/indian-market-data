@@ -103,7 +103,7 @@ cd .lambda_layer
 
 ## Documentation
 
-**[NikhilSuthar.github.io/indian-market-data](https://NikhilSuthar.github.io/indian-market-data)**
+**[View Full Documentation →](https://NikhilSuthar.github.io/indian-market-data)**
 
 | Page | Description |
 |------|-------------|

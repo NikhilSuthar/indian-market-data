@@ -178,7 +178,7 @@ mcx-data spot-archive --from 01/05/2026 --to 22/05/2026 --commodity GOLD
 
 ## Documentation
 
-Full docs at **[NikhilSuthar.github.io/indian-market-data](https://NikhilSuthar.github.io/indian-market-data)**
+Full docs at **[View Documentation →](https://NikhilSuthar.github.io/indian-market-data)**
 
 ---
 
