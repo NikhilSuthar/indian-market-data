@@ -1,10 +1,17 @@
 name: Publish nse-data
 
+# Triggers:
+#   - Push tag  nse-v*          → publish to PyPI (production)
+#   - Manual dispatch           → publish to TestPyPI or PyPI (your choice)
+#
+# Branch strategy:
+#   develop → merge when ready → tag nse-v0.9.0 → PyPI publish
+#   For TestPyPI: use workflow_dispatch manually
+
 on:
   push:
-    branches: ["release/*"]
-    paths: ["packages/nse-data/**", "src/**"]
-    tags: ["nse-v*"]
+    tags:
+      - "nse-v*"          # e.g. nse-v0.9.0 → triggers PyPI publish
   workflow_dispatch:
     inputs:
       target:
@@ -23,13 +30,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install build
-      - run: python -m build
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build package
+        run: python -m build
         working-directory: packages/nse-data
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload dist artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: nse-data-dist
           path: packages/nse-data/dist/
@@ -39,19 +53,21 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.ref, 'refs/heads/release/') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
     environment:
       name: testpypi
       url: https://test.pypi.org/project/nse-data/
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
         with:
           name: nse-data-dist
           path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
@@ -68,8 +84,11 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download dist artifacts
+        uses: actions/download-artifact@v4
         with:
           name: nse-data-dist
           path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
