@@ -56,8 +56,10 @@ def _build_session() -> Tuple[object, str]:
         s.headers.update(_HEADERS)
         _warmup(s, "curl_cffi")
         return s, "curl_cffi"
-    except ImportError:
-        pass
+    except ImportError as e:
+        print(f"curl_cffi not available: {e}")
+    except Exception as e:
+        print(f"curl_cffi failed to init: {e}")
 
     # 2. cloudscraper — JS challenge solver
     try:
@@ -70,8 +72,11 @@ def _build_session() -> Tuple[object, str]:
         return s, "cloudscraper"
     except ImportError:
         pass
+    except Exception as e:
+        print(f"cloudscraper failed: {e}")
 
     # 3. Plain requests fallback
+    print("WARNING: falling back to plain requests — MCX may return 403 (Akamai WAF)")
     import requests
     s = requests.Session()
     s.headers.update(_HEADERS)
