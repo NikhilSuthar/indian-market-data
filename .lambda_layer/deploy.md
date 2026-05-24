@@ -1,39 +1,84 @@
-# Lambda Deployment Guide
+# AWS Lambda Deployment Guide
 
-Complete setup to run `nse-data` on AWS Lambda.
+Complete step-by-step guide to deploy `nse-archives` + `mcx-data` on AWS Lambda for automated daily downloads to S3.
+
+---
 
 ## Architecture
 
 ```
-EventBridge (daily cron) → Lambda → NSE Archives → S3 Bucket
-                              ↓
-                         nse-data layer
-                       (pandas + requests)
+EventBridge Scheduler (daily cron)
+         │
+         ▼
+   AWS Lambda Function
+   ├── nse_lambda.py   → NSE India datasets (86 confirmed)
+   ├── mcx_lambda.py   → MCX commodity spot prices (28 commodities)
+   └── lambda_function.py  (combined)
+         │
+         ├── Layer: indian-market-data
+         │   ├── nse-archives + mcx-data
+         │   ├── pandas, openpyxl, requests
+         │   └── curl-cffi (Chrome TLS for MCX Akamai WAF)
+         │
+         ▼
+   S3 Bucket (raw zone)
+         │
+         ▼
+   Snowflake (via Snowpipe or COPY INTO)
 ```
 
-## Step 1: Upload Lambda Layer
+---
+
+## Prerequisites
+
+- AWS CLI configured (`aws configure`)
+- Python 3.12 + pip on Linux or WSL
+- An S3 bucket already created
+
+---
+
+## Step 1 — Build the Layer
 
 ```bash
 cd .lambda_layer
+chmod +x build.sh
+
+# Standard (uses PyPI releases — recommended for production)
 ./build.sh
 
-# Upload layer
+# With cloudscraper (extra WAF fallback)
+./build.sh --full
+
+# Dev mode (uses local source code — for testing changes)
+./build.sh --dev
+```
+
+---
+
+## Step 2 — Publish Layer to AWS
+
+```bash
 aws lambda publish-layer-version \
-  --layer-name nse-data \
-  --zip-file fileb://nse-data-lambda-layer.zip \
+  --layer-name indian-market-data \
+  --zip-file fileb://.lambda_layer/nse-data-lambda-layer.zip \
   --compatible-runtimes python3.12 python3.13 \
-  --description "nse-data library with pandas and requests" \
+  --description "nse-archives + mcx-data + pandas + curl-cffi" \
   --region ap-south-1
 ```
 
-Save the returned `LayerVersionArn`.
+Note the `LayerVersionArn` in the response — e.g.:
+```
+arn:aws:lambda:ap-south-1:123456789012:layer:indian-market-data:1
+```
 
-## Step 2: Create IAM Role
+---
+
+## Step 3 — Create IAM Role
 
 ```bash
 # Create role
 aws iam create-role \
-  --role-name nse-data-lambda-role \
+  --role-name indian-market-data-lambda-role \
   --assume-role-policy-document '{
     "Version": "2012-10-17",
     "Statement": [{
@@ -43,171 +88,226 @@ aws iam create-role \
     }]
   }'
 
-# Attach basic Lambda execution
+# Attach basic Lambda execution (CloudWatch Logs)
 aws iam attach-role-policy \
-  --role-name nse-data-lambda-role \
+  --role-name indian-market-data-lambda-role \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
-# Attach S3 write (create inline policy)
+# Attach S3 write policy
 aws iam put-role-policy \
-  --role-name nse-data-lambda-role \
-  --policy-name nse-data-s3-write \
+  --role-name indian-market-data-lambda-role \
+  --policy-name s3-write-market-data \
   --policy-document '{
     "Version": "2012-10-17",
     "Statement": [{
       "Effect": "Allow",
       "Action": ["s3:PutObject"],
-      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/nse-data/*"
+      "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME/*"
     }]
   }'
 ```
 
-## Step 3: Create Lambda Function
+Replace `YOUR-BUCKET-NAME` with your actual bucket name.
+
+---
+
+## Step 4 — Create Lambda Functions
+
+You can create **one combined function** or **two separate functions** (recommended for independent scheduling).
+
+### Option A — Separate NSE and MCX functions (recommended)
 
 ```bash
-# Zip the handler
-zip lambda_function.zip lambda_function.py
+# Package NSE handler
+zip nse_lambda.zip .lambda_layer/nse_lambda.py
 
-# Create function
 aws lambda create-function \
-  --function-name nse-data-downloader \
+  --function-name nse-india-downloader \
   --runtime python3.12 \
-  --role arn:aws:iam::ACCOUNT_ID:role/nse-data-lambda-role \
-  --handler lambda_function.handler \
-  --zip-file fileb://lambda_function.zip \
+  --role arn:aws:iam::ACCOUNT_ID:role/indian-market-data-lambda-role \
+  --handler nse_lambda.lambda_handler \
+  --zip-file fileb://nse_lambda.zip \
   --timeout 300 \
   --memory-size 512 \
-  --layers arn:aws:lambda:ap-south-1:ACCOUNT_ID:layer:nse-data:1 \
+  --layers LAYER_VERSION_ARN \
   --environment "Variables={S3_BUCKET=YOUR-BUCKET-NAME,S3_PREFIX=nse-data/}" \
   --region ap-south-1
 ```
 
-## Step 4: Schedule Daily Run (EventBridge)
+```bash
+# Package MCX handler
+zip mcx_lambda.zip .lambda_layer/mcx_lambda.py
+
+aws lambda create-function \
+  --function-name mcx-india-downloader \
+  --runtime python3.12 \
+  --role arn:aws:iam::ACCOUNT_ID:role/indian-market-data-lambda-role \
+  --handler mcx_lambda.lambda_handler \
+  --zip-file fileb://mcx_lambda.zip \
+  --timeout 120 \
+  --memory-size 256 \
+  --layers LAYER_VERSION_ARN \
+  --environment "Variables={S3_BUCKET=YOUR-BUCKET-NAME,MCX_S3_PREFIX=mcx-data/}" \
+  --region ap-south-1
+```
+
+### Option B — Single combined function
 
 ```bash
-# Create rule (runs Mon-Fri at 6:30 PM IST = 1:00 PM UTC)
+zip lambda_function.zip .lambda_layer/lambda_function.py
+
+aws lambda create-function \
+  --function-name indian-market-data-downloader \
+  --runtime python3.12 \
+  --role arn:aws:iam::ACCOUNT_ID:role/indian-market-data-lambda-role \
+  --handler lambda_function.lambda_handler \
+  --zip-file fileb://lambda_function.zip \
+  --timeout 300 \
+  --memory-size 512 \
+  --layers LAYER_VERSION_ARN \
+  --environment "Variables={S3_BUCKET=YOUR-BUCKET-NAME}" \
+  --region ap-south-1
+```
+
+---
+
+## Step 5 — Schedule with EventBridge
+
+NSE publishes data after 6 PM IST (12:30 UTC). MCX polls twice daily.
+
+```bash
+# NSE — daily at 6:30 PM IST (1:00 PM UTC), Mon–Fri
 aws events put-rule \
   --name nse-daily-download \
   --schedule-expression "cron(0 13 ? * MON-FRI *)" \
   --description "Download NSE reports after market close" \
   --region ap-south-1
 
-# Add Lambda as target
+# MCX — daily at 7 PM IST (1:30 PM UTC), Mon–Sat
+aws events put-rule \
+  --name mcx-daily-download \
+  --schedule-expression "cron(30 13 ? * MON-SAT *)" \
+  --description "Download MCX spot prices" \
+  --region ap-south-1
+```
+
+Add Lambda targets:
+
+```bash
+# NSE target
 aws events put-targets \
   --rule nse-daily-download \
   --targets '[{
-    "Id": "nse-data-lambda",
-    "Arn": "arn:aws:lambda:ap-south-1:ACCOUNT_ID:function:nse-data-downloader",
-    "Input": "{\"date\": \"TODAY\", \"download_all\": true, \"include_pdfs\": true}"
+    "Id": "nse-lambda",
+    "Arn": "arn:aws:lambda:ap-south-1:ACCOUNT_ID:function:nse-india-downloader",
+    "Input": "{\"date\": \"<REPLACE_WITH_DATE>\", \"download_all\": true}"
   }]' \
   --region ap-south-1
 
-# Grant EventBridge permission to invoke Lambda
+# MCX target
+aws events put-targets \
+  --rule mcx-daily-download \
+  --targets '[{
+    "Id": "mcx-lambda",
+    "Arn": "arn:aws:lambda:ap-south-1:ACCOUNT_ID:function:mcx-india-downloader",
+    "Input": "{\"date\": \"<REPLACE_WITH_DATE>\", \"mcx_spot\": true}"
+  }]' \
+  --region ap-south-1
+```
+
+> **Tip:** For dynamic date, modify the Lambda to use `datetime.today().strftime("%Y-%m-%d")` when `event.get("date")` is missing.
+
+Grant EventBridge permission to invoke:
+
+```bash
 aws lambda add-permission \
-  --function-name nse-data-downloader \
-  --statement-id eventbridge-daily \
+  --function-name nse-india-downloader \
+  --statement-id eventbridge-nse-daily \
   --action lambda:InvokeFunction \
   --principal events.amazonaws.com \
   --source-arn arn:aws:events:ap-south-1:ACCOUNT_ID:rule/nse-daily-download
+
+aws lambda add-permission \
+  --function-name mcx-india-downloader \
+  --statement-id eventbridge-mcx-daily \
+  --action lambda:InvokeFunction \
+  --principal events.amazonaws.com \
+  --source-arn arn:aws:events:ap-south-1:ACCOUNT_ID:rule/mcx-daily-download
 ```
 
-> **Note:** For dynamic date, modify the Lambda to use `datetime.now()` if `date` is `"TODAY"`.
+---
 
-## Step 5: Test
+## Step 6 — Test Manually
 
 ```bash
-# Invoke manually
+# Test NSE (5 default datasets)
 aws lambda invoke \
-  --function-name nse-data-downloader \
-  --payload '{"date": "2026-05-19", "report_types": ["ind_close_all", "sec_bhavdata_full"]}' \
+  --function-name nse-india-downloader \
+  --payload '{"date": "2026-05-22", "bucket": "YOUR-BUCKET"}' \
   --region ap-south-1 \
-  output.json
+  response.json && cat response.json
 
-cat output.json
+# Test MCX (today's spot + GOLD archive)
+aws lambda invoke \
+  --function-name mcx-india-downloader \
+  --payload '{"date": "2026-05-22", "bucket": "YOUR-BUCKET",
+              "mcx_spot": true, "mcx_archive": true,
+              "mcx_from_date": "2026-05-01", "mcx_to_date": "2026-05-22",
+              "mcx_commodities": ["GOLD", "SILVER"]}' \
+  --region ap-south-1 \
+  response.json && cat response.json
 ```
 
-## S3 Output Structure
+---
 
-```
-s3://my-bucket/nse-data/
-├── 2026-05-19/
-│   ├── sec_bhavdata_full/
-│   │   └── sec_bhavdata_full_19052026.csv
-│   ├── ind_close_all/
-│   │   └── ind_close_all_19052026.csv
-│   ├── cmvolt/
-│   │   └── CMVOLT_19052026.CSV
-│   ├── fo_secban/
-│   │   └── fo_secban_19052026.csv
-│   ├── security_master/
-│   │   └── NSE_CM_security_19052026.csv.gz
-│   └── ...
-└── pdfs/
-    ├── index_dashboard_pdf/
-    │   └── Index_Dashboard_May2026.pdf
-    └── passive_fund_pdf/
-        └── NiftyPassiveFundReport-May2026-B2B-HR.pdf
-```
-
-## Event Examples
-
-### Download default reports (5 most useful)
-```json
-{
-  "date": "2026-05-19",
-  "bucket": "my-nse-bucket"
-}
-```
-
-### Download ALL reports + PDFs
-```json
-{
-  "date": "2026-05-19",
-  "bucket": "my-nse-bucket",
-  "download_all": true,
-  "include_pdfs": true
-}
-```
-
-### Download specific reports only
-```json
-{
-  "date": "2026-05-19",
-  "bucket": "my-nse-bucket",
-  "report_types": ["sec_bhavdata_full", "ind_close_all", "fo_secban", "cmvolt"]
-}
-```
-
-### Custom S3 prefix
-```json
-{
-  "date": "2026-05-19",
-  "bucket": "my-nse-bucket",
-  "prefix": "raw/nse-india/",
-  "download_all": true
-}
-```
-
-## Local Testing (without AWS)
+## Update Layer (after new release)
 
 ```bash
+# 1. Rebuild
 cd .lambda_layer
-python3 lambda_function.py 2026-05-19
+./build.sh
+
+# 2. Publish new layer version
+aws lambda publish-layer-version \
+  --layer-name indian-market-data \
+  --zip-file fileb://nse-data-lambda-layer.zip \
+  --compatible-runtimes python3.12 python3.13 \
+  --region ap-south-1
+
+# 3. Update function to use new layer version
+aws lambda update-function-configuration \
+  --function-name nse-india-downloader \
+  --layers <NEW_LAYER_VERSION_ARN> \
+  --region ap-south-1
+
+aws lambda update-function-configuration \
+  --function-name mcx-india-downloader \
+  --layers <NEW_LAYER_VERSION_ARN> \
+  --region ap-south-1
 ```
 
-This tests DataFrame downloads without S3. To test with S3:
+---
 
-```bash
-export S3_BUCKET=my-nse-bucket
-python3 lambda_function.py 2026-05-19 my-nse-bucket
-```
+## Recommended Settings
+
+| Setting | NSE function | MCX function |
+|---------|-------------|-------------|
+| Memory | 512 MB | 256 MB |
+| Timeout | 300 s | 120 s |
+| Runtime | python3.12 | python3.12 |
+| Trigger | EventBridge Mon–Fri 6:30 PM IST | EventBridge Mon–Sat 7 PM IST |
+
+---
 
 ## Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
-| Timeout | Increase to 300s. NSE session warmup takes 3-5s. |
-| Memory error | Increase to 512MB+. `security_master` is ~13MB CSV. |
-| HTTP 403 | Non-trading day (weekend/holiday). Add date validation. |
-| HTTP 404 | File not yet published. NSE publishes after 6 PM IST. |
-| Rate limited | Add delays between downloads (script has 0.5s delay). |
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `curl_cffi not available` | Layer missing dist-info | Rebuild with `build.sh` (dist-info fix included) |
+| `MCX session type: requests` | curl_cffi import failed | Check CloudWatch logs for exact error |
+| MCX HTTP 403 | Akamai WAF block | Ensure `curl_cffi` in layer; use `--full` for cloudscraper fallback |
+| NSE HTTP 404 | Non-trading day or early invocation | Add logic to skip holidays; NSE publishes after 6 PM IST |
+| NSE HTTP 403 | Rate limiting | Built-in 0.3s delay; reduce parallel runs |
+| Lambda timeout | `download_all` on all 86 datasets | Set timeout to 300s |
+| Out of memory | `security_master` is 13 MB GZ | Set memory to 512 MB+ |
+| `slb_transaction_data` 404 | Month-end file — published in next month | Expected; file appears ~1st of following month |

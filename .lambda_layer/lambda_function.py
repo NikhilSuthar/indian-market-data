@@ -1,57 +1,57 @@
 """
-AWS Lambda function — nse-data
-================================
-Downloads all NSE datasets to S3 using the same folder structure
-as local downloads (.data/NSE Data Download-Sample).
+AWS Lambda function — nse-data + mcx-data
+==========================================
+Downloads NSE and MCX datasets to S3.
 
-S3 Structure mirrors local:
+S3 Structure:
     s3://bucket/nse-data/
-    ├── Capital Market/
-    │   ├── Equities & SME/
-    │   │   ├── Daily/       ← sec_bhavdata_full, cmvolt, ...
-    │   │   └── Monthly/     ← C_CATG_MAY2026.T01
-    │   ├── Indices/Daily/
-    │   ├── Mutual Fund/Daily/
-    │   └── Securities Lending & Borrowing/Daily|Monthly/
-    ├── Derivatives/
-    │   ├── Equity Derivative/Daily|Monthly/
-    │   ├── Commodity Derivative/Daily|Monthly/
-    │   ├── Currency Derivative/Daily/
-    │   └── Interest Rate Derivative/Daily/
-    ├── Debt/
-    │   ├── Corporate Segment/Daily/
-    │   ├── Debt Segment/Daily/
-    │   └── Tri-Party Repo/Daily/
-    └── EGR/EGR/Daily/
+    ├── Capital Market/Equities & SME/Daily/
+    ├── Capital Market/Indices/Daily/
+    ├── Derivatives/Equity Derivative/Daily|Monthly/
+    ├── Debt/Corporate Segment/Daily/
+    └── ...
+
+    s3://bucket/mcx-data/
+    ├── Spot Market/Recent/
+    │   └── MCX_spot_recent_ALL_20260522.csv
+    └── Spot Market/Archive/
+        ├── MCX_spot_archive_GOLD_20260501_20260522.csv
+        └── MCX_spot_archive_SILVER_20260501_20260522.csv
 
 Runtime:  Python 3.12+
-Layer:    nse-data-lambda-layer.zip (nse-data + pandas + requests + openpyxl)
-Memory:   512 MB
-Timeout:  300 seconds
-
-Environment Variables:
-    S3_BUCKET    — Target S3 bucket (required)
-    S3_PREFIX    — Root prefix, default: "nse-data/"
-
-IAM Policy required on Lambda execution role:
-    { "Effect": "Allow", "Action": ["s3:PutObject"],
-      "Resource": "arn:aws:s3:::YOUR-BUCKET/nse-data/*" }
+Layer:    nse-data-lambda-layer.zip
+Memory:   512 MB | Timeout: 300s
 
 Event examples:
-    # Download all datasets
+    # NSE — all datasets
     { "date": "2026-05-22", "month": "2026-05", "bucket": "my-bucket", "download_all": true }
 
-    # Download defaults only (5 core datasets)
+    # NSE — defaults only (5 core datasets)
     { "date": "2026-05-22", "bucket": "my-bucket" }
 
-    # Specific datasets
-    { "date": "2026-05-22", "bucket": "my-bucket",
-      "datasets": [["capital_market", "equities_sme", "sec_bhavdata_full"],
-                   ["capital_market", "indices", "ind_close_all"]] }
+    # MCX — spot recent (all commodities, today)
+    { "date": "2026-05-22", "bucket": "my-bucket", "mcx_spot": true }
 
-    # Test TRI from niftyindices.com (tests if Cloudflare allows Lambda IP)
-    { "date": "2026-05-22", "bucket": "my-bucket", "test_tri": true,
-      "tri_index": "NIFTY 50", "tri_start": "01-May-2026", "tri_end": "22-May-2026" }
+    # MCX — spot archive for specific commodities
+    { "date": "2026-05-22", "bucket": "my-bucket",
+      "mcx_archive": true,
+      "mcx_from_date": "2026-05-01", "mcx_to_date": "2026-05-22",
+      "mcx_commodities": ["GOLD", "SILVER", "CRUDEOIL"] }
+
+    # MCX — archive for ALL 28 commodities
+    { "date": "2026-05-22", "bucket": "my-bucket",
+      "mcx_archive": true,
+      "mcx_from_date": "2026-05-01", "mcx_to_date": "2026-05-22" }
+
+    # NSE + MCX together
+    { "date": "2026-05-22", "month": "2026-05", "bucket": "my-bucket",
+      "download_all": true, "mcx_spot": true, "mcx_archive": true,
+      "mcx_from_date": "2026-05-01", "mcx_to_date": "2026-05-22",
+      "mcx_commodities": ["GOLD", "SILVER", "CRUDEOIL", "NATURALGAS"] }
+
+    # TRI only
+    { "date": "2026-05-22", "bucket": "my-bucket", "tri_only": true,
+      "tri_start": "01-May-2026", "tri_end": "22-May-2026" }
 """
 
 import json
@@ -61,6 +61,23 @@ from datetime import datetime
 
 from nsedata import nse
 from nsedata.registry import get_config
+
+# MCX — import with graceful fallback (in case layer not updated yet)
+try:
+    from mcxdata import mcx as _mcx
+    MCX_AVAILABLE = True
+except ImportError:
+    MCX_AVAILABLE = False
+    print("⚠️  mcx-data not in layer — MCX downloads will be skipped")
+
+# All 28 MCX commodities (as of May 2026)
+ALL_MCX_COMMODITIES = [
+    "ALUMINI", "ALUMINIUM", "CARDAMOM", "COPPER", "COTTON", "COTTONOIL",
+    "CPO", "CRUDEOIL", "CRUDEOILM", "ELECDMBL", "GOLD", "GOLDGUINEA",
+    "GOLDM", "GOLDPETAL", "GOLDTEN", "KAPAS", "LEAD", "LEADMINI",
+    "MENTHAOIL", "NATGASMINI", "NATURALGAS", "NICKEL", "SILVER", "SILVERM",
+    "SILVERMIC", "STEELREBAR", "ZINC", "ZINCMINI",
+]
 
 # ─── Folder mapping — mirrors local download structure ───────────────────────
 FOLDER_MAP = {
@@ -216,6 +233,14 @@ def lambda_handler(event, context):
     test_tri          = event.get("test_tri", False)
     tri_only          = event.get("tri_only", False)  # download ONLY TRI, skip all NSE datasets
 
+    # MCX params
+    mcx_spot          = event.get("mcx_spot", False)       # download today's spot prices
+    mcx_archive       = event.get("mcx_archive", False)    # download historical archive
+    mcx_from_date     = event.get("mcx_from_date", None)   # YYYY-MM-DD
+    mcx_to_date       = event.get("mcx_to_date", date)     # YYYY-MM-DD, defaults to today
+    mcx_commodities   = event.get("mcx_commodities", None) # list or None = all 28
+    mcx_prefix        = event.get("mcx_prefix") or os.environ.get("MCX_S3_PREFIX", "mcx-data/")
+
     # Determine which datasets to download
     if tri_only:
         # Skip all NSE datasets — only run TRI test
@@ -306,6 +331,22 @@ def lambda_handler(event, context):
         print(f"\n=== TRI: {tri_results['summary']['uploaded']} uploaded, "
               f"{tri_results['summary']['failed']} failed ===")
 
+    # ─── MCX Spot Recent ─────────────────────────────────────────────────
+    if mcx_spot:
+        mcx_results = _download_mcx_recent(bucket, mcx_prefix, date)
+        results["mcx_spot"] = mcx_results
+
+    # ─── MCX Spot Archive ─────────────────────────────────────────────────
+    if mcx_archive:
+        if not mcx_from_date:
+            print("⚠️  mcx_archive=true but mcx_from_date not set — using first day of month")
+            mcx_from_date = date[:7] + "-01"
+        commodities = mcx_commodities if mcx_commodities else ALL_MCX_COMMODITIES
+        mcx_arch_results = _download_mcx_archive(
+            bucket, mcx_prefix, mcx_from_date, mcx_to_date, commodities
+        )
+        results["mcx_archive"] = mcx_arch_results
+
     results["summary"] = {
         "total":    len(results["uploaded"]) + len(results["failed"]),
         "uploaded": len(results["uploaded"]),
@@ -388,6 +429,91 @@ def _download_tri(index_name, start_date, end_date, bucket, prefix):
             "cloudflare_blocked": blocked,
             "error": err[:200],
         }
+
+
+def _download_mcx_recent(bucket: str, prefix: str, date: str) -> dict:
+    """Download MCX spot recent (today's prices) to S3."""
+    if not MCX_AVAILABLE:
+        return {"status": "SKIPPED", "reason": "mcx-data not in layer"}
+
+    try:
+        # Log which HTTP backend is active — helps diagnose WAF issues
+        from mcxdata.session import get_session as _get_sess
+        _, stype = _get_sess()
+        print(f"MCX session type: {stype} (curl_cffi=best, requests=may 403)")
+
+        df = _mcx.get_spot_recent()
+        if df.empty:
+            return {"status": "EMPTY", "rows": 0}
+
+        date_compact = date.replace("-", "")
+        key = f"{prefix}Spot Market/Recent/MCX_spot_recent_ALL_{date_compact}.csv"
+
+        import boto3
+        boto3.client("s3").put_object(
+            Bucket=bucket, Key=key,
+            Body=df.to_csv(index=False).encode("utf-8"),
+            ContentType="text/csv",
+        )
+        uri = f"s3://{bucket}/{key}"
+        print(f"✓ MCX spot_recent → {key.split('/')[-1]} ({len(df)} rows)")
+        return {"status": "SUCCESS", "rows": len(df), "s3_uri": uri}
+
+    except Exception as e:
+        err = str(e)[:120]
+        print(f"✗ MCX spot_recent: {err}")
+        return {"status": "FAILED", "error": err}
+
+
+def _download_mcx_archive(bucket: str, prefix: str, from_date: str,
+                           to_date: str, commodities: list) -> dict:
+    """Download MCX spot archive for a list of commodities to S3."""
+    if not MCX_AVAILABLE:
+        return {"status": "SKIPPED", "reason": "mcx-data not in layer"}
+
+    import boto3
+    import time as _time
+
+    s3 = boto3.client("s3")
+    uploaded, failed = [], []
+
+    # Compact date range for filename
+    fd = from_date.replace("-", "")
+    td = to_date.replace("-", "")
+
+    for commodity in commodities:
+        try:
+            df = _mcx.get_spot_archive(from_date, to_date, commodity=commodity)
+            if df.empty:
+                print(f"  MCX archive {commodity}: no data for {from_date}→{to_date}")
+                failed.append({"commodity": commodity, "error": "empty response"})
+                _time.sleep(1)
+                continue
+
+            key = f"{prefix}Spot Market/Archive/MCX_spot_archive_{commodity}_{fd}_{td}.csv"
+            s3.put_object(
+                Bucket=bucket, Key=key,
+                Body=df.to_csv(index=False).encode("utf-8"),
+                ContentType="text/csv",
+            )
+            uri = f"s3://{bucket}/{key}"
+            print(f"✓ MCX archive {commodity}: {len(df)} rows → {key.split('/')[-1]}")
+            uploaded.append({"commodity": commodity, "rows": len(df), "s3_uri": uri})
+
+        except Exception as e:
+            err = str(e)[:100]
+            print(f"✗ MCX archive {commodity}: {err}")
+            failed.append({"commodity": commodity, "error": err})
+
+        _time.sleep(1.5)  # polite delay between commodities
+
+    summary = {
+        "total":    len(commodities),
+        "uploaded": len(uploaded),
+        "failed":   len(failed),
+    }
+    print(f"=== MCX archive: {summary['uploaded']} uploaded, {summary['failed']} failed ===")
+    return {"summary": summary, "uploaded": uploaded, "failed": failed}
 
 
 def _is_monthly(cat, sub, ds):
