@@ -1,6 +1,15 @@
 # indian-market-data
 
-Download **NSE** and **MCX India** market data as pandas DataFrames — bhavcopy, Nifty indices, F&O, commodity spot prices. Works on **AWS Lambda**, **Snowflake**, and any cloud environment.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NikhilSuthar/indian-market-data/main/docs/assets/nse.jpg" alt="NSE India" height="55"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/NikhilSuthar/indian-market-data/main/docs/assets/mcx.png" alt="MCX India" height="55"/>
+</p>
+
+<p align="center">
+  Download <strong>NSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
+  Bhavcopy · Nifty indices · F&amp;O · Commodity spot prices · Works on AWS Lambda
+</p>
 
 [![PyPI](https://img.shields.io/pypi/v/indian-market-data)](https://pypi.org/project/indian-market-data/)
 [![Python](https://img.shields.io/pypi/pyversions/indian-market-data)](https://pypi.org/project/indian-market-data/)

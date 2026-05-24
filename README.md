@@ -1,15 +1,28 @@
 # indian-market-data
 
-Download **NSE** and **MCX India** market data as pandas DataFrames — bhavcopy, Nifty indices, F&O, commodity spot prices. Works on **AWS Lambda**, **Snowflake**, and any cloud environment.
+<p align="center">
+  <img src="docs/assets/nse.jpg" alt="NSE India" height="60"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/mcx.png" alt="MCX India" height="60"/>
+</p>
 
-[![PyPI nse-data](https://img.shields.io/pypi/v/nse-data?label=nse-data)](https://pypi.org/project/nse-data/)
-[![PyPI mcx-data](https://img.shields.io/pypi/v/mcx-data?label=mcx-data)](https://pypi.org/project/mcx-data/)
-[![Python](https://img.shields.io/pypi/pyversions/nse-data)](https://pypi.org/project/nse-data/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  Download <strong>NSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
+  Bhavcopy, Nifty indices, F&amp;O, commodity spot prices — direct from exchange archives.<br/>
+  Works on <strong>AWS Lambda</strong>, <strong>Snowflake</strong>, and any cloud environment.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/v/nse-archives?label=nse-archives" alt="nse-archives PyPI"/></a>
+  <a href="https://pypi.org/project/mcx-data/"><img src="https://img.shields.io/pypi/v/mcx-data?label=mcx-data" alt="mcx-data PyPI"/></a>
+  <a href="https://pypi.org/project/indian-market-data/"><img src="https://img.shields.io/pypi/v/indian-market-data?label=indian-market-data" alt="indian-market-data PyPI"/></a>
+  <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/pyversions/nse-archives" alt="Python 3.9+"/></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"/></a>
+</p>
 
 ```bash
 pip install indian-market-data     # NSE + MCX together
-pip install nse-archives               # NSE only
+pip install nse-archives           # NSE only
 pip install mcx-data               # MCX only
 ```
 
@@ -21,7 +34,7 @@ pip install mcx-data               # MCX only
 
 | Package | PyPI | Datasets | Description |
 |---------|------|----------|-------------|
-| [`nse-data`](packages/nse-data/) | [↗](https://pypi.org/project/nse-data/) | 91 | NSE India — equities, F&O, debt, indices, EGR |
+| [`nse-archives`](packages/nse-data/) | [↗](https://pypi.org/project/nse-archives/) | 91 | NSE India — equities, F&O, debt, indices, EGR |
 | [`mcx-data`](packages/mcx-data/) | [↗](https://pypi.org/project/mcx-data/) | 2 | MCX India — commodity spot prices |
 | [`indian-market-data`](packages/indian-market-data/) | [↗](https://pypi.org/project/indian-market-data/) | All | Umbrella — installs both |
 
@@ -74,7 +87,7 @@ df = mcx.get_spot_archive("2026-05-01", "2026-05-22", commodity="CRUDEOIL")
 mcx.download("spot", "market", "spot_recent",
              s3_bucket="my-bucket", s3_prefix="raw/mcx/")
 
-mcx.list_commodities()   # 28 commodities
+mcx.list_commodities()   # 28 commodities: GOLD, SILVER, CRUDEOIL, ...
 ```
 
 ---
@@ -83,7 +96,7 @@ mcx.list_commodities()   # 28 commodities
 
 ```bash
 cd .lambda_layer
-./build.sh      # builds layer with nse-data + mcx-data + pandas + curl-cffi
+./build.sh      # builds layer with nse-archives + mcx-data + pandas + curl-cffi
 ```
 
 ---

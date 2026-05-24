@@ -6,6 +6,12 @@ nav_order: 1
 
 # Indian Market Data
 
+<p align="center">
+  <img src="assets/nse.jpg" alt="NSE India" height="55"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/mcx.png" alt="MCX India" height="55"/>
+</p>
+
 Download **NSE** and **MCX India** market data as **pandas DataFrames** or raw files to **local disk / S3**.
 
 Works from **AWS Lambda**, **Snowflake**, and any cloud environment — no browser, no portal session needed.

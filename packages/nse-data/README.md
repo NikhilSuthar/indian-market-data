@@ -1,5 +1,15 @@
 # nse-archives
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NikhilSuthar/indian-market-data/main/docs/assets/nse.jpg" alt="NSE India" height="55"/>
+</p>
+
+<p align="center">
+  Download <strong>NSE India</strong> market data as pandas DataFrames.<br/>
+  91 datasets — bhavcopy, Nifty indices, F&amp;O, debt, SLB, IRD, EGR.<br/>
+  Works on <strong>AWS Lambda</strong> and Snowflake.
+</p>
+
 [![PyPI version](https://badge.fury.io/py/nse-archives.svg)](https://pypi.org/project/nse-archives/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

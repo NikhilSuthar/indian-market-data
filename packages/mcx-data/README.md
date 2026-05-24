@@ -1,5 +1,15 @@
 # mcx-data
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NikhilSuthar/indian-market-data/main/docs/assets/mcx.png" alt="MCX India" height="55"/>
+</p>
+
+<p align="center">
+  Download <strong>MCX India</strong> commodity spot market data as pandas DataFrames.<br/>
+  28 commodities — GOLD, SILVER, CRUDEOIL, NATURALGAS and more.<br/>
+  Works on <strong>AWS Lambda</strong> via Chrome TLS impersonation (bypasses Akamai WAF).
+</p>
+
 [![PyPI version](https://badge.fury.io/py/mcx-data.svg)](https://pypi.org/project/mcx-data/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
