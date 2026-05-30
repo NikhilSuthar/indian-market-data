@@ -8,7 +8,7 @@ permalink: /mcx
 
 # MCX India
 
-<img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" height="60"/>
+<img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" width="160"/>
 
 **mcx-data** — Download MCX India commodity spot market data as pandas DataFrames.
 
