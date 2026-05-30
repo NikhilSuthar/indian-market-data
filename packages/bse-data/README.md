@@ -1,6 +1,6 @@
-# bse-data
+# bse-index-data
 
-[![PyPI version](https://badge.fury.io/py/bse-data.svg)](https://pypi.org/project/bse-data/)
+[![PyPI version](https://badge.fury.io/py/bse-index-data.svg)](https://pypi.org/project/bse-index-data/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -11,7 +11,7 @@
 </p>
 
 ```bash
-pip install bse-data
+pip install bse-index-data
 ```
 
 Part of the [indian-market-data](https://github.com/NikhilSuthar/indian-market-data) monorepo.
@@ -57,11 +57,11 @@ bse.list_indices(category="Sectoral")
 ## CLI
 
 ```bash
-bse-data list
-bse-data list --category Sectoral
-bse-data index --name SENSEX --from 2026-01-01 --to 2026-05-22
-bse-data all-indices --date 2026-05-22
-bse-data live
+bse-index-data list
+bse-index-data list --category Sectoral
+bse-index-data index --name SENSEX --from 2026-01-01 --to 2026-05-22
+bse-index-data all-indices --date 2026-05-22
+bse-index-data live
 ```
 
 ## License

@@ -15,7 +15,7 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="bse-data",
+        prog="bse-index-data",
         description="Download BSE India index data as CSV",
     )
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")

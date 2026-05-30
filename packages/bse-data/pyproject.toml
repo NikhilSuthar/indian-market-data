@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "bse-data"
+name = "bse-index-data"
 version = "1.0.0"
 description = "Download BSE India market data as pandas DataFrames — SENSEX, BSE indices, historical OHLC. Works on AWS Lambda."
 readme = "README.md"
@@ -13,7 +13,7 @@ authors = [
     {name = "Nikhil Suthar", email = "nikhil.suthar@lumiq.ai"},
 ]
 keywords = [
-    "bse", "bse-data", "bse-india", "sensex", "bombay-stock-exchange",
+    "bse", "bse-index-data", "bse-data", "bse-india", "sensex", "bombay-stock-exchange",
     "india", "stock-market", "indices", "market-data", "financial-data",
     "pandas", "trading", "historical-data", "aws-lambda", "s3"
 ]
@@ -41,7 +41,7 @@ s3  = ["boto3>=1.28.0"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.scripts]
-bse-data = "bsedata.cli:main"
+bse-index-data = "bsedata.cli:main"
 
 [project.urls]
 Homepage      = "https://github.com/NikhilSuthar/indian-market-data"
