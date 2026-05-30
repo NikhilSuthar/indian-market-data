@@ -1,14 +1,14 @@
 ---
 layout: default
 title: AWS Lambda
-nav_order: 4
+nav_order: 5
 has_children: true
 permalink: /lambda
 ---
 
 # AWS Lambda
 
-Both `nse-archives` and `mcx-data` are designed to run on AWS Lambda. A pre-built layer script is included in the repository.
+All three packages — `nse-archives`, `bse-index-data` and `mcx-data` — are designed to run on AWS Lambda. A pre-built layer script is included in the repository.Both `nse-archives` and `mcx-data` are designed to run on AWS Lambda. A pre-built layer script is included in the repository.
 
 ```bash
 cd .lambda_layer

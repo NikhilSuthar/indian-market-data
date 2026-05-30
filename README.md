@@ -3,12 +3,14 @@
 <p align="center">
   <img src="docs/assets/nse.jpg" alt="NSE India" height="120"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/BSE_logo.png" alt="BSE India" height="120"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="docs/assets/mcx.png" alt="MCX India" height="180"/>
 </p>
 
 <p align="center">
-  Download <strong>NSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
-  Bhavcopy, Nifty indices, F&amp;O, commodity spot prices — direct from exchange archives.<br/>
+  Download <strong>NSE</strong>, <strong>BSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
+  Bhavcopy, SENSEX/Nifty indices, F&amp;O, commodity spot prices — direct from exchange archives.<br/>
   Works on <strong>AWS Lambda</strong>, <strong>Snowflake</strong>, and any cloud environment.
 </p>
 
