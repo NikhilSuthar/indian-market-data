@@ -8,7 +8,7 @@ permalink: /bse
 
 # BSE India
 
-<img src="{{ '/assets/BSE_logo.png' | relative_url }}" alt="BSE India" height="80"/>
+<img src="{{ '/assets/BSE_logo.png' | relative_url }}" alt="BSE India" height="60"/>
 
 **bse-index-data** — Download BSE India index data as pandas DataFrames.
 

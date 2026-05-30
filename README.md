@@ -1,11 +1,11 @@
 # indian-market-data
 
 <p align="center">
-  <img src="docs/assets/nse.jpg" alt="NSE India" height="120"/>
+  <img src="docs/assets/nse.jpg" alt="NSE India" height="80"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/BSE_logo.png" alt="BSE India" height="120"/>
+  <img src="docs/assets/BSE_logo.png" alt="BSE India" height="80"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/mcx.png" alt="MCX India" height="180"/>
+  <img src="docs/assets/mcx.png" alt="MCX India" height="80"/>
 </p>
 
 <p align="center">
@@ -16,6 +16,7 @@
 
 <p align="center">
   <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/v/nse-archives?label=nse-archives" alt="nse-archives PyPI"/></a>
+  <a href="https://pypi.org/project/bse-index-data/"><img src="https://img.shields.io/pypi/v/bse-index-data?label=bse-index-data" alt="bse-index-data PyPI"/></a>
   <a href="https://pypi.org/project/mcx-data/"><img src="https://img.shields.io/pypi/v/mcx-data?label=mcx-data" alt="mcx-data PyPI"/></a>
   <a href="https://pypi.org/project/indian-market-data/"><img src="https://img.shields.io/pypi/v/indian-market-data?label=indian-market-data" alt="indian-market-data PyPI"/></a>
   <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/pyversions/nse-archives" alt="Python 3.9+"/></a>
@@ -25,6 +26,7 @@
 ```bash
 pip install indian-market-data     # NSE + MCX together
 pip install nse-archives           # NSE only
+pip install bse-index-data         # BSE only
 pip install mcx-data               # MCX only
 ```
 
@@ -37,8 +39,9 @@ pip install mcx-data               # MCX only
 | Package | PyPI | Datasets | Description |
 |---------|------|----------|-------------|
 | [`nse-archives`](packages/nse-data/) | [↗](https://pypi.org/project/nse-archives/) | 91 | NSE India — equities, F&O, debt, indices, EGR |
+| [`bse-index-data`](packages/bse-data/) | [↗](https://pypi.org/project/bse-index-data/) | 55+ indices | BSE India — SENSEX, BSE500, BANKEX and 50+ more |
 | [`mcx-data`](packages/mcx-data/) | [↗](https://pypi.org/project/mcx-data/) | 2 | MCX India — commodity spot prices |
-| [`indian-market-data`](packages/indian-market-data/) | [↗](https://pypi.org/project/indian-market-data/) | All | Umbrella — installs both |
+| [`indian-market-data`](packages/indian-market-data/) | [↗](https://pypi.org/project/indian-market-data/) | All | Umbrella — installs all |
 
 ---
 
@@ -67,6 +70,37 @@ nse.list_datasets()   # 91 datasets
 ```
 
 **86 datasets confirmed working** on Lambda (May 2026) — equities, F&O, debt, indices, IRD, SLB, EGR.
+
+---
+
+## BSE — Quick Start
+
+```python
+from bsedata import bse
+
+# Historical SENSEX OHLC
+df = bse.get_index("SENSEX", "2026-01-01", "2026-05-22")
+
+# Historical BSE500, BANKEX, BSEIT etc.
+df = bse.get_index("BSE500", "2026-01-01", "2026-05-22")
+df = bse.get_index("BANKEX", "2026-01-01", "2026-05-22")
+
+# All 120+ indices for one date (single call)
+df = bse.get_all_indices("2026-05-22")
+
+# Live SENSEX quote
+df = bse.get_live_sensex()
+
+# Download to S3
+bse.download_index("SENSEX", "2026-01-01", "2026-05-22",
+                   s3_bucket="my-bucket", s3_prefix="raw/bse/")
+
+# List all 55 supported indices
+bse.list_indices()
+bse.list_indices(category="Sectoral")
+```
+
+**55 indices confirmed working** — Broad Market, Sectoral, Thematic, Strategy and Global.
 
 ---
 

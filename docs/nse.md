@@ -8,7 +8,7 @@ permalink: /nse
 
 # NSE India
 
-<img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" height="100"/>
+<img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" height="60"/>
 
 **nse-archives** — Download NSE India market data as pandas DataFrames.
 
