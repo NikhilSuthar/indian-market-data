@@ -1,12 +1,12 @@
 """
-bse-data CLI — command line interface for downloading BSE index data.
+bse-index-data CLI — command line interface for downloading BSE index data.
 
 Usage:
-    bse-data index --name SENSEX --from 2026-01-01 --to 2026-05-22
-    bse-data all-indices --date 2026-05-22
-    bse-data live
-    bse-data list
-    bse-data list --category Sectoral
+    bse-index-data index --name SENSEX --from 2026-01-01 --to 2026-05-22
+    bse-index-data all-indices --date 2026-05-22
+    bse-index-data live
+    bse-index-data list
+    bse-index-data list --category Sectoral
 """
 
 import argparse
@@ -34,14 +34,14 @@ def main():
     p_idx.add_argument("--to",    dest="to_date",   required=True, help="To date YYYY-MM-DD")
     p_idx.add_argument("--out",   default=".",       help="Output directory (default: .)")
     p_idx.add_argument("--s3-bucket", default=None,  help="S3 bucket name")
-    p_idx.add_argument("--s3-prefix", default="bse-data/", help="S3 prefix")
+    p_idx.add_argument("--s3-prefix", default="bse-index-data/", help="S3 prefix")
 
     # all-indices
     p_all = sub.add_parser("all-indices", help="Download all indices for one date")
     p_all.add_argument("--date", required=True, help="Date YYYY-MM-DD")
     p_all.add_argument("--out",  default=".",   help="Output directory")
     p_all.add_argument("--s3-bucket", default=None,  help="S3 bucket name")
-    p_all.add_argument("--s3-prefix", default="bse-data/", help="S3 prefix")
+    p_all.add_argument("--s3-prefix", default="bse-index-data/", help="S3 prefix")
 
     # live
     sub.add_parser("live", help="Get live SENSEX quote")

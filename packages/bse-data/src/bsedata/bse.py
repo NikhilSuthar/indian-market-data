@@ -1,5 +1,5 @@
 """
-bse-data public API.
+bse-index-data public API.
 
 Usage:
     from bsedata import bse
@@ -136,7 +136,7 @@ def download_index(
     to_date: str,
     output_dir: str = ".",
     s3_bucket: Optional[str] = None,
-    s3_prefix: str = "bse-data/",
+    s3_prefix: str = "bse-index-data/",
 ) -> str:
     """
     Download BSE index historical data to local file or S3.
@@ -147,7 +147,7 @@ def download_index(
         to_date:    "YYYY-MM-DD" or "YYYYMMDD"
         output_dir: Local directory (default: current dir)
         s3_bucket:  S3 bucket name (if saving to S3)
-        s3_prefix:  S3 key prefix (default: "bse-data/")
+        s3_prefix:  S3 key prefix (default: "bse-index-data/")
 
     Returns:
         Local file path or "s3://bucket/key"
@@ -192,7 +192,7 @@ def download_all_indices(
     date: str,
     output_dir: str = ".",
     s3_bucket: Optional[str] = None,
-    s3_prefix: str = "bse-data/",
+    s3_prefix: str = "bse-index-data/",
 ) -> str:
     """
     Download all BSE indices for a single date to local file or S3.

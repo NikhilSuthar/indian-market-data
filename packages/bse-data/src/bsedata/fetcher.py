@@ -3,28 +3,26 @@ BSE Data Fetcher — calls BSE India JSON API endpoints.
 
 All endpoints are on api.bseindia.com — no WAF, plain requests works.
 Session warmup (GET bseindia.com) is required to acquire cookies.
+curl_cffi Chrome TLS impersonation is needed to pass BSE's bot check.
 
 Confirmed endpoints (from browser devtools + BseIndiaApi reference):
 
-  Historical index OHLC:
-    GET https://api.bseindia.com/BseIndiaAPI/api/GetIndexData/w
-        ?index=SENSEX&flag=0&fromdate=YYYYMMDD&todate=YYYYMMDD
+  Historical index OHLC (CSV download):
+    GET https://api.bseindia.com/BseIndiaAPI/api/ProduceCSVForDate/w
+        ?strIndex=SENSEX&dtFromDate=DD/MM/YYYY&dtToDate=DD/MM/YYYY&period=D
 
   All indices for one date:
-    GET https://api.bseindia.com/BseIndiaAPI/api/fetchAllIndicesDataByDate/w
-        ?date=YYYYMMDD
+    GET https://api.bseindia.com/BseIndiaAPI/api/IndexArchDailyAll/w
+        ?fmdt=DD/MM/YYYY&todt=DD/MM/YYYY&index=All&period=D
 
   Index names list:
-    GET https://api.bseindia.com/BseIndiaAPI/api/fetchIndexNames/w
+    GET https://api.bseindia.com/BseIndiaAPI/api/FillddlIndex/w
+        ?fmdt=&todt=
 
-  Live SENSEX quote:
+  Live SENSEX quote (no session needed):
     GET https://api.bseindia.com/RealTimeBseIndiaAPI/api/GetSensexData/w
 
-  Index metadata:
-    GET https://api.bseindia.com/BseIndiaAPI/api/fetchIndexReportMetadata/w
-        ?index=SENSEX
-
-Response format: JSON array or object — varies by endpoint.
+Response format: CSV (historical) or JSON (all others).
 """
 
 import re
