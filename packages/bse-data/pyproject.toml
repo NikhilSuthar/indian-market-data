@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bse-data"
+version = "1.0.0"
+description = "Download BSE India market data as pandas DataFrames — SENSEX, BSE indices, historical OHLC. Works on AWS Lambda."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    {name = "Nikhil Suthar", email = "nikhil.suthar@lumiq.ai"},
+]
+keywords = [
+    "bse", "bse-data", "bse-india", "sensex", "bombay-stock-exchange",
+    "india", "stock-market", "indices", "market-data", "financial-data",
+    "pandas", "trading", "historical-data", "aws-lambda", "s3"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Typing :: Typed",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "pandas>=2.0.0",
+    "curl-cffi>=0.7.0",
+]
+
+[project.optional-dependencies]
+s3  = ["boto3>=1.28.0"]
+dev = ["pytest", "pytest-cov", "ruff"]
+
+[project.scripts]
+bse-data = "bsedata.cli:main"
+
+[project.urls]
+Homepage      = "https://github.com/NikhilSuthar/indian-market-data"
+Documentation = "https://NikhilSuthar.github.io/indian-market-data"
+Repository    = "https://github.com/NikhilSuthar/indian-market-data"
+"Bug Tracker" = "https://github.com/NikhilSuthar/indian-market-data/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
