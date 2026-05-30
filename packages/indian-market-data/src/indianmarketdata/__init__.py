@@ -30,7 +30,7 @@ Or use individually:
 See: https://NikhilSuthar.github.io/indian-market-data
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 try:
     from nsedata import nse
@@ -38,8 +38,13 @@ except ImportError:
     nse = None  # type: ignore
 
 try:
+    from bsedata import bse
+except ImportError:
+    bse = None  # type: ignore
+
+try:
     from mcxdata import mcx
 except ImportError:
     mcx = None  # type: ignore
 
-__all__ = ["nse", "mcx"]
+__all__ = ["nse", "bse", "mcx"]
