@@ -31,6 +31,6 @@ Quick Start:
 See: https://NikhilSuthar.github.io/indian-market-data
 """
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 from bsedata import bse

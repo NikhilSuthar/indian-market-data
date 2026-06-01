@@ -100,49 +100,50 @@ def get_index_full(
     Get historical data for a BSE index with ALL columns including
     P/E, P/B, Div Yield, Volume, Turnover, Points Change.
 
-    Uses IndexArchDailyAll endpoint — one call per calendar day.
-    Slower than get_index() but returns full fundamental data.
+    Accepts the same index key as get_index() — e.g. "BSE200", "SENSEX", "BANKEX".
 
     Args:
-        index_name: BSE index display name e.g. "BSE 200", "BSE SENSEX",
-                    "BSE 500", "BANKEX", "BSE IT"
-                    (use the name shown in get_all_indices() I_name column)
+        index_name: BSE index API key — same as get_index() e.g. "BSE200", "SENSEX"
+                    Use list_indices() to see all supported keys.
         from_date:  "YYYY-MM-DD" or "YYYYMMDD"
         to_date:    "YYYY-MM-DD" or "YYYYMMDD"
 
     Returns:
-        DataFrame — Date, Index Name, Open, High, Low, Close,
+        DataFrame — Index Name, Date, Open, High, Low, Close,
                     Change, Change %, Volume (Cr.), Turnover (Rs. Cr.),
                     P/E, P/B, Div Yield, Prev Close
 
     Example:
-        df = bse.get_index_full("BSE 200", "2026-05-01", "2026-05-22")
-        df = bse.get_index_full("BSE SENSEX", "2026-05-01", "2026-05-22")
+        df = bse.get_index_full("BSE200", "2026-05-01", "2026-05-22")
+        df = bse.get_index_full("SENSEX", "2026-05-01", "2026-05-22")
         df = bse.get_index_full("BANKEX", "2026-05-01", "2026-05-22")
     """
     import time as _time
     from datetime import datetime, timedelta
+
+    # Resolve display name from registry — BSE's IndexArchDailyAll uses display names
+    cfg = get_index_config(index_name)
+    display_name = cfg.name  # e.g. "BSE 200", "SENSEX", "BANKEX"
 
     fd = datetime.strptime(_to_yyyymmdd(from_date), "%Y%m%d")
     td = datetime.strptime(_to_yyyymmdd(to_date),   "%Y%m%d")
 
     frames = []
     current = fd
-    search_term = index_name.upper().strip()
 
     while current <= td:
         date_str = current.strftime("%Y-%m-%d")
         try:
             df_day = fetch_all_indices_by_date(_to_yyyymmdd(date_str))
             if not df_day.empty and "I_name" in df_day.columns:
-                # Exact match first, then partial
-                mask_exact   = df_day["I_name"].str.upper() == search_term
+                # Match by display name (exact first, then partial)
+                mask_exact   = df_day["I_name"].str.upper() == display_name.upper()
                 mask_partial = df_day["I_name"].str.upper().str.contains(
-                    search_term, na=False, regex=False
+                    display_name.upper(), na=False, regex=False
                 )
                 row = df_day[mask_exact] if mask_exact.any() else df_day[mask_partial]
                 if not row.empty:
-                    frames.append(row.iloc[[0]])  # take first match per day
+                    frames.append(row.iloc[[0]])
         except Exception:
             pass
         _time.sleep(0.3)
@@ -172,15 +173,22 @@ def get_index_full(
     }
     df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
 
-    # Drop the raw 'date' column (ISO timestamp)
+    # Drop raw 'date' ISO column and deduplicate
     df = df.drop(columns=["date"], errors="ignore")
-
-    # Deduplicate columns if any
     df = df.loc[:, ~df.columns.duplicated()]
 
-    # Ensure Date is string YYYY-MM-DD
+    # Ensure Date is YYYY-MM-DD
     if "Date" in df.columns:
         df["Date"] = df["Date"].astype(str).str[:10]
+
+    # Convert numerics
+    for col in ["Open","High","Low","Close","Change","Change %",
+                "Volume (Cr.)","Turnover (Rs. Cr.)","P/E","P/B","Div Yield","Prev Close"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(
+                df[col].astype(str).str.replace(",","",regex=False).str.strip(),
+                errors="coerce"
+            )
 
     preferred = ["Index Name","Date","Open","High","Low","Close",
                  "Change","Change %","Volume (Cr.)","Turnover (Rs. Cr.)",
