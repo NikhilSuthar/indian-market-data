@@ -60,6 +60,41 @@ Returns one row per trading day. Weekends and holidays are excluded automaticall
 
 ---
 
+### ✅ Historical Index — Full Columns (P/E, P/B, Volume, Turnover)
+
+Same index keys as `get_index()` but returns all fundamental columns.
+Uses one API call per calendar day — slower for long date ranges.
+
+```python
+from bsedata import bse
+
+# BSE200 — full columns for May 2026
+df = bse.get_index_full("BSE200", "2026-05-01", "2026-05-22")
+
+# SENSEX with P/E, P/B, Div Yield
+df = bse.get_index_full("SENSEX", "2026-05-01", "2026-05-22")
+
+# BANKEX sectoral
+df = bse.get_index_full("BANKEX", "2026-05-01", "2026-05-22")
+```
+
+**Columns:** `Index Name, Date, Open, High, Low, Close, Change, Change %, Volume (Cr.), Turnover (Rs. Cr.), P/E, P/B, Div Yield, Prev Close`
+
+**Sample output (BSE200, May 2026):**
+
+| Index Name | Date | Open | Close | Change % | P/E | P/B | Div Yield | Volume (Cr.) |
+|-----------|------|------|-------|---------|-----|-----|-----------|-------------|
+| BSE 200 | 2026-05-20 | 10922.23 | 11011.04 | 0.31 | 21.88 | 4.20 | 1.12 | 15.29 |
+| BSE 200 | 2026-05-21 | 11081.79 | 11015.45 | 0.04 | 21.86 | 4.20 | 1.12 | 12.65 |
+| BSE 200 | 2026-05-22 | 11041.19 | 11047.96 | 0.30 | 21.93 | 4.21 | 1.15 | 13.42 |
+
+> **Note:** `get_index()` and `get_index_full()` use the **same index key** (e.g. `"BSE200"`).
+> `get_index()` is faster (single API call). `get_index_full()` is slower but returns P/E, P/B, Volume, Turnover.
+
+**API endpoint:** `GET https://api.bseindia.com/BseIndiaAPI/api/IndexArchDailyAll/w`
+
+---
+
 ### ✅ All Indices for One Date
 
 Get all 120+ BSE indices' closing values for a single date in one API call.
@@ -240,6 +275,19 @@ bse-index-data list
 bse-index-data list --category Sectoral
 bse-index-data list --category "Broad Market"
 ```
+
+---
+
+## Method Comparison
+
+| Method | Speed | Columns | Use case |
+|--------|-------|---------|---------|
+| `get_index(key, from, to)` | Fast — single API call | OHLC only (6 cols) | Price charts, returns computation |
+| `get_index_full(key, from, to)` | Slower — one call per day | Full 15 cols incl. P/E, P/B, Volume | Fundamental analysis, valuation |
+| `get_all_indices(date)` | Fast — single call | Full columns for ALL indices | Daily snapshot of entire market |
+| `get_live_sensex()` | Instant | Live quote | Real-time monitoring |
+
+> Both `get_index()` and `get_index_full()` use the **same index key** — e.g. `"BSE200"`, `"SENSEX"`, `"BANKEX"`.
 
 ---
 
