@@ -213,39 +213,45 @@ def _parse_bse_date(val) -> Optional[str]:
     if re.match(r'^\d{2}/\d{2}/\d{4}$', s):
         return datetime.strptime(s, "%d/%m/%Y").strftime("%Y-%m-%d")
 
-    # DD Mon YYYY
-    for fmt in ("%d %b %Y", "%d %B %Y", "%d-%b-%Y"):
+    # DD Mon YYYY  or  D-Mon-YYYY  or  D-Month-YYYY
+    for fmt in ("%d %b %Y", "%d %B %Y", "%d-%b-%Y", "%-d-%b-%Y",
+                "%d-%B-%Y", "%-d-%B-%Y", "%d %B, %Y"):
         try:
             return datetime.strptime(s, fmt).strftime("%Y-%m-%d")
         except ValueError:
             pass
 
+    # Try pandas as last resort
+    try:
+        return pd.to_datetime(s, dayfirst=True).strftime("%Y-%m-%d")
+    except Exception:
+        pass
+
     return s  # return as-is if unrecognised
 
 
 def _clean_index_history(df: pd.DataFrame, index_name: str) -> pd.DataFrame:
-    """Standardise historical index DataFrame."""
+    """Standardise historical index DataFrame — keep all columns BSE returns."""
     if df.empty:
         return df
 
-    # Normalise column names — BSE uses various casings
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Rename to standard names
+    # Rename only the columns we know — leave everything else as-is
     rename = {
-        # Date variants
         "Date": "Date", "date": "Date", "DT": "Date", "Dt": "Date",
-        "TradingDate": "Date", "trading_date": "Date",
-        # OHLC variants
+        "TradingDate": "Date",
         "Open": "Open", "open": "Open", "OPEN": "Open",
         "High": "High", "high": "High", "HIGH": "High",
         "Low":  "Low",  "low":  "Low",  "LOW":  "Low",
         "Close": "Close", "close": "Close", "CLOSE": "Close",
         "CloseIndex": "Close", "Closing": "Close",
-        # Change
         "Change": "Change", "change": "Change",
-        "PerChange": "Change %", "perchange": "Change %",
-        "PChange": "Change %",
+        "PerChange": "Change %", "perchange": "Change %", "PChange": "Change %",
+        "Change(%)": "Change %",
+        "Points Change": "Points Change",
+        "Volume(Cr.)": "Volume (Cr.)",
+        "Turnover (Rs.Cr.)": "Turnover (Rs. Cr.)",
     }
     df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
 
@@ -254,7 +260,10 @@ def _clean_index_history(df: pd.DataFrame, index_name: str) -> pd.DataFrame:
         df["Date"] = df["Date"].apply(_parse_bse_date)
 
     # Convert numeric columns
-    for col in ["Open", "High", "Low", "Close", "Change", "Change %"]:
+    numeric_cols = ["Open", "High", "Low", "Close", "Change", "Change %",
+                    "Points Change", "Volume (Cr.)", "Turnover (Rs. Cr.)",
+                    "P/E", "P/B", "Div Yield"]
+    for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(
                 df[col].astype(str).str.replace(",", "", regex=False).str.strip(),
@@ -262,10 +271,12 @@ def _clean_index_history(df: pd.DataFrame, index_name: str) -> pd.DataFrame:
             )
 
     # Add index name column
-    df["Index Name"] = index_name
+    df.insert(0, "Index Name", index_name)
 
-    # Reorder
-    preferred = ["Index Name", "Date", "Open", "High", "Low", "Close", "Change", "Change %"]
+    # Put key columns first, keep all remaining columns after
+    preferred = ["Index Name", "Date", "Open", "High", "Low", "Close",
+                 "Points Change", "Change %", "Volume (Cr.)", "Turnover (Rs. Cr.)",
+                 "P/E", "P/B", "Div Yield"]
     cols  = [c for c in preferred if c in df.columns]
     extra = [c for c in df.columns if c not in cols]
     df    = df[cols + extra]

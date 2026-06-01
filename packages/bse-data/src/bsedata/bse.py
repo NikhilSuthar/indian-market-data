@@ -69,6 +69,9 @@ def get_index(index_name: str, from_date: str, to_date: str) -> pd.DataFrame:
     """
     Get historical OHLC for a BSE index over a date range.
 
+    Returns Date, Open, High, Low, Close from the BSE CSV API.
+    For full columns (P/E, P/B, Volume, Turnover) use get_all_indices() per date.
+
     Args:
         index_name: BSE index API key e.g. "SENSEX", "BSE500", "BANKEX"
                     Use list_indices() to see all supported keys.
@@ -76,12 +79,11 @@ def get_index(index_name: str, from_date: str, to_date: str) -> pd.DataFrame:
         to_date:    End date   — "YYYY-MM-DD" or "YYYYMMDD"
 
     Returns:
-        DataFrame — Index Name, Date, Open, High, Low, Close, Change, Change %
+        DataFrame — Index Name, Date, Open, High, Low, Close
 
     Example:
         df = bse.get_index("SENSEX", "2026-01-01", "2026-05-22")
         df = bse.get_index("BSE500", "2026-01-01", "2026-05-22")
-        df = bse.get_index("BANKEX", "2026-01-01", "2026-05-22")
     """
     cfg  = get_index_config(index_name)
     fd   = _to_yyyymmdd(from_date)
