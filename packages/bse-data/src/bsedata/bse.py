@@ -91,6 +91,105 @@ def get_index(index_name: str, from_date: str, to_date: str) -> pd.DataFrame:
     return fetch_index_history(cfg.api_key, fd, td)
 
 
+def get_index_full(
+    index_name: str,
+    from_date: str,
+    to_date: str,
+) -> pd.DataFrame:
+    """
+    Get historical data for a BSE index with ALL columns including
+    P/E, P/B, Div Yield, Volume, Turnover, Points Change.
+
+    Uses IndexArchDailyAll endpoint — one call per calendar day.
+    Slower than get_index() but returns full fundamental data.
+
+    Args:
+        index_name: BSE index display name e.g. "BSE 200", "BSE SENSEX",
+                    "BSE 500", "BANKEX", "BSE IT"
+                    (use the name shown in get_all_indices() I_name column)
+        from_date:  "YYYY-MM-DD" or "YYYYMMDD"
+        to_date:    "YYYY-MM-DD" or "YYYYMMDD"
+
+    Returns:
+        DataFrame — Date, Index Name, Open, High, Low, Close,
+                    Change, Change %, Volume (Cr.), Turnover (Rs. Cr.),
+                    P/E, P/B, Div Yield, Prev Close
+
+    Example:
+        df = bse.get_index_full("BSE 200", "2026-05-01", "2026-05-22")
+        df = bse.get_index_full("BSE SENSEX", "2026-05-01", "2026-05-22")
+        df = bse.get_index_full("BANKEX", "2026-05-01", "2026-05-22")
+    """
+    import time as _time
+    from datetime import datetime, timedelta
+
+    fd = datetime.strptime(_to_yyyymmdd(from_date), "%Y%m%d")
+    td = datetime.strptime(_to_yyyymmdd(to_date),   "%Y%m%d")
+
+    frames = []
+    current = fd
+    search_term = index_name.upper().strip()
+
+    while current <= td:
+        date_str = current.strftime("%Y-%m-%d")
+        try:
+            df_day = fetch_all_indices_by_date(_to_yyyymmdd(date_str))
+            if not df_day.empty and "I_name" in df_day.columns:
+                # Exact match first, then partial
+                mask_exact   = df_day["I_name"].str.upper() == search_term
+                mask_partial = df_day["I_name"].str.upper().str.contains(
+                    search_term, na=False, regex=False
+                )
+                row = df_day[mask_exact] if mask_exact.any() else df_day[mask_partial]
+                if not row.empty:
+                    frames.append(row.iloc[[0]])  # take first match per day
+        except Exception:
+            pass
+        _time.sleep(0.3)
+        current += timedelta(days=1)
+
+    if not frames:
+        return pd.DataFrame()
+
+    df = pd.concat(frames, ignore_index=True)
+
+    # Rename BSE raw columns to readable names
+    rename = {
+        "I_name":    "Index Name",
+        "date":      "Date",
+        "I_open":    "Open",
+        "I_high":    "High",
+        "I_low":     "Low",
+        "I_close":   "Close",
+        "Chg":       "Change",
+        "ChgPer":    "Change %",
+        "Volume":    "Volume (Cr.)",
+        "Turnover":  "Turnover (Rs. Cr.)",
+        "I_pe":      "P/E",
+        "I_pb":      "P/B",
+        "I_yl":      "Div Yield",
+        "Prev_Close":"Prev Close",
+    }
+    df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
+
+    # Drop the raw 'date' column (ISO timestamp)
+    df = df.drop(columns=["date"], errors="ignore")
+
+    # Deduplicate columns if any
+    df = df.loc[:, ~df.columns.duplicated()]
+
+    # Ensure Date is string YYYY-MM-DD
+    if "Date" in df.columns:
+        df["Date"] = df["Date"].astype(str).str[:10]
+
+    preferred = ["Index Name","Date","Open","High","Low","Close",
+                 "Change","Change %","Volume (Cr.)","Turnover (Rs. Cr.)",
+                 "P/E","P/B","Div Yield","Prev Close"]
+    cols  = [c for c in preferred if c in df.columns]
+    extra = [c for c in df.columns if c not in cols]
+    return df[cols + extra].reset_index(drop=True)
+
+
 def get_all_indices(date: str) -> pd.DataFrame:
     """
     Get all BSE indices' closing values for a single date.
