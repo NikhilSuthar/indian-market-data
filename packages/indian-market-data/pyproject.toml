@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "indian-market-data"
-version = "1.0.1"
+version = "1.1.0"
 description = "NSE + BSE + MCX India market data as pandas DataFrames — bhavcopy, SENSEX/Nifty indices, F&O, commodity spot prices. AWS Lambda ready."
 readme = "README.md"
 license = "MIT"
@@ -27,15 +27,16 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "nse-archives>=1.0.0",
-    "bse-index-data>=1.0.0",
-    "mcx-data>=1.0.0",
+    "nse-archives>=1.1.0",
+    "bse-index-data>=1.1.0",
+    "mcx-data>=1.1.0",
 ]
 
 [project.optional-dependencies]
+polars = ["polars>=0.20.0"]
 s3 = ["boto3>=1.28.0"]
 cloudflare = ["cloudscraper>=1.2.71"]
-all = ["boto3>=1.28.0", "cloudscraper>=1.2.71"]
+all = ["boto3>=1.28.0", "cloudscraper>=1.2.71", "polars>=0.20.0"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.urls]
