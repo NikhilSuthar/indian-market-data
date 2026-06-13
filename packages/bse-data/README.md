@@ -64,6 +64,28 @@ bse-index-data all-indices --date 2026-05-22
 bse-index-data live
 ```
 
+## Polars output (optional)
+
+By default every function returns a **pandas** DataFrame. To get **polars**
+DataFrames instead, install the extra and set one environment variable before
+importing — no code changes needed:
+
+```bash
+pip install bse-index-data[polars]
+```
+
+```python
+import os
+os.environ["IMD_DATAFRAME"] = "polars"   # set before importing bsedata
+
+from bsedata import bse
+df = bse.get_index("SENSEX", "2026-01-01", "2026-05-22")
+type(df)   # polars.DataFrame
+```
+
+All internal logic stays in pandas; conversion happens only at the final return
+step. Leave `IMD_DATAFRAME` unset (or `=pandas`) for the default pandas output.
+
 ## License
 
 MIT — data from [BSE India](https://www.bseindia.com).

@@ -109,7 +109,29 @@ nse-data info capital_market equities_sme sec_bhavdata_full
 - Data source: `nsearchives.nseindia.com` — no Cloudflare, works from any IP
 - Only available on **trading days** — weekends and [NSE holidays](https://www.nseindia.com/resources/exchange-communication-holidays) return HTTP 404
 - Date format: `YYYY-MM-DD` for daily, `YYYY-MM` for monthly datasets
-- S3 upload uses IAM role — install `pip install nse-data[s3]` for boto3
+- S3 upload uses IAM role — install `pip install nse-archives[s3]` for boto3
+
+## Polars output (optional)
+
+By default every function returns a **pandas** DataFrame. To get **polars**
+DataFrames instead, install the extra and set one environment variable before
+importing — no code changes needed:
+
+```bash
+pip install nse-archives[polars]
+```
+
+```python
+import os
+os.environ["IMD_DATAFRAME"] = "polars"   # set before importing nsedata
+
+from nsedata import nse
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+type(df)   # polars.DataFrame
+```
+
+All internal logic stays in pandas; conversion happens only at the final return
+step. Leave `IMD_DATAFRAME` unset (or `=pandas`) for the default pandas output.
 
 ## License
 

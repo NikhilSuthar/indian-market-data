@@ -64,6 +64,28 @@ mcx.list_commodities()
 - Uses `curl-cffi` Chrome TLS impersonation to bypass MCX Akamai WAF
 - Lambda IPs are generally unblocked — works reliably on AWS
 
+## Polars output (optional)
+
+By default every function returns a **pandas** DataFrame. To get **polars**
+DataFrames instead, install the extra and set one environment variable before
+importing — no code changes needed:
+
+```bash
+pip install mcx-data[polars]
+```
+
+```python
+import os
+os.environ["IMD_DATAFRAME"] = "polars"   # set before importing mcxdata
+
+from mcxdata import mcx
+df = mcx.get_spot_recent()
+type(df)   # polars.DataFrame
+```
+
+All internal logic stays in pandas; conversion happens only at the final return
+step. Leave `IMD_DATAFRAME` unset (or `=pandas`) for the default pandas output.
+
 ## License
 
 MIT — data from [MCX India](https://www.mcxindia.com).

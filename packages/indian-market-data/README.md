@@ -182,6 +182,31 @@ Full docs at **[View Documentation →](https://NikhilSuthar.github.io/indian-ma
 
 ---
 
+## Polars output (optional)
+
+By default every function returns a **pandas** DataFrame. To get **polars**
+DataFrames instead, install the extra and set one environment variable before
+importing — no code changes needed, and it applies to NSE, BSE and MCX alike:
+
+```bash
+pip install indian-market-data[polars]
+```
+
+```python
+import os
+os.environ["IMD_DATAFRAME"] = "polars"   # set before importing
+
+from indianmarketdata import nse, bse, mcx
+type(nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22"))  # polars.DataFrame
+type(bse.get_index("SENSEX", "2026-01-01", "2026-05-22"))                            # polars.DataFrame
+type(mcx.get_spot_recent())                                                          # polars.DataFrame
+```
+
+All internal logic stays in pandas; conversion happens only at the final return
+step. Leave `IMD_DATAFRAME` unset (or `=pandas`) for the default pandas output.
+
+---
+
 ## License
 
 MIT — data sourced from [NSE India](https://www.nseindia.com) and [MCX India](https://www.mcxindia.com).
