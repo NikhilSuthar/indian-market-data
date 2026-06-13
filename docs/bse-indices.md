@@ -62,6 +62,39 @@ Returns one row per trading day. Weekends and holidays are excluded automaticall
 
 ### ✅ Historical Index — Full Columns (P/E, P/B, Volume, Turnover)
 
+Historical data with all fundamental columns. Uses same key as `get_index()`.
+
+> Slower than `get_index()` — makes one API call per calendar day.
+
+```python
+from bsedata import bse
+
+# BSE200 — full columns
+df = bse.get_index_full("BSE200", "2026-05-01", "2026-05-22")
+
+# SENSEX — with fundamentals
+df = bse.get_index_full("SENSEX", "2026-05-01", "2026-05-22")
+
+# BANKEX
+df = bse.get_index_full("BANKEX", "2026-05-01", "2026-05-22")
+```
+
+**Columns:** `Index Name, Date, Open, High, Low, Close, Change, Change %, Volume (Cr.), Turnover (Rs. Cr.), P/E, P/B, Div Yield, Prev Close`
+
+**Sample output (BSE200, May 2026):**
+
+| Index Name | Date | Open | Close | P/E | P/B | Div Yield | Volume (Cr.) |
+|-----------|------|------|-------|-----|-----|-----------|-------------|
+| BSE 200 | 2026-05-20 | 10922.23 | 11011.04 | 21.88 | 4.20 | 1.12 | 15.29 |
+| BSE 200 | 2026-05-21 | 11081.79 | 11015.45 | 21.86 | 4.20 | 1.12 | 12.65 |
+| BSE 200 | 2026-05-22 | 11041.19 | 11047.96 | 21.93 | 4.21 | 1.15 | 13.42 |
+
+**API endpoint:** `GET https://api.bseindia.com/BseIndiaAPI/api/IndexArchDailyAll/w`
+
+---
+
+### ✅ Historical Index — Full Columns (P/E, P/B, Volume, Turnover)
+
 Same index keys as `get_index()` but returns all fundamental columns.
 Uses one API call per calendar day — slower for long date ranges.
 
