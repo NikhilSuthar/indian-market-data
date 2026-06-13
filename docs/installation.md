@@ -6,67 +6,105 @@ nav_order: 1
 
 # Installation
 
-## Option 1 — Both NSE + MCX (recommended)
+## Option 1 — All packages together
 
 ```bash
 pip install indian-market-data
 ```
 
-Installs `nse-data` + `mcx-data` together.
+Installs `nse-archives` + `bse-index-data` + `mcx-data` together.
 
-## Option 2 — NSE only
+## Option 2 — Individual packages
 
 ```bash
-pip install nse-archives
-
-# With S3 support
-pip install nse-archives[s3]
-
-# With Cloudflare bypass (for niftyindices.com TRI)
-pip install nse-archives[cloudflare]
+pip install nse-archives           # NSE only
+pip install bse-index-data         # BSE only
+pip install mcx-data               # MCX only
 ```
 
-## Option 3 — MCX only
+## Optional extras
 
 ```bash
-pip install mcx-data
-
-# With S3 support
+# S3 upload support
+pip install nse-archives[s3]
 pip install mcx-data[s3]
+pip install bse-index-data[s3]
+
+# Cloudflare bypass (for niftyindices.com TRI)
+pip install nse-archives[cloudflare]
+
+# Polars output (optional — see below)
+pip install nse-archives[polars]
+pip install mcx-data[polars]
+pip install bse-index-data[polars]
 ```
 
 **Requirements:** Python 3.9+ | `requests` | `pandas` | `openpyxl`
 
-**MCX additionally requires:** `curl-cffi>=0.7.0` (installed automatically)
+**BSE + MCX additionally require:** `curl-cffi>=0.7.0` (installed automatically)
+
+---
+
+## Optional: Polars Output
+
+All packages support **optional Polars output** with zero code changes — just set one environment variable before importing:
+
+```python
+import os
+os.environ["IMD_DATAFRAME"] = "polars"   # must be set before importing
+
+from nsedata import nse
+from bsedata import bse
+from mcxdata import mcx
+
+df = nse.get("capital_market", "equities_sme", "sec_bhavdata_full", "2026-05-22")
+type(df)  # polars.DataFrame
+
+df = bse.get_index("SENSEX", "2026-01-01", "2026-05-22")  # polars.DataFrame
+df = mcx.get_spot_recent()                                  # polars.DataFrame
+```
+
+All internal logic stays in pandas. The conversion to polars happens only at the last step before returning to you.
+
+Polars must be installed separately:
+```bash
+pip install nse-archives[polars]      # adds polars>=0.20.0
+pip install mcx-data[polars]
+pip install bse-index-data[polars]
+```
+
+Polars works on AWS Lambda — compatible Linux wheels, ~15 MB.
 
 ---
 
 ## Verify
 
 ```python
-import nsedata
-print(nsedata.__version__)   # 0.9.1
-
-import mcxdata
-print(mcxdata.__version__)   # 0.1.0
+import nsedata, mcxdata, bsedata
+print(nsedata.__version__)    # 1.1.0
+print(mcxdata.__version__)    # 1.1.0
+print(bsedata.__version__)    # 1.1.0
 
 from nsedata import nse
+from bsedata import bse
 from mcxdata import mcx
 
-nse.list_datasets()          # 91 NSE datasets
-mcx.list_datasets()          # 2 MCX datasets
+nse.list_datasets()           # 91 NSE datasets
+bse.list_indices()            # 55 BSE indices
+mcx.list_datasets()           # 2 MCX datasets
 ```
 
 ---
 
 ## Lambda Layer
 
-Includes both `nse-data` and `mcx-data` + all dependencies:
+Includes `nse-archives` + `bse-index-data` + `mcx-data` + all dependencies:
 
 ```bash
 cd .lambda_layer
-./build.sh                   # standard
-./build.sh --full            # + cloudscraper (TRI + MCX WAF extra fallback)
+./build.sh                   # standard (from PyPI)
+./build.sh --dev             # from local source (development)
+./build.sh --full            # + cloudscraper (TRI + extra WAF fallback)
 ```
 
 Upload and attach to your Lambda function:
@@ -76,5 +114,5 @@ aws lambda publish-layer-version \
   --layer-name indian-market-data \
   --zip-file fileb://nse-data-lambda-layer.zip \
   --compatible-runtimes python3.12 python3.13 \
-  --description "nse-data + mcx-data + pandas + curl-cffi"
+  --description "nse-archives + bse-index-data + mcx-data + pandas + curl-cffi"
 ```
