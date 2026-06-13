@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "indian-market-data"
-version = "1.1.0"
+version = "1.1.1"
 description = "NSE + BSE + MCX India market data as pandas DataFrames — bhavcopy, SENSEX/Nifty indices, F&O, commodity spot prices. AWS Lambda ready."
 readme = "README.md"
 license = "MIT"
@@ -27,9 +27,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "nse-archives>=1.1.0",
-    "bse-index-data>=1.1.0",
-    "mcx-data>=1.1.0",
+    "nse-archives>=1.1.1",
+    "bse-index-data>=1.1.1",
+    "mcx-data>=1.1.1",
 ]
 
 [project.optional-dependencies]
