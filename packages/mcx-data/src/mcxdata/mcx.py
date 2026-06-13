@@ -37,6 +37,7 @@ import pandas as pd
 
 from mcxdata.registry import list_datasets as _list_datasets
 from mcxdata.fetcher import fetch_recent, fetch_archive
+from mcxdata.dataframe import to_output_frame
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -44,15 +45,13 @@ from mcxdata.fetcher import fetch_recent, fetch_archive
 def list_datasets(category: str = None) -> pd.DataFrame:
     """List all available MCX datasets."""
     rows = _list_datasets(category)
-    return pd.DataFrame(rows)
+    return to_output_frame(pd.DataFrame(rows))
 
 
 def list_commodities() -> list:
-    """
-    Return the 28 MCX commodity names from the spot market data directly.
-    Uses get_spot_recent() so it always reflects live MCX data.
-    """
-    df = get_spot_recent()
+    """Return the 28 MCX commodity names from the spot market data directly."""
+    import pandas as pd
+    df = fetch_recent()  # always pandas internally
     return sorted(df["Commodity"].unique().tolist())
 
 
@@ -75,7 +74,6 @@ def get_spot_recent(commodity: str = "ALL", location: str = "ALL") -> pd.DataFra
     """
     df = fetch_recent()
 
-    # Filter client-side if a specific commodity requested
     if commodity and commodity.upper() != "ALL":
         mask = df["Commodity"].str.upper() == commodity.upper()
         df = df[mask].reset_index(drop=True)
@@ -83,7 +81,7 @@ def get_spot_recent(commodity: str = "ALL", location: str = "ALL") -> pd.DataFra
         mask = df["Location"].str.upper() == location.upper()
         df = df[mask].reset_index(drop=True)
 
-    return df
+    return to_output_frame(df)
 
 
 # ── Spot archive ──────────────────────────────────────────────────────────────
@@ -112,7 +110,7 @@ def get_spot_archive(
     """
     fd = _to_yyyymmdd(from_date)
     td = _to_yyyymmdd(to_date)
-    return fetch_archive(fd, td, commodity=commodity, location=location)
+    return to_output_frame(fetch_archive(fd, td, commodity=commodity, location=location))
 
 
 # ── Generic get() — mirrors nse-data API pattern ──────────────────────────────

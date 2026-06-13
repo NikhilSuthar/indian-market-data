@@ -28,6 +28,7 @@ from typing import Optional
 import pandas as pd
 
 from nsedata.registry import REGISTRY, DatasetConfig, get_config, list_datasets
+from nsedata.dataframe import to_output_frame
 from nsedata.fetcher import (
     _build_session, _format_url, fetch_bytes, parse_to_df, save_file
 )
@@ -87,7 +88,7 @@ def get(
     url = _format_url(cfg, date, **kwargs)
     session = _build_session()
     content = fetch_bytes(url, session)
-    return parse_to_df(content, cfg)
+    return to_output_frame(parse_to_df(content, cfg))
 
 
 def download(
@@ -228,7 +229,7 @@ def list_datasets(category: str = None, subcategory: str = None) -> pd.DataFrame
         cfg = get_config(row["category"], row["subcategory"], row["dataset"])
         row["description"] = cfg.description[:80]
         row["key_columns"] = cfg.columns[:60]
-    return pd.DataFrame(rows)
+    return to_output_frame(pd.DataFrame(rows))
 
 
 def get_config_info(category: str, subcategory: str, dataset: str) -> dict:
@@ -286,7 +287,7 @@ def get_historical_index(
         >>> df = nse.get_historical_index("nifty50", "01-Jan-2026", "31-Mar-2026")
     """
     from nsedata.niftyindices import get_historical
-    return get_historical(index_name, start_date, end_date)
+    return to_output_frame(get_historical(index_name, start_date, end_date))
 
 
 def get_tri(
@@ -323,7 +324,7 @@ def get_tri(
         >>> df = nse.get_tri("niftybank", "01-Apr-2026", "30-Apr-2026")
     """
     from nsedata.niftyindices import get_tri as _get_tri
-    return _get_tri(index_name, start_date, end_date)
+    return to_output_frame(_get_tri(index_name, start_date, end_date))
 
 
 def derive_tri(
@@ -360,10 +361,9 @@ def derive_tri(
         >>> tri_df = nse.derive_tri(nifty)
     """
     from nsedata.niftyindices import derive_tri as _derive_tri
-    # Handle ind_close_all column naming
     if "Closing Index Value" in price_df.columns and "Close" not in price_df.columns:
         price_df = price_df.rename(columns={"Closing Index Value": "Close"})
-    return _derive_tri(price_df, dividends, base_date, base_value)
+    return to_output_frame(_derive_tri(price_df, dividends, base_date, base_value))
 
 
 def list_index_names() -> pd.DataFrame:

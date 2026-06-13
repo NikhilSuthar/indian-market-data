@@ -40,6 +40,7 @@ from bsedata.fetcher import (
     _to_yyyymmdd,
 )
 from bsedata.registry import BSE_INDICES, get_index_config, list_all_indices
+from bsedata.dataframe import to_output_frame
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -62,7 +63,7 @@ def list_indices(category: str = None) -> pd.DataFrame:
     rows = list_all_indices()
     if category:
         rows = [r for r in rows if r["category"].lower() == category.lower()]
-    return pd.DataFrame(rows)
+    return to_output_frame(pd.DataFrame(rows))
 
 
 def get_index(index_name: str, from_date: str, to_date: str) -> pd.DataFrame:
@@ -88,7 +89,7 @@ def get_index(index_name: str, from_date: str, to_date: str) -> pd.DataFrame:
     cfg  = get_index_config(index_name)
     fd   = _to_yyyymmdd(from_date)
     td   = _to_yyyymmdd(to_date)
-    return fetch_index_history(cfg.api_key, fd, td)
+    return to_output_frame(fetch_index_history(cfg.api_key, fd, td))
 
 
 def get_index_full(
@@ -195,7 +196,7 @@ def get_index_full(
                  "P/E","P/B","Div Yield","Prev Close"]
     cols  = [c for c in preferred if c in df.columns]
     extra = [c for c in df.columns if c not in cols]
-    return df[cols + extra].reset_index(drop=True)
+    return to_output_frame(df[cols + extra].reset_index(drop=True))
 
 
 def get_all_indices(date: str) -> pd.DataFrame:
@@ -211,7 +212,7 @@ def get_all_indices(date: str) -> pd.DataFrame:
     Example:
         df = bse.get_all_indices("2026-05-22")
     """
-    return fetch_all_indices_by_date(_to_yyyymmdd(date))
+    return to_output_frame(fetch_all_indices_by_date(_to_yyyymmdd(date)))
 
 
 def get_live_sensex() -> pd.DataFrame:
@@ -225,7 +226,7 @@ def get_live_sensex() -> pd.DataFrame:
         df = bse.get_live_sensex()
         print(f"SENSEX: {df['LTP'].iloc[0]:,.2f}")
     """
-    return fetch_live_sensex()
+    return to_output_frame(fetch_live_sensex())
 
 
 def get_index_names_from_api() -> list:

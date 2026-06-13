@@ -38,6 +38,7 @@ dependencies = [
 
 [project.optional-dependencies]
 s3  = ["boto3>=1.28.0"]
+polars = ["polars>=0.20.0"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.scripts]

@@ -34,8 +34,9 @@ dependencies = [
 
 [project.optional-dependencies]
 cloudflare = ["cloudscraper>=1.2.71"]
-s3 = ["boto3>=1.28.0"]
-all = ["cloudscraper>=1.2.71", "boto3>=1.28.0"]
+s3  = ["boto3>=1.28.0"]
+polars = ["polars>=0.20.0"]
+all = ["cloudscraper>=1.2.71", "boto3>=1.28.0", "polars>=0.20.0"]
 dev = ["pytest", "pytest-cov", "ruff"]
 
 [project.scripts]
