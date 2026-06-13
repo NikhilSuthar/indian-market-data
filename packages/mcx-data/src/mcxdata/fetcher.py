@@ -23,33 +23,34 @@ import pandas as pd
 
 from mcxdata.session import get_session, reset_session, MCX_BASE
 
-# ── Endpoint URLs ─────────────────────────────────────────────────────────────
-_URL_RECENT  = f"{MCX_BASE}/backpage.aspx/GetSpotMarketPrice"
-_URL_ARCHIVE = f"{MCX_BASE}/backpage.aspx/GetSpotMarketArchive"
+# ── Endpoint URLs (MCX moved these to root-level GET in 2026) ─────────────────
+# Old (dead): POST /backpage.aspx/GetSpotMarketPrice  → now returns 404 HTML
+# New:        GET  /GetSpotMarketPrice?culture=en
+#             GET  /GetSpotMarketArchive?Product=..&Location=..&fromDate=..&toDate=..&Session=..&culture=en
+_URL_RECENT  = f"{MCX_BASE}/GetSpotMarketPrice"
+_URL_ARCHIVE = f"{MCX_BASE}/GetSpotMarketArchive"
 
-_POST_HEADERS = {
-    "Content-Type": "application/json; charset=UTF-8",
+_GET_HEADERS = {
     "Accept": "application/json, text/javascript, */*; q=0.01",
     "X-Requested-With": "XMLHttpRequest",
     "Referer": f"{MCX_BASE}/market-data/spot-market-price",
-    "Origin": MCX_BASE,
 }
 
 
 def fetch_recent(commodity: str = "ALL", location: str = "ALL",
                  session_val: str = "0") -> pd.DataFrame:
     """
-    POST GetSpotMarketPrice — returns today's spot prices for all commodities.
+    GET /GetSpotMarketPrice — today's spot prices for all commodities.
 
     Args:
         commodity:   Not used by MCX for Recent (always returns all). Kept for API symmetry.
         location:    Not used by MCX for Recent.
-        session_val: "0"=Both, "1"=Session1, "2"=Session2
+        session_val: Not used for Recent.
 
     Returns:
-        DataFrame with columns: Symbol, Unit, Location, Spot Price (Rs.), Change
+        DataFrame with columns: Commodity, Unit, Location, Spot Price (Rs.), Up/Down, Date
     """
-    raw = _post(_URL_RECENT, body="")
+    raw = _get(_URL_RECENT, params={"culture": "en"})
     return _parse_response(raw)
 
 
@@ -57,70 +58,99 @@ def fetch_archive(from_date: str, to_date: str,
                   commodity: str = "ALL", location: str = "ALL",
                   session_val: str = "0") -> pd.DataFrame:
     """
-    POST GetSpotMarketArchive — returns historical spot prices.
+    GET /GetSpotMarketArchive — historical spot prices.
 
     Args:
-        from_date:   YYYYMMDD e.g. "20260501"
-        to_date:     YYYYMMDD e.g. "20260522"
+        from_date:   DD/MM/YYYY e.g. "01/05/2026"
+        to_date:     DD/MM/YYYY e.g. "22/05/2026"
         commodity:   "ALL" or commodity name e.g. "GOLD", "SILVER"
         location:    "ALL" or location name
         session_val: "0"=Both, "1"=Session1, "2"=Session2
 
     Returns:
-        DataFrame with columns: Symbol, Unit, Location, Date, Spot Price (Rs.), Change
+        DataFrame with columns: Commodity, Unit, Location, Date, Spot Price (Rs.), Up/Down
     """
-    payload = {
+    params = {
         "Product":  commodity if commodity and commodity != "ALL" else "ALL",
         "Location": location  if location  and location  != "ALL" else "ALL",
-        "Fromdate": from_date,
+        "fromDate": from_date,
+        "toDate":   to_date,
         "Session":  session_val,
-        "Todate":   to_date,
+        "culture":  "en",
     }
-    raw = _post(_URL_ARCHIVE, body=json.dumps(payload))
+    raw = _get(_URL_ARCHIVE, params=params)
     return _parse_response(raw)
 
 
-def _post(url: str, body: str) -> dict:
+def _get(url: str, params: dict) -> dict:
     """
-    POST to MCX backpage endpoint. Returns parsed JSON dict.
+    GET an MCX market-data endpoint. Returns parsed JSON dict.
 
-    Retry strategy on 403:
-      - Attempt 1: retry after 3s with same session (cookies preserved)
-      - Attempt 2: rebuild session (fresh warmup) and retry after 5s
-    Never destroy cookies on first 403 — Akamai uses session state.
+    MCX sits behind Akamai. Two failure modes are handled here:
+      * HTTP 403         — hard block
+      * HTTP 200 + HTML  — soft block / challenge page (body is not JSON)
+
+    Retry strategy:
+      - Attempt 1: same session, wait 3s (cookies preserved)
+      - Attempt 2: rebuild session (fresh warmup), wait 5s
+      - Attempt 3: give up with an informative error
     """
     session, stype = get_session()
+    last_snippet = ""
 
     for attempt in range(3):
         try:
             if stype == "curl_cffi":
-                r = session.post(url, data=body, headers=_POST_HEADERS, timeout=25)
+                r = session.get(url, params=params, headers=_GET_HEADERS, timeout=25)
             else:
-                session.headers.update(_POST_HEADERS)
-                r = session.post(url, data=body, timeout=25)
+                session.headers.update(_GET_HEADERS)
+                r = session.get(url, params=params, timeout=25)
 
+            # ── Hard block ───────────────────────────────────────────────
             if r.status_code == 403:
-                if attempt == 0:
-                    # First 403 — same session, just wait longer
-                    time.sleep(3)
-                    continue
-                elif attempt == 1:
-                    # Second 403 — rebuild session with fresh warmup
-                    reset_session()
-                    time.sleep(5)
+                if attempt < 2:
+                    _rotate_session(attempt)
                     session, stype = get_session()
                     continue
-                else:
-                    raise RuntimeError(f"HTTP 403: {url} (Akamai WAF blocking — ensure curl_cffi is installed)")
+                raise RuntimeError(
+                    f"HTTP 403 from {url} — Akamai WAF is blocking this IP. "
+                    f"Ensure curl_cffi is installed; cloud/VPS IPs are often blocked, "
+                    f"AWS Lambda IPs usually work."
+                )
+
+            if r.status_code == 404:
+                raise RuntimeError(
+                    f"HTTP 404 from {url} — MCX endpoint not found. "
+                    f"The MCX API URL may have changed again; please report this."
+                )
 
             if r.status_code != 200:
-                raise RuntimeError(f"HTTP {r.status_code}: {url}")
+                raise RuntimeError(f"HTTP {r.status_code} from {url}")
 
-            return r.json()
+            # ── Parse body defensively (do NOT trust r.json()) ───────────
+            text = _response_text(r)
+            parsed = _try_json(text)
+            if parsed is not None:
+                return parsed
+
+            # 200 but not JSON → soft block / challenge page
+            last_snippet = (text or "").strip()[:200]
+            if attempt < 2:
+                _rotate_session(attempt)
+                session, stype = get_session()
+                continue
+
+            ctype = _response_header(r, "content-type")
+            raise RuntimeError(
+                f"MCX returned a non-JSON 200 response from {url} "
+                f"(content-type: {ctype!r}, {len(text or '')} chars). "
+                f"This is usually an Akamai challenge/HTML page. "
+                f"First 200 chars: {last_snippet!r}"
+            )
 
         except RuntimeError:
             raise
-        except Exception as e:
+        except Exception:
             if attempt < 2:
                 time.sleep(2)
                 continue
@@ -129,55 +159,119 @@ def _post(url: str, body: str) -> dict:
     raise RuntimeError(f"Failed after 3 attempts: {url}")
 
 
+def _rotate_session(attempt: int) -> None:
+    """Wait, then on the second attempt rebuild the session with a fresh warmup."""
+    if attempt == 0:
+        time.sleep(3)
+    else:
+        reset_session()
+        time.sleep(5)
+
+
+def _response_text(r) -> str:
+    """Return the decoded response body as text, regardless of session backend."""
+    try:
+        text = r.text
+        if text:
+            return text
+    except Exception:
+        pass
+    try:
+        content = r.content
+        if isinstance(content, bytes):
+            return content.decode("utf-8", errors="replace")
+        return str(content)
+    except Exception:
+        return ""
+
+
+def _response_header(r, name: str) -> str:
+    try:
+        return r.headers.get(name, "") or ""
+    except Exception:
+        return ""
+
+
+def _try_json(text: str):
+    """Parse JSON from a text body, tolerating a leading BOM/whitespace. None if not JSON."""
+    if not text:
+        return None
+    cleaned = text.lstrip("\ufeff \t\r\n")
+    if not cleaned or cleaned[0] not in "{[":
+        return None
+    try:
+        return json.loads(cleaned)
+    except (ValueError, json.JSONDecodeError):
+        return None
+
+
 def _parse_response(raw: dict) -> pd.DataFrame:
     """
-    Parse MCX backpage response.
+    Parse MCX market-data response (2026 schema).
 
-    MCX returns:
-      {"d": {"Summary": {"AsOn": ..., "Count": 28}, "Data": [{...}, ...]}}
-    or for archive:
-      {"d": {"Summary": {...}, "Data": [{...}, ...]}}
+    Recent:  {"IsSuccess": true, "Data": {"Summary": {...}, "Data": [ {...}, ... ]}}
+    Archive: {"IsSuccess": true, "Data": [ {...}, ... ]}
+    Empty:   {"IsSuccess": false, "Message": "No data found.", "Data": null}
+
+    Field names are lowercase: symbol, unit, location, todaysSpotPrice,
+    change, _changeSign, date (.NET /Date(ms)/), FormattedDate, FormattedTime.
     """
-    if "d" not in raw:
-        raise RuntimeError(f"Unexpected response format: {list(raw.keys())}")
+    if not isinstance(raw, dict):
+        raise RuntimeError(f"Unexpected response type: {type(raw)}")
 
-    inner = raw["d"]
+    # Legacy schema fallback ({"d": ...}) — kept for safety.
+    if "d" in raw and "Data" not in raw and "IsSuccess" not in raw:
+        inner = raw["d"]
+        if isinstance(inner, str):
+            inner = json.loads(inner) if inner.strip() else []
+        data = inner.get("Data", inner.get("data", [])) if isinstance(inner, dict) else inner
+        return _clean_df(pd.DataFrame(data or []))
 
-    # inner can be a dict with "Data" key, a list, or a JSON string
-    if isinstance(inner, str):
-        if not inner.strip():
-            return pd.DataFrame()
-        inner = json.loads(inner)
-
-    if isinstance(inner, dict):
-        data = inner.get("Data", inner.get("data", []))
-    elif isinstance(inner, list):
-        data = inner
-    else:
-        raise RuntimeError(f"Cannot parse .d of type {type(inner)}: {str(inner)[:100]}")
-
-    if not data:
+    if raw.get("IsSuccess") is False:
+        # No data for the requested range/commodity — return empty frame.
         return pd.DataFrame()
 
-    df = pd.DataFrame(data)
-    return _clean_df(df)
+    data_node = raw.get("Data")
+    if data_node is None:
+        return pd.DataFrame()
+
+    # Recent wraps the rows in Data.Data; archive returns Data as a list directly.
+    if isinstance(data_node, dict):
+        rows = data_node.get("Data", data_node.get("data", []))
+    elif isinstance(data_node, list):
+        rows = data_node
+    else:
+        raise RuntimeError(f"Cannot parse 'Data' of type {type(data_node)}")
+
+    if not rows:
+        return pd.DataFrame()
+
+    return _clean_df(pd.DataFrame(rows))
 
 
 def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
-    """Standardise MCX response DataFrame."""
+    """Standardise MCX response DataFrame (2026 lowercase field schema)."""
     if df.empty:
         return df
 
-    # Drop internal ASP.NET type field and junk columns
+    # Drop internal ASP.NET / duplicate fields
     drop_cols = [c for c in df.columns if c.startswith("__")
-                 or c in ("ExtensionData", "EnSymbol", "Enlocation")]
+                 or c in ("ExtensionData", "enSymbol", "enlocation",
+                          "EnSymbol", "Enlocation", "_changeSign",
+                          "FormattedDate", "FormattedTime")]
     df = df.drop(columns=drop_cols, errors="ignore")
 
-    # Rename MCX field names → readable column names
+    # Rename MCX field names → readable column names (handle both old + new casing)
     rename = {
+        "symbol":          "Commodity",
         "Symbol":          "Commodity",
+        "unit":            "Unit",
+        "location":        "Location",
+        "todaysSpotPrice": "Spot Price (Rs.)",
         "TodaysSpotPrice": "Spot Price (Rs.)",
+        "change":          "Up/Down",
         "Change":          "Up/Down",
+        "date":            "Date",
     }
     df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
 
@@ -191,16 +285,16 @@ def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
         )
         df[price_col] = pd.to_numeric(df[price_col], errors="coerce")
 
-    # Parse .NET JSON Date: /Date(milliseconds)/ → datetime
+    # Parse .NET JSON Date: /Date(milliseconds)/ → datetime → ISO string
     if "Date" in df.columns:
         import re as _re
         def _parse_net_date(val):
             m = _re.search(r'/Date\((\d+)\)/', str(val))
             if m:
                 return pd.to_datetime(int(m.group(1)), unit="ms")
-            return pd.NaT
+            return pd.to_datetime(val, errors="coerce")
         df["Date"] = df["Date"].apply(_parse_net_date)
-        df["Date"] = df["Date"].dt.strftime("%Y-%m-%d %H:%M:%S")  # ISO: "2026-05-22 12:33:11"
+        df["Date"] = df["Date"].dt.strftime("%Y-%m-%d %H:%M:%S")
 
     # Reorder columns sensibly
     preferred_order = ["Commodity", "Unit", "Location", "Spot Price (Rs.)", "Up/Down", "Date"]

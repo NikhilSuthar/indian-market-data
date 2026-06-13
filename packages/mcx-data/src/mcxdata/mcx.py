@@ -108,8 +108,8 @@ def get_spot_archive(
         df = mcx.get_spot_archive("2026-05-01", "2026-05-22")
         df = mcx.get_spot_archive("2026-05-01", "2026-05-22", commodity="GOLD")
     """
-    fd = _to_yyyymmdd(from_date)
-    td = _to_yyyymmdd(to_date)
+    fd = _to_ddmmyyyy(from_date)
+    td = _to_ddmmyyyy(to_date)
     return to_output_frame(fetch_archive(fd, td, commodity=commodity, location=location))
 
 
@@ -211,19 +211,20 @@ def download(
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
-def _to_yyyymmdd(date_str: str) -> str:
+def _to_ddmmyyyy(date_str: str) -> str:
     """
-    Accept YYYY-MM-DD or DD/MM/YYYY → return YYYYMMDD (MCX format for archive).
+    Accept YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, or YYYYMMDD
+    → return DD/MM/YYYY (the format the MCX archive GET endpoint expects).
     """
     s = date_str.strip()
-    if re.match(r'^\d{8}$', s):                    # already YYYYMMDD
+    if re.match(r'^\d{2}/\d{2}/\d{4}$', s):        # already DD/MM/YYYY
         return s
     if re.match(r'^\d{4}-\d{2}-\d{2}$', s):        # YYYY-MM-DD
-        return datetime.strptime(s, "%Y-%m-%d").strftime("%Y%m%d")
-    if re.match(r'^\d{2}/\d{2}/\d{4}$', s):        # DD/MM/YYYY
-        return datetime.strptime(s, "%d/%m/%Y").strftime("%Y%m%d")
+        return datetime.strptime(s, "%Y-%m-%d").strftime("%d/%m/%Y")
+    if re.match(r'^\d{8}$', s):                    # YYYYMMDD
+        return datetime.strptime(s, "%Y%m%d").strftime("%d/%m/%Y")
     if re.match(r'^\d{2}-\d{2}-\d{4}$', s):        # DD-MM-YYYY
-        return datetime.strptime(s, "%d-%m-%Y").strftime("%Y%m%d")
+        return datetime.strptime(s, "%d-%m-%Y").strftime("%d/%m/%Y")
     raise ValueError(
         f"Unrecognised date format: '{date_str}'. "
         "Use YYYY-MM-DD, DD/MM/YYYY, or YYYYMMDD."
