@@ -59,9 +59,9 @@ done
 
 # ── Detect versions ──────────────────────────────────────────
 if [ "$USE_DEV" = true ]; then
-    NSE_VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/src'); from nsedata import __version__; print(__version__)" 2>/dev/null || echo "dev")
+    NSE_VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/packages/nse-data/src'); from nsedata import __version__; print(__version__)" 2>/dev/null || echo "dev")
     MCX_VERSION=$(python3 -c "import sys; sys.path.insert(0,'$PROJECT_ROOT/packages/mcx-data/src'); from mcxdata import __version__; print(__version__)" 2>/dev/null || echo "dev")
-    NSE_SOURCE="local source ($PROJECT_ROOT)"
+    NSE_SOURCE="local source ($PROJECT_ROOT/packages/nse-data)"
     MCX_SOURCE="local source ($PROJECT_ROOT/packages/mcx-data)"
 else
     NSE_VERSION=$(pip3 index versions nse-archives 2>/dev/null | grep -oP '[\d.]+' | head -1 || echo "latest")
@@ -139,7 +139,7 @@ if [ "$USE_DEV" = true ]; then
     pip install --quiet \
         --target "$BUILD_DIR/python" \
         --no-deps \
-        "$PROJECT_ROOT"
+        "$PROJECT_ROOT/packages/nse-data"
     pip install --quiet \
         --target "$BUILD_DIR/python" \
         --no-deps \

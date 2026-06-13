@@ -36,7 +36,7 @@ Usage:
     python download_all.py --date 2026-05-22 --month 2026-05 --out ./nse_data --tri
 
 Requirements:
-    pip install nse-data openpyxl
+    pip install nse-archives openpyxl
     pip install cloudscraper  # only needed for --tri
 """
 
@@ -48,10 +48,14 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
-# ─── Add src to path if running from repo ────────────────────────────────────
+# ─── Add package source to path if running from repo ─────────────────────────
 _script_dir = Path(__file__).parent
 _project_root = _script_dir.parent
-if (_project_root / "src").exists():
+# Canonical source lives under packages/nse-data/src (the published copy).
+_pkg_src = _project_root / "packages" / "nse-data" / "src"
+if _pkg_src.exists():
+    sys.path.insert(0, str(_pkg_src))
+elif (_project_root / "src").exists():
     sys.path.insert(0, str(_project_root / "src"))
 
 from nsedata import nse
