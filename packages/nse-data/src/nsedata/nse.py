@@ -88,7 +88,14 @@ def get(
     url = _format_url(cfg, date, **kwargs)
     session = _build_session()
     content = fetch_bytes(url, session)
-    return to_output_frame(parse_to_df(content, cfg))
+    df = parse_to_df(content, cfg)
+
+    # For monthly datasets, add a report_month column (YYYY-MM) for easy tracking
+    if cfg.date_type == "monthly":
+        month_str = date[:7] if len(date) >= 7 else date
+        df.insert(0, "report_month", month_str)
+
+    return to_output_frame(df)
 
 
 def download(
