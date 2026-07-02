@@ -92,6 +92,9 @@ def _format_url(cfg: DatasetConfig, date_str: str, **kwargs) -> str:
             "{dd-Mon-YYYY}": dt.strftime("%d-%b-%Y"),
         }
     elif cfg.date_type == "monthly":
+        # Accept both "YYYY-MM" and "YYYY-MM-DD" for monthly datasets
+        if len(date_str) > 7 and date_str[7:8] == "-":
+            date_str = date_str[:7]  # Truncate "2026-06-30" → "2026-06"
         dt = datetime.strptime(date_str + "-01", "%Y-%m-%d")
         replacements = {
             "{MON}":  dt.strftime("%b").upper(),
