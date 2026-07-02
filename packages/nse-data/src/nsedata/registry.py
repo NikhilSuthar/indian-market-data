@@ -44,6 +44,7 @@ class DatasetConfig:
     encoding: str = "utf-8"         # File encoding
     separator: Optional[str] = None # None = auto-detect
     zip_extract: Optional[str] = None  # For ZIP: which file to extract (regex pattern)
+    section: Optional[int] = None   # For multi-section files: 1-indexed section number to extract
 
     # Metadata
     frequency: str = "Daily"
@@ -114,13 +115,80 @@ REGISTRY = {
             ),
 
             "market_activity": DatasetConfig(
-                name="Market Activity Report",
-                description="Daily market summary: turnover, advances/declines, breadth, circuit hits.",
+                name="Market Activity — Summary",
+                description="Daily market summary: traded value, traded quantity, number of trades, total market capitalisation.",
                 url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
                 file_pattern="MA{ddmmyy}.csv",
                 file_format="csv",
+                section=2,
                 frequency="Daily",
-                columns="Market,Advances,Declines,Unchanged,Total,Traded,Turnover",
+                columns="Metric,Value",
+            ),
+
+            "market_activity_indices": DatasetConfig(
+                name="Market Activity — Index OHLC",
+                description="Daily OHLC for all NSE indices (~140 indices) extracted from Market Activity Report.",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=3,
+                frequency="Daily",
+                columns="INDEX,PREVIOUS CLOSE,OPEN,HIGH,LOW,CLOSE,GAIN/LOSS",
+            ),
+
+            "market_activity_breadth": DatasetConfig(
+                name="Market Activity — Advances/Declines",
+                description="Daily market breadth: advances, declines, unchanged count.",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=4,
+                frequency="Daily",
+                columns="Metric,Count",
+            ),
+
+            "market_activity_top25": DatasetConfig(
+                name="Market Activity — Top 25 Securities",
+                description="Top 25 securities by traded value for the day.",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=6,
+                frequency="Daily",
+                columns="SYMBOL,SERIES,PREV. CLOSE,CLOSE PRICE,%VAR,VALUE(Rs Crs)",
+            ),
+
+            "market_activity_gainers": DatasetConfig(
+                name="Market Activity — Top 5 Nifty 50 Gainers",
+                description="Top 5 Nifty 50 gainers for the day.",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=7,
+                frequency="Daily",
+                columns="SYMBOL,SERIES,PREV. CLOSE,CLOSE PRICE,%VAR,VALUE(Rs Crs)",
+            ),
+
+            "market_activity_losers": DatasetConfig(
+                name="Market Activity — Top 5 Nifty 50 Losers",
+                description="Top 5 Nifty 50 losers for the day.",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=8,
+                frequency="Daily",
+                columns="SYMBOL,SERIES,PREV. CLOSE,CLOSE PRICE,%VAR,VALUE(Rs Crs)",
+            ),
+
+            "market_activity_securities": DatasetConfig(
+                name="Market Activity — Securities Price Volume",
+                description="Full securities price volume data for all traded securities in normal market (~3300 rows).",
+                url_pattern="/archives/equities/mkt/MA{ddmmyy}.csv",
+                file_pattern="MA{ddmmyy}.csv",
+                file_format="csv",
+                section=9,
+                frequency="Daily",
+                columns="SYMBOL,SERIES,CLOSE PRICE,TRADED VALUE,TRADED QUANTITY",
             ),
 
             "cmvolt": DatasetConfig(

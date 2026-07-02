@@ -152,6 +152,46 @@ def fetch_bytes(url: str, session: requests.Session = None) -> bytes:
     return resp.content
 
 
+def _extract_section(text: str, section_num: int) -> str:
+    """
+    Extract a section from a multi-section CSV file.
+
+    Sections are separated by blank lines. Returns the text of the
+    requested section (1-indexed). The first non-blank line of the
+    section is treated as the header.
+    """
+    lines = text.split("\n")
+    sections = []
+    current = []
+
+    for line in lines:
+        if line.strip() == "":
+            if current:
+                sections.append(current)
+                current = []
+        else:
+            current.append(line)
+    if current:
+        sections.append(current)
+
+    if section_num < 1 or section_num > len(sections):
+        raise RuntimeError(
+            f"Section {section_num} not found. File has {len(sections)} sections."
+        )
+
+    section_lines = sections[section_num - 1]
+
+    # Skip the first line if it's a title/label (doesn't contain comma-separated data columns)
+    # Heuristic: if first line has fewer commas than second line, it's a title
+    if len(section_lines) > 1:
+        first_commas = section_lines[0].count(",")
+        second_commas = section_lines[1].count(",")
+        if first_commas < second_commas:
+            section_lines = section_lines[1:]
+
+    return "\n".join(section_lines)
+
+
 def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
     """
     Parse raw bytes into a DataFrame based on file format.
@@ -163,6 +203,9 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
 
     if fmt == "csv":
         text = _decode_content(content, enc)
+        # Handle multi-section CSV files (sections separated by blank lines)
+        if cfg.section:
+            text = _extract_section(text, cfg.section)
         df = pd.read_csv(io.StringIO(text), skiprows=skip, on_bad_lines="skip")
 
     elif fmt == "gz_csv":
@@ -227,6 +270,12 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
         )
 
     df.columns = [str(c).strip() for c in df.columns]
+
+    # Drop leading empty column (common in MA files where each line starts with comma)
+    if cfg.section and not df.empty:
+        first_col = df.columns[0]
+        if first_col.startswith("Unnamed") and df[first_col].isna().all():
+            df = df.drop(columns=[first_col])
 
     # Clean up section separators and embedded section headers
     # (common in PR ZIP files: pr, pd, gl have blank comma rows and section labels)
