@@ -90,10 +90,14 @@ def get(
     content = fetch_bytes(url, session)
     df = parse_to_df(content, cfg)
 
-    # For monthly datasets, add a report_month column (YYYY-MM) for easy tracking
+    # Add tracking date column for easy identification
     if cfg.date_type == "monthly":
         month_str = date[:7] if len(date) >= 7 else date
         df.insert(0, "report_month", month_str)
+    elif cfg.date_type == "daily":
+        # Normalize to YYYY-MM-DD
+        date_str = date[:10] if len(date) >= 10 else date
+        df.insert(0, "reporting_date", date_str)
 
     return to_output_frame(df)
 
