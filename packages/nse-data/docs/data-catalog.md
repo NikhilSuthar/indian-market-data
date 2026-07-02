@@ -6,7 +6,7 @@ nav_order: 6
 
 # NSE Data Catalog
 
-Complete catalog of **79 downloadable datasets** from NSE, organized by market segment.
+Complete catalog of **80 downloadable datasets** from NSE, organized by market segment.
 
 ---
 
@@ -14,17 +14,17 @@ Complete catalog of **79 downloadable datasets** from NSE, organized by market s
 
 | Category | Datasets | ✅ Implemented | 🔜 Planned |
 |----------|----------|---------------|------------|
-| Capital Market — Equities | 18 | 3 | 15 |
-| Capital Market — Indices | 7 | 1 | 6 |
-| Capital Market — Risk & Margins | 7 | 0 | 7 |
-| Capital Market — SME | 2 | 0 | 2 |
-| Capital Market — SLB | 6 | 0 | 6 |
-| Derivatives — Equity F&O | 24 | 0 | 24 |
-| Derivatives — Commodity | 7 | 0 | 7 |
-| Derivatives — Currency | 6 | 0 | 6 |
-| Derivatives — Interest Rate (IRD) | 2 | 0 | 2 |
-| Debt — Tri-Party Repo | 1 | 0 | 1 |
-| **Total** | **80** | **4** | **76** |
+| Capital Market — Equities | 18 | 15 | 3 |
+| Capital Market — Indices | 7 | 3 | 4 |
+| Capital Market — Risk & Margins | 7 | 7 | 0 |
+| Capital Market — SME | 2 | 2 | 0 |
+| Capital Market — SLB | 6 | 6 | 0 |
+| Derivatives — Equity F&O | 24 | 10 | 14 |
+| Derivatives — Commodity | 7 | 3 | 4 |
+| Derivatives — Currency | 6 | 2 | 4 |
+| Derivatives — Interest Rate (IRD) | 2 | 2 | 0 |
+| Debt — Tri-Party Repo | 1 | 1 | 0 |
+| **Total** | **80** | **51** | **29** |
 
 ---
 
@@ -83,7 +83,7 @@ download_report("sec_bhavdata", "2026-04-17")
 
 ---
 
-### 3. `bhavcopy_udiff` — Capital Market Bhavcopy (UDiFF/ISIN format) 🔜
+### 3. `bhavcopy_udiff` — Capital Market Bhavcopy (UDiFF/ISIN format) ✅
 
 | Field | Value |
 |-------|-------|
@@ -102,7 +102,7 @@ download_report("bhavcopy_udiff", "2026-04-17")
 
 ---
 
-### 4. `cm_security_master` — NSE CM Security Master 🔜
+### 4. `cm_security_master` — NSE CM Security Master ✅
 
 | Field | Value |
 |-------|-------|
@@ -140,7 +140,7 @@ download_report("market_activity", "2026-04-17")
 
 ---
 
-### 6. `mto` — Multiple Trade Orders (Delivery Position) 🔜
+### 6. `mto` — Multiple Trade Orders (Delivery Position) ✅
 
 | Field | Value |
 |-------|-------|
@@ -159,7 +159,7 @@ download_report("mto", "2026-04-17")
 
 ---
 
-### 7. `short_selling` — Short Selling Daily Report 🔜
+### 7. `short_selling` — Short Selling Daily Report ✅
 
 | Field | Value |
 |-------|-------|
@@ -178,7 +178,7 @@ download_report("short_selling", "2026-04-17")
 
 ---
 
-### 8. `cm_52wk_highlow` — Capital Market 52-Week High/Low 🔜
+### 8. `cm_52wk_highlow` — Capital Market 52-Week High/Low ✅
 
 | Field | Value |
 |-------|-------|
@@ -197,7 +197,7 @@ download_report("cm_52wk_highlow", "2026-04-17")
 
 ---
 
-### 9. `block_deals` — Block Deals (Daily) 🔜
+### 9. `block_deals` — Block Deals (Daily) ✅
 
 | Field | Value |
 |-------|-------|
@@ -216,7 +216,7 @@ download_report("block_deals", "2026-04-17")
 
 ---
 
-### 10. `bulk_deals` — Bulk Deals (Daily) 🔜
+### 10. `bulk_deals` — Bulk Deals (Daily) ✅
 
 | Field | Value |
 |-------|-------|
@@ -273,7 +273,7 @@ download_report("circuit_changes", "2026-04-17")
 
 ---
 
-### 13. `eq_band_changes` — Equity Price Band Changes 🔜
+### 13. `eq_band_changes` — Equity Price Band Changes ✅
 
 | Field | Value |
 |-------|-------|
@@ -292,7 +292,7 @@ download_report("eq_band_changes", "2026-04-17")
 
 ---
 
-### 14. `sec_list` — CM Security List 🔜
+### 14. `sec_list` — CM Security List ✅
 
 | Field | Value |
 |-------|-------|
@@ -311,7 +311,7 @@ download_report("sec_list", "2026-04-17")
 
 ---
 
-### 15. `series_change` — Series Change Notifications 🔜
+### 15. `series_change` — Series Change Notifications ✅
 
 | Field | Value |
 |-------|-------|
@@ -330,7 +330,7 @@ download_report("series_change", "2026-04-17")
 
 ---
 
-### 16. `auction_buy` — Auction Buy (AUB) 🔜
+### 16. `auction_buy` — Auction Buy (AUB) ✅
 
 | Field | Value |
 |-------|-------|
@@ -349,7 +349,7 @@ download_report("auction_buy", "2026-04-17")
 
 ---
 
-### 17. `margin_trading` — Margin Trading Report 🔜
+### 17. `margin_trading` — Margin Trading Report ✅
 
 | Field | Value |
 |-------|-------|
@@ -408,7 +408,7 @@ download_report("ind_close_all", "2026-04-17")
 
 ---
 
-### 20. `pe_pb_div` — Index P/E, P/B & Dividend Yield 🔜
+### 20. `pe_pb_div` — Index P/E, P/B & Dividend Yield ✅
 
 | Field | Value |
 |-------|-------|
@@ -427,7 +427,7 @@ download_report("pe_pb_div", "2026-04-17")
 
 ---
 
-### 21. `reg_ind` — Regional Indices Daily 🔜
+### 21. `reg_ind` — Regional Indices Daily ✅
 
 | Field | Value |
 |-------|-------|
@@ -446,7 +446,7 @@ download_report("reg_ind", "2026-04-17")
 
 ---
 
-### 22. `reg1_ind` — Regional Indices (Secondary) 🔜
+### 22. `reg1_ind` — Regional Indices (Secondary) ✅
 
 | Field | Value |
 |-------|-------|
@@ -465,7 +465,7 @@ download_report("reg1_ind", "2026-04-17")
 
 ---
 
-### 23. `top10_nifty50` — Index Top Movers 🔜
+### 23. `top10_nifty50` — Index Top Movers ✅
 
 | Field | Value |
 |-------|-------|
@@ -524,7 +524,7 @@ download_report("nifty_mcwb", "2026-04-17")
 
 ## Capital Market — Risk & Margins
 
-### 26. `cmvolt` — CM Security Volatility 🔜
+### 26. `cmvolt` — CM Security Volatility ✅
 
 | Field | Value |
 |-------|-------|
@@ -543,7 +543,7 @@ download_report("cmvolt", "2026-04-17")
 
 ---
 
-### 27. `c_var1` — CM VaR Margin File (6 intraday snapshots) 🔜
+### 27. `c_var1` — CM VaR Margin File (6 intraday snapshots) ✅
 
 | Field | Value |
 |-------|-------|
@@ -562,7 +562,7 @@ download_report("c_var1", "2026-04-17")
 
 ---
 
-### 28. `c_catg` — CM Security Categorisation 🔜
+### 28. `c_catg` — CM Security Categorisation ✅
 
 | Field | Value |
 |-------|-------|
@@ -581,7 +581,7 @@ download_report("c_catg", "2026-04-17")
 
 ---
 
-### 29. `csqr_m` — Client Segregation Quarterly Report 🔜
+### 29. `csqr_m` — Client Segregation Quarterly Report ✅
 
 | Field | Value |
 |-------|-------|
@@ -600,7 +600,7 @@ download_report("csqr_m", "2026-04-17")
 
 ---
 
-### 30. `fcm_intrm_bc` — FCM Interim Bhavcopy 🔜
+### 30. `fcm_intrm_bc` — FCM Interim Bhavcopy ✅
 
 | Field | Value |
 |-------|-------|
@@ -619,7 +619,7 @@ download_report("fcm_intrm_bc", "2026-04-17")
 
 ---
 
-### 31. `c_stt` — STT Report 🔜
+### 31. `c_stt` — STT Report ✅
 
 | Field | Value |
 |-------|-------|
@@ -659,7 +659,7 @@ download_report("ael", "2026-04-17")
 
 ## Capital Market — SME
 
-### 33. `sme_eod` — SME Platform EOD Market Data 🔜
+### 33. `sme_eod` — SME Platform EOD Market Data ✅
 
 | Field | Value |
 |-------|-------|
@@ -678,7 +678,7 @@ download_report("sme_eod", "2026-04-17")
 
 ---
 
-### 34. `sme_bands` — SME Complete Price Bands 🔜
+### 34. `sme_bands` — SME Complete Price Bands ✅
 
 | Field | Value |
 |-------|-------|
@@ -699,7 +699,7 @@ download_report("sme_bands", "2026-04-17")
 
 ## Capital Market — Securities Lending & Borrowing
 
-### 35. `slb_var` — SLB VaR Margin File 🔜
+### 35. `slb_var` — SLB VaR Margin File ✅
 
 | Field | Value |
 |-------|-------|
@@ -718,7 +718,7 @@ download_report("slb_var", "2026-04-17")
 
 ---
 
-### 36. `slbm_bc` — SLB Bhavcopy 🔜
+### 36. `slbm_bc` — SLB Bhavcopy ✅
 
 | Field | Value |
 |-------|-------|
@@ -737,7 +737,7 @@ download_report("slbm_bc", "2026-04-17")
 
 ---
 
-### 37. `slb_elg_sec` — SLB Eligible Securities List 🔜
+### 37. `slb_elg_sec` — SLB Eligible Securities List ✅
 
 | Field | Value |
 |-------|-------|
@@ -756,7 +756,7 @@ download_report("slb_elg_sec", "2026-04-17")
 
 ---
 
-### 38. `slb_openpos` — SLB Open Positions 🔜
+### 38. `slb_openpos` — SLB Open Positions ✅
 
 | Field | Value |
 |-------|-------|
@@ -775,7 +775,7 @@ download_report("slb_openpos", "2026-04-17")
 
 ---
 
-### 39. `slb_transaction` — SLB Transaction Data (Monthly) 🔜
+### 39. `slb_transaction` — SLB Transaction Data (Monthly) ✅
 
 | Field | Value |
 |-------|-------|
@@ -794,7 +794,7 @@ download_report("slb_transaction", "2026-04-17")
 
 ---
 
-### 40. `slb_foreclosure` — SLB Foreclosure Report 🔜
+### 40. `slb_foreclosure` — SLB Foreclosure Report ✅
 
 | Field | Value |
 |-------|-------|
@@ -834,7 +834,7 @@ download_report("fo_bhav", "2026-04-17")
 
 ---
 
-### 42. `fo_udiff` — F&O Bhavcopy (UDiFF) 🔜
+### 42. `fo_udiff` — F&O Bhavcopy (UDiFF) ✅
 
 | Field | Value |
 |-------|-------|
@@ -853,7 +853,7 @@ download_report("fo_udiff", "2026-04-17")
 
 ---
 
-### 43. `fo_contract` — F&O Contract Master 🔜
+### 43. `fo_contract` — F&O Contract Master ✅
 
 | Field | Value |
 |-------|-------|
@@ -929,7 +929,7 @@ download_report("fo_sett_prce", "2026-04-17")
 
 ---
 
-### 47. `fovolt` — F&O Volatility 🔜
+### 47. `fovolt` — F&O Volatility ✅
 
 | Field | Value |
 |-------|-------|
@@ -948,7 +948,7 @@ download_report("fovolt", "2026-04-17")
 
 ---
 
-### 48. `fo_secban` — F&O Security Ban List 🔜
+### 48. `fo_secban` — F&O Security Ban List ✅
 
 | Field | Value |
 |-------|-------|
@@ -1157,7 +1157,7 @@ download_report("ncloi", "2026-04-17")
 
 ---
 
-### 59. `fpi_long` — Combined FPI Long Positions 🔜
+### 59. `fpi_long` — Combined FPI Long Positions ✅
 
 | Field | Value |
 |-------|-------|
@@ -1176,7 +1176,7 @@ download_report("fpi_long", "2026-04-17")
 
 ---
 
-### 60. `fii_longpos` — FII Long Positions 🔜
+### 60. `fii_longpos` — FII Long Positions ✅
 
 | Field | Value |
 |-------|-------|
@@ -1195,7 +1195,7 @@ download_report("fii_longpos", "2026-04-17")
 
 ---
 
-### 61. `ewpl` — Early Warning Position Limits 🔜
+### 61. `ewpl` — Early Warning Position Limits ✅
 
 | Field | Value |
 |-------|-------|
@@ -1214,7 +1214,7 @@ download_report("ewpl", "2026-04-17")
 
 ---
 
-### 62. `fopl` — F&O Position Limits (Monthly) 🔜
+### 62. `fopl` — F&O Position Limits (Monthly) ✅
 
 | Field | Value |
 |-------|-------|
@@ -1233,7 +1233,7 @@ download_report("fopl", "2026-04-17")
 
 ---
 
-### 63. `mpl` — Member Position Limit (Monthly) 🔜
+### 63. `mpl` — Member Position Limit (Monthly) ✅
 
 | Field | Value |
 |-------|-------|
@@ -1252,7 +1252,7 @@ download_report("mpl", "2026-04-17")
 
 ---
 
-### 64. `tmopl` — TM Open Position Limit (Monthly) 🔜
+### 64. `tmopl` — TM Open Position Limit (Monthly) ✅
 
 | Field | Value |
 |-------|-------|
@@ -1292,7 +1292,7 @@ download_report("co_bc", "2026-04-17")
 
 ---
 
-### 66. `co_udiff` — Commodity Bhavcopy (UDiFF) 🔜
+### 66. `co_udiff` — Commodity Bhavcopy (UDiFF) ✅
 
 | Field | Value |
 |-------|-------|
@@ -1311,7 +1311,7 @@ download_report("co_udiff", "2026-04-17")
 
 ---
 
-### 67. `co_contract` — Commodity Derivatives Contract Master 🔜
+### 67. `co_contract` — Commodity Derivatives Contract Master ✅
 
 | Field | Value |
 |-------|-------|
@@ -1427,7 +1427,7 @@ download_report("cd_bc", "2026-04-17")
 
 ---
 
-### 73. `cd_udiff` — Currency Derivatives Bhavcopy (UDiFF) 🔜
+### 73. `cd_udiff` — Currency Derivatives Bhavcopy (UDiFF) ✅
 
 | Field | Value |
 |-------|-------|
@@ -1446,7 +1446,7 @@ download_report("cd_udiff", "2026-04-17")
 
 ---
 
-### 74. `cd_contract` — Currency Derivatives Contract Master 🔜
+### 74. `cd_contract` — Currency Derivatives Contract Master ✅
 
 | Field | Value |
 |-------|-------|
@@ -1524,7 +1524,7 @@ download_report("x_volt", "2026-04-17")
 
 ## Derivatives — Interest Rate (IRD)
 
-### 78. `i_volt` — IRD Volatility 🔜
+### 78. `i_volt` — IRD Volatility ✅
 
 | Field | Value |
 |-------|-------|
@@ -1564,7 +1564,7 @@ download_report("irf_nse", "2026-04-17")
 
 ## Debt — Tri-Party Repo
 
-### 80. `trm_bc` — Tri-Party Repo Bhavcopy 🔜
+### 80. `trm_bc` — Tri-Party Repo Bhavcopy ✅
 
 | Field | Value |
 |-------|-------|
@@ -1589,52 +1589,52 @@ download_report("trm_bc", "2026-04-17")
 |---|-----|------|--------|
 | 1 | `pr_bundle` | Bhavcopy (PR) Daily Zip Bundle | ✅ |
 | 2 | `sec_bhavdata` | Securities Bhavcopy with Delivery | ✅ |
-| 3 | `bhavcopy_udiff` | CM Bhavcopy (UDiFF/ISIN) | 🔜 |
-| 4 | `cm_security_master` | NSE CM Security Master | 🔜 |
+| 3 | `bhavcopy_udiff` | CM Bhavcopy (UDiFF/ISIN) | ✅ |
+| 4 | `cm_security_master` | NSE CM Security Master | ✅ |
 | 5 | `market_activity` | Market Activity Report | ✅ |
-| 6 | `mto` | Multiple Trade Orders | 🔜 |
-| 7 | `short_selling` | Short Selling Daily Report | 🔜 |
-| 8 | `cm_52wk_highlow` | 52-Week High/Low | 🔜 |
-| 9 | `block_deals` | Block Deals (Daily) | 🔜 |
-| 10 | `bulk_deals` | Bulk Deals (Daily) | 🔜 |
+| 6 | `mto` | Multiple Trade Orders | ✅ |
+| 7 | `short_selling` | Short Selling Daily Report | ✅ |
+| 8 | `cm_52wk_highlow` | 52-Week High/Low | ✅ |
+| 9 | `block_deals` | Block Deals (Daily) | ✅ |
+| 10 | `bulk_deals` | Bulk Deals (Daily) | ✅ |
 | 11 | `bulk_deals_hist` | Bulk Deals (Historical) | 🔜 |
 | 12 | `circuit_changes` | Circuit Filter Changes | 🔜 |
-| 13 | `eq_band_changes` | Equity Price Band Changes | 🔜 |
-| 14 | `sec_list` | CM Security List | 🔜 |
-| 15 | `series_change` | Series Change Notifications | 🔜 |
-| 16 | `auction_buy` | Auction Buy (AUB) | 🔜 |
-| 17 | `margin_trading` | Margin Trading Report | 🔜 |
+| 13 | `eq_band_changes` | Equity Price Band Changes | ✅ |
+| 14 | `sec_list` | CM Security List | ✅ |
+| 15 | `series_change` | Series Change Notifications | ✅ |
+| 16 | `auction_buy` | Auction Buy (AUB) | ✅ |
+| 17 | `margin_trading` | Margin Trading Report | ✅ |
 | 18 | `most_active` | Most Active Securities | 🔜 |
 | 19 | `ind_close_all` | All Indices Daily Close | ✅ |
-| 20 | `pe_pb_div` | Index P/E, P/B & Div Yield | 🔜 |
-| 21 | `reg_ind` | Regional Indices Daily | 🔜 |
-| 22 | `reg1_ind` | Regional Indices (Secondary) | 🔜 |
-| 23 | `top10_nifty50` | Index Top Movers | 🔜 |
+| 20 | `pe_pb_div` | Index P/E, P/B & Div Yield | ✅ |
+| 21 | `reg_ind` | Regional Indices Daily | ✅ |
+| 22 | `reg1_ind` | Regional Indices (Secondary) | ✅ |
+| 23 | `top10_nifty50` | Index Top Movers | ✅ |
 | 24 | `ind_impact_cost` | Index Impact Cost | 🔜 |
 | 25 | `nifty_mcwb` | Nifty MCWB | 🔜 |
-| 26 | `cmvolt` | CM Security Volatility | 🔜 |
-| 27 | `c_var1` | CM VaR Margin File | 🔜 |
-| 28 | `c_catg` | CM Security Categorisation | 🔜 |
-| 29 | `csqr_m` | Client Segregation Quarterly | 🔜 |
-| 30 | `fcm_intrm_bc` | FCM Interim Bhavcopy | 🔜 |
-| 31 | `c_stt` | STT Report | 🔜 |
+| 26 | `cmvolt` | CM Security Volatility | ✅ |
+| 27 | `c_var1` | CM VaR Margin File | ✅ |
+| 28 | `c_catg` | CM Security Categorisation | ✅ |
+| 29 | `csqr_m` | Client Segregation Quarterly | ✅ |
+| 30 | `fcm_intrm_bc` | FCM Interim Bhavcopy | ✅ |
+| 31 | `c_stt` | STT Report | ✅ |
 | 32 | `ael` | Approved Eligible List | 🔜 |
-| 33 | `sme_eod` | SME Platform EOD | 🔜 |
-| 34 | `sme_bands` | SME Complete Price Bands | 🔜 |
-| 35 | `slb_var` | SLB VaR Margin File | 🔜 |
-| 36 | `slbm_bc` | SLB Bhavcopy | 🔜 |
-| 37 | `slb_elg_sec` | SLB Eligible Securities | 🔜 |
-| 38 | `slb_openpos` | SLB Open Positions | 🔜 |
-| 39 | `slb_transaction` | SLB Transaction Data | 🔜 |
-| 40 | `slb_foreclosure` | SLB Foreclosure Report | 🔜 |
+| 33 | `sme_eod` | SME Platform EOD | ✅ |
+| 34 | `sme_bands` | SME Complete Price Bands | ✅ |
+| 35 | `slb_var` | SLB VaR Margin File | ✅ |
+| 36 | `slbm_bc` | SLB Bhavcopy | ✅ |
+| 37 | `slb_elg_sec` | SLB Eligible Securities | ✅ |
+| 38 | `slb_openpos` | SLB Open Positions | ✅ |
+| 39 | `slb_transaction` | SLB Transaction Data | ✅ |
+| 40 | `slb_foreclosure` | SLB Foreclosure Report | ✅ |
 | 41 | `fo_bhav` | F&O Daily Bhavcopy | 🔜 |
-| 42 | `fo_udiff` | F&O Bhavcopy (UDiFF) | 🔜 |
-| 43 | `fo_contract` | F&O Contract Master | 🔜 |
+| 42 | `fo_udiff` | F&O Bhavcopy (UDiFF) | ✅ |
+| 43 | `fo_contract` | F&O Contract Master | ✅ |
 | 44 | `fo_spd_contract` | F&O Spread Contract Master | 🔜 |
 | 45 | `fno_bc` | F&O Bhavcopy (DAT) | 🔜 |
 | 46 | `fo_sett_prce` | F&O Settlement Prices | 🔜 |
-| 47 | `fovolt` | F&O Volatility | 🔜 |
-| 48 | `fo_secban` | F&O Security Ban List | 🔜 |
+| 47 | `fovolt` | F&O Volatility | ✅ |
+| 48 | `fo_secban` | F&O Security Ban List | ✅ |
 | 49 | `combineoi` | F&O Combined OI | 🔜 |
 | 50 | `combineoi_deleq` | Combined OI Deriv-Equity Link | 🔜 |
 | 51 | `fo_participant_oi` | F&O Participant OI | 🔜 |
@@ -1645,28 +1645,28 @@ download_report("trm_bc", "2026-04-17")
 | 56 | `optidx` | Options on Index | 🔜 |
 | 57 | `optstk` | Options on Stocks | 🔜 |
 | 58 | `ncloi` | NCL Open Interest | 🔜 |
-| 59 | `fpi_long` | Combined FPI Long Positions | 🔜 |
-| 60 | `fii_longpos` | FII Long Positions | 🔜 |
-| 61 | `ewpl` | Early Warning Position Limits | 🔜 |
-| 62 | `fopl` | F&O Position Limits | 🔜 |
-| 63 | `mpl` | Member Position Limit | 🔜 |
-| 64 | `tmopl` | TM Open Position Limit | 🔜 |
+| 59 | `fpi_long` | Combined FPI Long Positions | ✅ |
+| 60 | `fii_longpos` | FII Long Positions | ✅ |
+| 61 | `ewpl` | Early Warning Position Limits | ✅ |
+| 62 | `fopl` | F&O Position Limits | ✅ |
+| 63 | `mpl` | Member Position Limit | ✅ |
+| 64 | `tmopl` | TM Open Position Limit | ✅ |
 | 65 | `co_bc` | Commodity Bhavcopy (DAT) | 🔜 |
-| 66 | `co_udiff` | Commodity Bhavcopy (UDiFF) | 🔜 |
-| 67 | `co_contract` | Commodity Contract Master | 🔜 |
+| 66 | `co_udiff` | Commodity Bhavcopy (UDiFF) | ✅ |
+| 67 | `co_contract` | Commodity Contract Master | ✅ |
 | 68 | `co_volt` | Commodity Volatility | 🔜 |
 | 69 | `co_sett_prce` | Commodity Settlement Prices | 🔜 |
 | 70 | `co_nse_fo` | Commodity F&O Combined | 🔜 |
 | 71 | `co_nse_op` | Commodity Options | 🔜 |
 | 72 | `cd_bc` | Currency Derivatives Bhavcopy | 🔜 |
-| 73 | `cd_udiff` | Currency Bhavcopy (UDiFF) | 🔜 |
-| 74 | `cd_contract` | Currency Contract Master | 🔜 |
+| 73 | `cd_udiff` | Currency Bhavcopy (UDiFF) | ✅ |
+| 74 | `cd_contract` | Currency Contract Master | ✅ |
 | 75 | `cd_spd_contract` | CD Spread Contract Master | 🔜 |
 | 76 | `cd_sett_prce` | Currency Settlement Prices | 🔜 |
 | 77 | `x_volt` | Currency Volatility | 🔜 |
-| 78 | `i_volt` | IRD Volatility | 🔜 |
+| 78 | `i_volt` | IRD Volatility | ✅ |
 | 79 | `irf_nse` | IRF Daily File | 🔜 |
-| 80 | `trm_bc` | Tri-Party Repo Bhavcopy | 🔜 |
+| 80 | `trm_bc` | Tri-Party Repo Bhavcopy | ✅ |
 
 ---
 
