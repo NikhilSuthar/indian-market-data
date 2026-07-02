@@ -227,6 +227,22 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
         )
 
     df.columns = [str(c).strip() for c in df.columns]
+
+    # Clean up section separators and embedded section headers
+    # (common in PR ZIP files: pr, pd, gl have blank comma rows and section labels)
+    if not df.empty:
+        # Drop rows where ALL columns are NaN/empty (blank separator lines)
+        df = df.dropna(how="all")
+
+        # Drop rows where the first column is NaN/empty but some middle column
+        # has a section label (e.g. "NIFTY 50 Sec", "COMPULSORY ROLLING STOCKS")
+        first_col = df.columns[0]
+        if first_col in ("MKT", "GAIN_LOSS"):
+            mask = df[first_col].astype(str).str.strip().isin(["", "nan", "NaN"])
+            df = df[~mask]
+
+        df = df.reset_index(drop=True)
+
     return df
 
 
