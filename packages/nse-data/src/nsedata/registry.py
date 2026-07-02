@@ -405,6 +405,127 @@ REGISTRY = {
                 columns="MARKET,SERIES,SYMBOL,SECURITY,PREV_CL_PR,OPEN_PRICE,HIGH_PRICE,LOW_PRICE,CLOSE_PRICE,NET_TRDVAL,NET_TRDQTY,CORP_IND,TRADES,HI_52_WK,LO_52_WK",
             ),
 
+            "bhavcopy_pd": DatasetConfig(
+                name="Bhavcopy Price Data with Symbol (PD)",
+                description="OHLC with SYMBOL & SERIES columns — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="pd{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^pd\d{8}\.csv$",
+                frequency="Daily",
+                columns="MKT,SERIES,SYMBOL,SECURITY,PREV_CL_PR,OPEN_PRICE,HIGH_PRICE,LOW_PRICE,CLOSE_PRICE,NET_TRDVAL,NET_TRDQTY,IND_SEC,CORP_IND,TRADES,HI_52_WK,LO_52_WK",
+            ),
+
+            "bhavcopy_bc": DatasetConfig(
+                name="Book Closure / Corporate Actions (BC)",
+                description="Corporate actions with record date, ex-date, book closure period — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="bc{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^bc\d{8}\.csv$",
+                frequency="Daily",
+                columns="SERIES,SYMBOL,SECURITY,RECORD_DT,BC_STRT_DT,BC_END_DT,EX_DT,ND_STRT_DT,ND_END_DT,PURPOSE",
+            ),
+
+            "bhavcopy_bh": DatasetConfig(
+                name="Price Band Hits (BH)",
+                description="Securities that hit upper or lower circuit during the day — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="bh{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^bh\d{8}\.csv$",
+                frequency="Daily",
+                columns="SYMBOL,SERIES,SECURITY,HIGH/LOW",
+            ),
+
+            "bhavcopy_hl": DatasetConfig(
+                name="52-Week New High/Low (HL)",
+                description="Securities hitting new 52-week high or low — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="hl{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^hl\d{8}\.csv$",
+                frequency="Daily",
+                columns="SECURITY,NEW,PREVIOUS,NEW_STATUS",
+            ),
+
+            "bhavcopy_gl": DatasetConfig(
+                name="Gainers & Losers (GL)",
+                description="All securities with gain/loss percentage — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="gl{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^gl\d{8}\.csv$",
+                frequency="Daily",
+                columns="GAIN_LOSS,SECURITY,CLOSE_PRIC,PREV_CL_PR,PERCENT_CG",
+            ),
+
+            "bhavcopy_tt": DatasetConfig(
+                name="Top 25 Traded Securities (TT)",
+                description="Top 25 securities by traded value — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="tt{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^tt\d{8}\.csv$",
+                frequency="Daily",
+                columns="SECURITY,PREV_CL_PR,CLOSE_PRIC,NET_TRDQTY,NET_TRDVAL",
+            ),
+
+            "bhavcopy_etf": DatasetConfig(
+                name="ETF EOD Data (ETF)",
+                description="ETF end-of-day prices with underlying info — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="etf{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^etf\d{8}\.csv$",
+                frequency="Daily",
+                columns="MARKET,SERIES,SYMBOL,SECURITY,PREVIOUS CLOSE PRICE,OPEN PRICE,HIGH PRICE,LOW PRICE,CLOSE PRICE,NET TRADED VALUE,NET TRADED QTY,TRADES,52 WEEK HIGH,52 WEEK LOW,UNDERLYING",
+            ),
+
+            "bhavcopy_sme": DatasetConfig(
+                name="SME Platform EOD (from PR ZIP)",
+                description="SME-Emerge securities OHLC — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="sme{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^sme\d{8}\.csv$",
+                frequency="Daily",
+                columns="MARKET,SERIES,SYMBOL,SECURITY,PREV_CL_PR,OPEN_PRICE,HIGH_PRICE,LOW_PRICE,CLOSE_PRICE,NET_TRDVAL,NET_TRDQTY,CORP_IND,HI_52_WK,LO_52_WK",
+            ),
+
+            "bhavcopy_mcap": DatasetConfig(
+                name="Market Capitalisation (MCAP)",
+                description="Market cap for all listed securities — extracted from PR ZIP bundle.",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="mcap{ddmmyyyy}.csv",
+                file_format="zip_csv",
+                zip_extract=r"^mcap\d{8}\.csv$",
+                frequency="Daily",
+                columns="Trade Date,Symbol,Series,Security Name,Category,Last Trade Date,Face Value(Rs.),Issue Size,Close Price/Paid up value(Rs.),Market Cap(Rs.)",
+            ),
+
+            "bhavcopy_an": DatasetConfig(
+                name="Announcements (AN)",
+                description="Company announcements — extracted from PR ZIP bundle. Text format (fixed-width).",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="an{ddmmyyyy}.txt",
+                file_format="zip_csv",
+                zip_extract=r"^an\d{8}\.txt$",
+                frequency="Daily",
+                columns="COMPANY NAME,SYMBOL,ANNOUNCEMENTS",
+            ),
+
+            "bhavcopy_bm": DatasetConfig(
+                name="Board Meetings (BM)",
+                description="Upcoming board meeting dates and purpose — extracted from PR ZIP bundle. Text format (fixed-width).",
+                url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
+                file_pattern="bm{ddmmyyyy}.txt",
+                file_format="zip_csv",
+                zip_extract=r"^bm\d{8}\.txt$",
+                frequency="Daily",
+                columns="COMPANY NAME,SYMBOL,BM DATE,BM PURPOSE",
+            ),
+
             "mrg_trading": DatasetConfig(
                 name="Margin Trading Facility Report",
                 description="Margin trading facility activity. Delivered as ZIP containing CSV.",

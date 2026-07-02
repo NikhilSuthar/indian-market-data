@@ -168,21 +168,21 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
 
     elif fmt in ("zip_csv", "zip"):
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
-            # Filter: CSV files only, exclude directory entries (end with /)
-            csv_files = [n for n in zf.namelist()
-                         if n.lower().endswith(".csv") and not n.endswith("/")]
-            if not csv_files:
-                raise RuntimeError(f"No CSV files found in ZIP. Contents: {zf.namelist()}")
+            # Filter: CSV and TXT files, exclude directory entries (end with /)
+            data_files = [n for n in zf.namelist()
+                         if n.lower().endswith((".csv", ".txt")) and not n.endswith("/")]
+            if not data_files:
+                raise RuntimeError(f"No CSV/TXT files found in ZIP. Contents: {zf.namelist()}")
 
             # Apply extract pattern if specified
             if cfg.zip_extract:
-                matching = [n for n in csv_files if re.search(cfg.zip_extract, n, re.IGNORECASE)]
+                matching = [n for n in data_files if re.search(cfg.zip_extract, n, re.IGNORECASE)]
                 if matching:
                     target = matching[0]
                 else:
-                    target = csv_files[0]
+                    target = data_files[0]
             else:
-                target = csv_files[0]
+                target = data_files[0]
 
             text = _decode_content(zf.read(target), enc)
             df = pd.read_csv(io.StringIO(text), skiprows=skip, on_bad_lines="skip")

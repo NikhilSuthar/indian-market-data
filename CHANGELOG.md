@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-02
+
+### Added
+- 11 new dataset keys for Bhavcopy (PR) Daily ZIP Bundle sub-files:
+  - `bhavcopy_pd` — Price Data with Symbol & Series
+  - `bhavcopy_bc` — Book Closure / Corporate Actions
+  - `bhavcopy_bh` — Price Band Hits (circuit breakers)
+  - `bhavcopy_hl` — 52-Week New High/Low
+  - `bhavcopy_gl` — Gainers & Losers
+  - `bhavcopy_tt` — Top 25 Traded Securities
+  - `bhavcopy_etf` — ETF End-of-Day Data
+  - `bhavcopy_sme` — SME Platform EOD (from PR ZIP)
+  - `bhavcopy_mcap` — Market Capitalisation
+  - `bhavcopy_an` — Company Announcements
+  - `bhavcopy_bm` — Board Meetings
+
+### Changed
+- Fetcher ZIP extraction now supports `.txt` files in addition to `.csv` inside ZIP archives
+
 ## [0.1.0] - 2026-05-19
 
 ### Added
