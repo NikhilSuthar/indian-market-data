@@ -93,11 +93,10 @@ def get(
     # Add tracking date column for easy identification
     if cfg.date_type == "monthly":
         month_str = date[:7] if len(date) >= 7 else date
-        df.insert(0, "report_month", month_str)
+        df = pd.concat([pd.DataFrame({"report_month": [month_str] * len(df)}), df.reset_index(drop=True)], axis=1)
     elif cfg.date_type == "daily":
-        # Normalize to YYYY-MM-DD
         date_str = date[:10] if len(date) >= 10 else date
-        df.insert(0, "reporting_date", date_str)
+        df = pd.concat([pd.DataFrame({"reporting_date": [date_str] * len(df)}), df.reset_index(drop=True)], axis=1)
 
     return to_output_frame(df)
 

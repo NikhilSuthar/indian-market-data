@@ -417,28 +417,6 @@ REGISTRY = {
                 columns="SYMBOL,SERIES,ISIN,Sec Desc,STT Indicator",
             ),
 
-            "fcm_bc": DatasetConfig(
-                name="FCM Interim Bhavcopy",
-                description="Interim bhavcopy for clearing/margining before EOD files. Fixed-width DAT format.",
-                url_pattern="/content/trdops/FCM_INTRM_BC{ddmmyyyy}.DAT",
-                file_pattern="FCM_INTRM_BC{ddmmyyyy}.DAT",
-                file_format="dat",
-                portal_only=False,
-                frequency="Daily",
-                columns="Security,Symbol,Series,PrevClose,Open,High,Low,Close,TradeDate",
-            ),
-
-            "mrg_trading": DatasetConfig(
-                name="Margin Trading Facility Report",
-                description="Margin trading facility activity. Delivered as ZIP containing CSV.",
-                url_pattern="/content/equities/mrg_trading_{ddmmyy}.zip",
-                file_pattern="mrg_trading_{ddmmyy}.zip",
-                file_format="zip_csv",
-                portal_only=False,
-                frequency="Daily",
-                columns="SEBI Report data on margin trading",
-            ),
-
             "cvar1": DatasetConfig(
                 name="VaR Margin File (C_VAR1)",
                 description="6 intraday snapshots of VaR margin. Snapshot number 1-6 appended to filename. "
