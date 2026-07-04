@@ -156,16 +156,18 @@ def _extract_section(text: str, section_num: int) -> str:
     """
     Extract a section from a multi-section CSV file.
 
-    Sections are separated by blank lines. Returns the text of the
-    requested section (1-indexed). The first non-blank line of the
-    section is treated as the header.
+    Sections are separated by blank lines OR comma-only lines (e.g. ,,,).
+    Returns the text of the requested section (1-indexed).
     """
     lines = text.split("\n")
     sections = []
     current = []
 
     for line in lines:
-        if line.strip() == "":
+        # A separator is a blank line or a line containing only commas/spaces
+        stripped = line.strip()
+        is_separator = (stripped == "" or stripped.replace(",", "").strip() == "")
+        if is_separator:
             if current:
                 sections.append(current)
                 current = []
@@ -181,8 +183,7 @@ def _extract_section(text: str, section_num: int) -> str:
 
     section_lines = sections[section_num - 1]
 
-    # Skip the first line if it's a title/label (doesn't contain comma-separated data columns)
-    # Heuristic: if first line has fewer commas than second line, it's a title
+    # Skip the first line if it's a title/label (fewer commas than the data header)
     if len(section_lines) > 1:
         first_commas = section_lines[0].count(",")
         second_commas = section_lines[1].count(",")
@@ -231,6 +232,9 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
                 target = data_files[0]
 
             text = _decode_content(zf.read(target), enc)
+            # Handle multi-section CSV inside a ZIP
+            if cfg.section:
+                text = _extract_section(text, cfg.section)
             df = pd.read_csv(io.StringIO(text), skiprows=skip, on_bad_lines="skip")
 
     elif fmt == "zip_xlsx":

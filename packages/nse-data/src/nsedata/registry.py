@@ -573,14 +573,27 @@ REGISTRY = {
             ),
 
             "mrg_trading": DatasetConfig(
-                name="Margin Trading Facility Report",
-                description="Margin trading facility activity. Delivered as ZIP containing CSV.",
+                name="Margin Trading — Scripwise Detail",
+                description="Daily margin trading scripwise data: quantity financed and amount financed per security by all members. ~2170 securities.",
                 url_pattern="/content/equities/mrg_trading_{ddmmyy}.zip",
                 file_pattern="mrg_trading_{ddmmyy}.zip",
                 file_format="zip_csv",
+                section=3,
                 portal_only=False,
                 frequency="Daily",
-                columns="SEBI Report data on margin trading",
+                columns="Symbol,Name,Qty Fin by all the members(No.of Shares),Amt Fin by all the members(Rs. In Lakhs)",
+            ),
+
+            "mrg_trading_summary": DatasetConfig(
+                name="Margin Trading — Summary",
+                description="Daily margin trading summary: total outstanding, fresh exposure, exposure liquidated, net outstanding.",
+                url_pattern="/content/equities/mrg_trading_{ddmmyy}.zip",
+                file_pattern="mrg_trading_{ddmmyy}.zip",
+                file_format="zip_csv",
+                section=2,
+                portal_only=False,
+                frequency="Daily",
+                columns="Sr.No.,Particulars,Rs. In Lakhs",
             ),
 
             # Monthly
