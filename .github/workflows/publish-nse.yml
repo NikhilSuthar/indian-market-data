@@ -1,4 +1,4 @@
-name: Publish nse-data
+name: Publish nse-archives
 
 # Triggers:
 #   - Push tag  nse-v*          → build + publish to PyPI + create GitHub Release
@@ -7,7 +7,7 @@ name: Publish nse-data
 on:
   push:
     tags:
-      - "nse-v*"          # e.g. nse-v1.0.0
+      - "nse-v*"          # e.g. nse-v1.2.0
   workflow_dispatch:
     inputs:
       target:
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   build:
-    name: Build nse-data
+    name: Build nse-archives
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,14 +46,14 @@ jobs:
           path: packages/nse-data/dist/
 
   publish-testpypi:
-    name: Publish nse-data → TestPyPI
+    name: Publish nse-archives → TestPyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
     environment:
       name: testpypi
-      url: https://test.pypi.org/project/nse-data/
+      url: https://test.pypi.org/project/nse-archives/
     permissions:
       id-token: write
     steps:
@@ -66,7 +66,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
-    name: Publish nse-data → PyPI
+    name: Publish nse-archives → PyPI
     needs: build
     runs-on: ubuntu-latest
     if: |
@@ -74,7 +74,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
     environment:
       name: pypi
-      url: https://pypi.org/project/nse-data/
+      url: https://pypi.org/project/nse-archives/
     permissions:
       id-token: write
     steps:
@@ -85,7 +85,7 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
-    name: Create GitHub Release — nse-data
+    name: Create GitHub Release — nse-archives
     needs: publish-pypi
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/nse-v')
@@ -103,29 +103,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "nse-data ${{ github.ref_name }}"
+          name: "nse-archives ${{ github.ref_name }}"
           body: |
-            ## nse-data ${{ github.ref_name }}
+            ## nse-archives ${{ github.ref_name }}
 
             Python library to download NSE India market data as pandas DataFrames.
 
-            **86+ datasets** across equities, F&O, debt, indices, SLB, IRD, EGR.
+            **100+ datasets** across equities, F&O, debt, indices, SLB, IRD, EGR.
             Works on AWS Lambda and Snowflake.
 
             ### Install
             ```bash
-            pip install nse-data==${{ github.ref_name }}
+            pip install nse-archives
             ```
 
-            ### What's included
-            - Capital Market: Equities & SME (32), Indices (2), Mutual Fund (1), SLB (12)
-            - Derivatives: Equity F&O (8), Commodity (3), Currency (3), Interest Rate (9)
-            - Debt: Corporate (15), Debt Segment (4), Tri-Party Repo (1)
-            - EGR (1)
-            - Historical Index + TRI from niftyindices.com
-
             ### Links
-            - [PyPI](https://pypi.org/project/nse-data/)
+            - [PyPI](https://pypi.org/project/nse-archives/)
             - [Documentation](https://NikhilSuthar.github.io/indian-market-data)
             - [Changelog](https://github.com/NikhilSuthar/indian-market-data/blob/main/CHANGELOG.md)
           files: dist/*
