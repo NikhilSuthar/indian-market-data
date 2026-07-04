@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-07-05
+
+### Fixed
+- `mrg_trading` now returns proper scripwise detail (~2170 securities) instead of garbage data
+- Added `mrg_trading_summary` dataset key for the 4-row daily summary section
+- `_extract_section` now treats comma-only lines as section separators (handles ZIP-based multi-section CSVs)
+- `zip_csv` format now supports `section` extraction after ZIP decompression
+- Added `rename_columns` config to `DatasetConfig` — applied to clean `mrg_trading` column names:
+  - `Qty Fin by all the members(No.of Shares)` → `Qty_Financed_Shares`
+  - `Amt Fin by all the members(Rs. In Lakhs)` → `Amt_Financed_Lakhs`
+
 ## [1.2.0] - 2026-07-02
 
 ### Added
