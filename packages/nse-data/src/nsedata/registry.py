@@ -46,6 +46,7 @@ class DatasetConfig:
     zip_extract: Optional[str] = None  # For ZIP: which file to extract (regex pattern)
     section: Optional[int] = None   # For multi-section files: 1-indexed section number to extract
     rename_columns: Optional[dict] = None  # Column rename map {old_name: new_name}
+    normalize_dates: bool = False          # Normalize date columns to YYYY-MM-DD (handles DD/MM/YYYY legacy format)
 
     # Metadata
     frequency: str = "Daily"
@@ -465,11 +466,14 @@ REGISTRY = {
 
             "bhavcopy_bc": DatasetConfig(
                 name="Book Closure / Corporate Actions (BC)",
-                description="Corporate actions with record date, ex-date, book closure period — extracted from PR ZIP bundle.",
+                description="Corporate actions with record date, ex-date, book closure period — extracted from PR ZIP bundle. "
+                            "Note: BC_STRT_DT, BC_END_DT, ND_STRT_DT, ND_END_DT are null from Dec 2025 onwards (NSE schema change). "
+                            "Date format changed from DD/MM/YYYY (pre-2026) to YYYY-MM-DD (2026+) — auto-normalized.",
                 url_pattern="/archives/equities/bhavcopy/pr/PR{ddmmyy}.zip",
                 file_pattern="bc{ddmmyyyy}.csv",
                 file_format="zip_csv",
-                zip_extract=r"^bc\d{8}\.csv$",
+                zip_extract=r"^bc\d{6,8}\.csv$",
+                normalize_dates=True,
                 frequency="Daily",
                 columns="SERIES,SYMBOL,SECURITY,RECORD_DT,BC_STRT_DT,BC_END_DT,EX_DT,ND_STRT_DT,ND_END_DT,PURPOSE",
             ),

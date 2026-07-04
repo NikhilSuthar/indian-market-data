@@ -279,6 +279,16 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
     if cfg.rename_columns:
         df = df.rename(columns=cfg.rename_columns)
 
+    # Normalize date columns to YYYY-MM-DD (handles DD/MM/YYYY legacy format pre-2026)
+    if cfg.normalize_dates and not df.empty:
+        for col in df.columns:
+            if col in ("reporting_date", "report_month"):
+                continue
+            sample = df[col].dropna().astype(str).head(5)
+            # Detect DD/MM/YYYY format (has slashes and day first)
+            if sample.str.match(r'^\d{2}/\d{2}/\d{4}$').any():
+                df[col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce").dt.strftime("%Y-%m-%d")
+
     # Drop leading empty column (common in MA files where each line starts with comma)
     if cfg.section and not df.empty:
         first_col = df.columns[0]
