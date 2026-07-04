@@ -275,6 +275,10 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
 
     df.columns = [str(c).strip() for c in df.columns]
 
+    # Apply column renames if specified in the dataset config
+    if cfg.rename_columns:
+        df = df.rename(columns=cfg.rename_columns)
+
     # Drop leading empty column (common in MA files where each line starts with comma)
     if cfg.section and not df.empty:
         first_col = df.columns[0]

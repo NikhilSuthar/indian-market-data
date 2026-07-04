@@ -45,6 +45,7 @@ class DatasetConfig:
     separator: Optional[str] = None # None = auto-detect
     zip_extract: Optional[str] = None  # For ZIP: which file to extract (regex pattern)
     section: Optional[int] = None   # For multi-section files: 1-indexed section number to extract
+    rename_columns: Optional[dict] = None  # Column rename map {old_name: new_name}
 
     # Metadata
     frequency: str = "Daily"
@@ -581,7 +582,11 @@ REGISTRY = {
                 section=3,
                 portal_only=False,
                 frequency="Daily",
-                columns="Symbol,Name,Qty Fin by all the members(No.of Shares),Amt Fin by all the members(Rs. In Lakhs)",
+                columns="Symbol,Name,Qty_Financed_Shares,Amt_Financed_Lakhs",
+                rename_columns={
+                    "Qty Fin by all the members(No.of Shares)": "Qty_Financed_Shares",
+                    "Amt Fin by all the members(Rs. In Lakhs)": "Amt_Financed_Lakhs",
+                },
             ),
 
             "mrg_trading_summary": DatasetConfig(
