@@ -768,6 +768,7 @@ REGISTRY = {
                 portal_only=False,
                 date_type="monthly",
                 frequency="Monthly",
+                strip_date_from_columns=True,
                 columns="SYMBOL,Client Limit (no. of shares)",
             ),
 
@@ -780,6 +781,7 @@ REGISTRY = {
                 portal_only=False,
                 date_type="monthly",
                 frequency="Monthly",
+                strip_date_from_columns=True,
                 columns="SYMBOL,Participant Limit (no. of shares)",
             ),
 
@@ -792,6 +794,7 @@ REGISTRY = {
                 portal_only=False,
                 date_type="monthly",
                 frequency="Monthly",
+                strip_date_from_columns=True,
                 columns="SYMBOL,MWPL(no. of shares)",
             ),
 
@@ -804,6 +807,7 @@ REGISTRY = {
                 portal_only=False,
                 date_type="monthly",
                 frequency="Monthly",
+                strip_date_from_columns=True,
                 columns="SYMBOL,Participant Limit (no. of shares)",
             ),
 
@@ -888,7 +892,8 @@ REGISTRY = {
                 file_format="csv",
                 date_type="monthly",
                 frequency="Monthly",
-                columns="Member position limit data",
+                strip_date_from_columns=True,
+                columns="UNDERLYING_NAME,MWPL",
             ),
 
             "tmopl": DatasetConfig(
