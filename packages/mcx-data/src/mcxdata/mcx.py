@@ -36,7 +36,7 @@ from typing import Optional
 import pandas as pd
 
 from mcxdata.registry import list_datasets as _list_datasets
-from mcxdata.fetcher import fetch_recent, fetch_archive
+from mcxdata.fetcher import fetch_recent, fetch_archive, fetch_bhavcopy
 from mcxdata.dataframe import to_output_frame
 
 
@@ -56,6 +56,35 @@ def list_commodities() -> list:
 
 
 # ── Spot recent ───────────────────────────────────────────────────────────────
+
+def get_bhavcopy(
+    instrument: str = "ALL",
+) -> pd.DataFrame:
+    """
+    Get today's MCX futures & options bhavcopy (all contracts).
+
+    Data is preloaded by the MCX bhavcopy page on each request.
+    Includes FUTCOM, FUTIDX, OPTCOM, OPTFUT, OPTIDX across all commodities.
+
+    Args:
+        instrument: "ALL" or one of "FUTCOM", "FUTIDX", "OPTCOM", "OPTFUT", "OPTIDX"
+
+    Returns:
+        DataFrame — Date, Symbol, InstrumentName, ExpiryDate, StrikePrice,
+                    OptionType, Open, High, Low, Close, PreviousClose,
+                    Volume, Value, OpenInterest
+
+    Example:
+        df = mcx.get_bhavcopy()
+        df = mcx.get_bhavcopy(instrument="FUTCOM")
+        df = mcx.get_bhavcopy(instrument="OPTCOM")
+    """
+    df = fetch_bhavcopy()
+    if instrument and instrument.upper() != "ALL":
+        mask = df["InstrumentName"].str.upper() == instrument.upper()
+        df = df[mask].reset_index(drop=True)
+    return to_output_frame(df)
+
 
 def get_spot_recent(commodity: str = "ALL", location: str = "ALL") -> pd.DataFrame:
     """

@@ -16,6 +16,7 @@ Response format:
 
 import json
 import io
+import re
 import time
 from typing import Optional
 
@@ -23,18 +24,132 @@ import pandas as pd
 
 from mcxdata.session import get_session, reset_session, MCX_BASE
 
-# ── Endpoint URLs (MCX moved these to root-level GET in 2026) ─────────────────
-# Old (dead): POST /backpage.aspx/GetSpotMarketPrice  → now returns 404 HTML
-# New:        GET  /GetSpotMarketPrice?culture=en
-#             GET  /GetSpotMarketArchive?Product=..&Location=..&fromDate=..&toDate=..&Session=..&culture=en
-_URL_RECENT  = f"{MCX_BASE}/GetSpotMarketPrice"
-_URL_ARCHIVE = f"{MCX_BASE}/GetSpotMarketArchive"
+# ── Endpoint URLs ─────────────────────────────────────────────────────────────
+_URL_RECENT   = f"{MCX_BASE}/GetSpotMarketPrice"
+_URL_ARCHIVE  = f"{MCX_BASE}/GetSpotMarketArchive"
+_URL_BHAVCOPY = f"{MCX_BASE}/market-data/bhavcopy"  # preloads JSON in page HTML
 
 _GET_HEADERS = {
     "Accept": "application/json, text/javascript, */*; q=0.01",
     "X-Requested-With": "XMLHttpRequest",
     "Referer": f"{MCX_BASE}/market-data/spot-market-price",
 }
+
+_BHAV_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Referer": f"{MCX_BASE}/market-data/bhavcopy",
+}
+
+
+def fetch_bhavcopy() -> pd.DataFrame:
+    """
+    Fetch today's MCX bhavcopy (futures & options) from the bhavcopy page.
+
+    MCX preloads the current day's full bhavcopy data as JSON in the
+    #bhavcopy-data <script> tag on the page — no separate API call needed.
+
+    Returns:
+        DataFrame with columns: Date, Symbol, InstrumentName, ExpiryDate,
+        StrikePrice, OptionType, Open, High, Low, Close, PreviousClose,
+        Volume, VolumeInThousands, Value, OpenInterest
+    """
+    session, stype = get_session()
+
+    for attempt in range(3):
+        try:
+            if stype == "curl_cffi":
+                r = session.get(_URL_BHAVCOPY, headers=_BHAV_HEADERS, timeout=25)
+            else:
+                session.headers.update(_BHAV_HEADERS)
+                r = session.get(_URL_BHAVCOPY, timeout=25)
+
+            if r.status_code != 200:
+                raise RuntimeError(f"HTTP {r.status_code} from {_URL_BHAVCOPY}")
+
+            html = r.text
+
+            # Extract preloaded JSON from <div id="bhavcopy-data" ...>...</div>
+            match = re.search(
+                r'<div[^>]+id=["\']bhavcopy-data["\'][^>]*>(.*?)</div>',
+                html, re.DOTALL
+            )
+            if not match:
+                if attempt < 2:
+                    time.sleep(3)
+                    continue
+                raise RuntimeError(
+                    "MCX bhavcopy page did not contain preloaded #bhavcopy-data JSON. "
+                    "The page structure may have changed."
+                )
+
+            raw_json = match.group(1).strip()
+            if not raw_json or raw_json == "null":
+                return pd.DataFrame()
+
+            rows = json.loads(raw_json)
+            if not rows:
+                return pd.DataFrame()
+
+            df = pd.DataFrame(rows)
+            return _clean_bhavcopy_df(df)
+
+        except RuntimeError:
+            raise
+        except Exception:
+            if attempt < 2:
+                time.sleep(2)
+                continue
+            raise
+
+    raise RuntimeError(f"Failed to fetch bhavcopy after 3 attempts")
+
+
+def _clean_bhavcopy_df(df: pd.DataFrame) -> pd.DataFrame:
+    """Standardise MCX bhavcopy DataFrame columns."""
+    if df.empty:
+        return df
+
+    # Drop internal/display fields
+    drop_cols = [c for c in df.columns if c in ("sLTT", "DateDisplay")]
+    df = df.drop(columns=drop_cols, errors="ignore")
+
+    # Rename to clean names
+    rename = {
+        "Date":           "Date",
+        "Symbol":         "Symbol",
+        "InstrumentName": "InstrumentName",
+        "ExpiryDate":     "ExpiryDate",
+        "StrikePrice":    "StrikePrice",
+        "OptionType":     "OptionType",
+        "Open":           "Open",
+        "High":           "High",
+        "Low":            "Low",
+        "Close":          "Close",
+        "PreviousClose":  "PreviousClose",
+        "Volume":         "Volume_Lots",
+        "VolumeInThousands": "Volume_Unit",
+        "Value":          "Value_Lakhs",
+        "OpenInterest":   "OI_Lots",
+    }
+    df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
+
+    # Parse date: MCX uses "MM/DD/YYYY" internally (e.g. "07/03/2026" = July 3)
+    if "Date" in df.columns:
+        df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y", errors="coerce").dt.strftime("%Y-%m-%d")
+
+    # Clean Symbol (strip trailing spaces)
+    if "Symbol" in df.columns:
+        df["Symbol"] = df["Symbol"].str.strip()
+
+    # Preferred column order
+    preferred = ["Date", "Symbol", "InstrumentName", "ExpiryDate", "StrikePrice",
+                 "OptionType", "Open", "High", "Low", "Close", "PreviousClose",
+                 "Volume_Lots", "Volume_Unit", "Value_Lakhs", "OI_Lots"]
+    cols = [c for c in preferred if c in df.columns]
+    extra = [c for c in df.columns if c not in cols]
+    df = df[cols + extra]
+
+    return df.reset_index(drop=True)
 
 
 def fetch_recent(commodity: str = "ALL", location: str = "ALL",
