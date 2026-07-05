@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcx-data"
-version = "1.1.1"
-description = "Download MCX India commodity market data as pandas DataFrames — spot prices (recent + archive), futures bhavcopy. Works on AWS Lambda."
+version = "1.2.0"
+description = "Download MCX India commodity market data as pandas DataFrames — spot prices (recent + archive), futures & options bhavcopy (FUTCOM, FUTIDX, OPTCOM, OPTFUT, OPTIDX). Works on AWS Lambda."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
