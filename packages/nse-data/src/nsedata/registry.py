@@ -47,6 +47,7 @@ class DatasetConfig:
     section: Optional[int] = None   # For multi-section files: 1-indexed section number to extract
     rename_columns: Optional[dict] = None  # Column rename map {old_name: new_name}
     normalize_dates: bool = False          # Normalize date columns to YYYY-MM-DD (handles DD/MM/YYYY legacy format)
+    strip_date_from_columns: bool = False  # Strip month/year from column names (e.g. "Mean Impact Cost(June 2026)" -> "Mean Impact Cost")
 
     # Metadata
     frequency: str = "Daily"
@@ -909,7 +910,8 @@ REGISTRY = {
                 file_format="csv",
                 date_type="monthly",
                 frequency="Monthly",
-                columns="Impact cost data",
+                strip_date_from_columns=True,
+                columns="Sr No.,Symbol,Mean Impact Cost",
             ),
         },
 

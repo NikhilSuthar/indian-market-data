@@ -279,6 +279,16 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
     if cfg.rename_columns:
         df = df.rename(columns=cfg.rename_columns)
 
+    # Strip month/year suffixes from column names (e.g. "Mean Impact Cost(June 2026)" -> "Mean Impact Cost")
+    if cfg.strip_date_from_columns and not df.empty:
+        import re as _re
+        def _strip_date(col: str) -> str:
+            # Remove patterns like (June 2026), (Jun 2026), (June\t  2026), trailing spaces
+            cleaned = _re.sub(r'\(\s*\w+\s+\d{4}\s*\)', '', col)
+            cleaned = _re.sub(r'\s+', ' ', cleaned).strip()
+            return cleaned if cleaned else col
+        df.columns = [_strip_date(str(c)) for c in df.columns]
+
     # Normalize date columns to YYYY-MM-DD (handles DD/MM/YYYY legacy format pre-2026)
     if cfg.normalize_dates and not df.empty:
         for col in df.columns:
