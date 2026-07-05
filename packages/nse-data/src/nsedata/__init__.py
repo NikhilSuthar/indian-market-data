@@ -25,6 +25,6 @@ Quick Start:
 See: https://NikhilSuthar.github.io/nse-data
 """
 
-__version__ = "1.2.2"
+__version__ = "1.2.3"
 
 from nsedata import nse

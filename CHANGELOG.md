@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Sourced from MCX bhavcopy page preloaded JSON (no separate API call)
   - Works through Akamai via existing curl_cffi Chrome TLS session
 
+## [nse-archives 1.2.3] - 2026-07-05
+
+### Fixed
+- `fo_impact_cost`, `mpl`, `slb_mpl`, `slb_cli`, `slb_fopl`, `slb_ppl` — month/year stripped from column names (e.g. `Mean Impact Cost(June 2026)` → `Mean Impact Cost`)
+- Added `strip_date_from_columns` flag to `DatasetConfig` for dynamic column name cleaning
+
 ## [nse-archives 1.2.2] - 2026-07-05
 
 ### Fixed

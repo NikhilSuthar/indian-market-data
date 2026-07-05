@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nse-archives"
-version = "1.2.2"
+version = "1.2.3"
 description = "Download NSE India market data as pandas DataFrames — bhavcopy, indices, F&O, equity, debt, commodity, currency derivatives. Works on AWS Lambda and Snowflake."
 readme = "README.md"
 license = "MIT"
