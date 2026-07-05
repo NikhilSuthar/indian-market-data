@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Sourced from MCX bhavcopy page preloaded JSON (no separate API call)
   - Works through Akamai via existing curl_cffi Chrome TLS session
 
+## [nse-archives 1.2.2] - 2026-07-05
+
+### Fixed
+- `fpi_long` and `fii_long`: files are served as XLSX despite `.csv` extension — fixed format, garbled special characters resolved
+- `fpi_long`: `skip_rows=[1,2]` removes sub-header rows cleanly
+- `fii_long`: clean column names via `rename_columns`, footnote rows dropped
+- `_parse_excel` now supports list-based `skip_rows` (not just int)
+- `_parse_excel` now auto-drops all-null rows (footnotes/spacers)
+
 ## [nse-archives 1.2.1] - 2026-07-05
 
 ### Fixed
