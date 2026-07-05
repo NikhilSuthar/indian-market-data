@@ -308,32 +308,40 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
             mask = df[first_col].astype(str).str.strip().isin(["", "nan", "NaN"])
             df = df[~mask]
 
+        # Drop footnote/disclaimer rows (rows where first column starts with * or #)
+        if "Product Category" in df.columns:
+            mask = df["Product Category"].astype(str).str.startswith(("*", "#"))
+            df = df[~mask]
+
         df = df.reset_index(drop=True)
 
     return df
 
 
-def _parse_excel(content: bytes, skip_rows: int) -> pd.DataFrame:
+def _parse_excel(content: bytes, skip_rows) -> pd.DataFrame:
     """
     Smart Excel parser that handles:
     - Merged cells / non-standard headers
     - Multiple sheets
-    - Skip rows before actual header
+    - Skip rows before actual header (int) or list of row indices to skip
     """
     try:
         df = pd.read_excel(io.BytesIO(content), skiprows=skip_rows)
         # Check for too many unnamed columns (sign of merged header)
         unnamed = sum(1 for c in df.columns if "Unnamed" in str(c))
-        if unnamed > len(df.columns) * 0.5:
+        if unnamed > len(df.columns) * 0.5 and isinstance(skip_rows, int):
             # Try skipping one more row
             df = pd.read_excel(io.BytesIO(content), skiprows=skip_rows + 1)
         df.columns = [str(c).strip() for c in df.columns]
+        # Drop rows where all data columns are null (footnotes, blank spacers)
+        df = df.dropna(how="all").reset_index(drop=True)
         return df
     except Exception as e:
         # Try first sheet by index
         xl = pd.ExcelFile(io.BytesIO(content))
         df = pd.read_excel(xl, sheet_name=0, skiprows=skip_rows)
         df.columns = [str(c).strip() for c in df.columns]
+        df = df.dropna(how="all").reset_index(drop=True)
         return df
 
 

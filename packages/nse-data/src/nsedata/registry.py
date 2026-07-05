@@ -40,7 +40,7 @@ class DatasetConfig:
     portal_only: bool = False       # portal_only=True — requires NSE portal session, no direct URL
 
     # Parser hints
-    skip_rows: int = 0              # Rows to skip before header
+    skip_rows: object = 0              # Rows to skip before header: int or list[int]
     encoding: str = "utf-8"         # File encoding
     separator: Optional[str] = None # None = auto-detect
     zip_extract: Optional[str] = None  # For ZIP: which file to extract (regex pattern)
@@ -1038,26 +1038,36 @@ REGISTRY = {
 
             "fpi_long": DatasetConfig(
                 name="Combined FPI Long Positions",
-                description="Combined FPI long positions across derivatives. Encoding: latin-1. NSE portal session required — not available via direct archive URL",
+                description="Combined FPI long positions across derivatives. "
+                            "File served as XLSX despite .csv extension. "
+                            "Columns: Date, Aggregate Net Long Position (INR Crore), "
+                            "Permissible Limit, Available Limit, Position%, Breach of 90% Threshold.",
                 url_pattern="/archives/ird/fii/Combined_FPI_long_psn_{ddmmyyyy}.csv",
-                                file_pattern="Combined_FPI_long_psn_{ddmmyyyy}.csv",
-                file_format="csv",
+                file_pattern="Combined_FPI_long_psn_{ddmmyyyy}.csv",
+                file_format="xlsx",
                 portal_only=False,
-                encoding="latin-1",
+                skip_rows=[1, 2],
                 frequency="Daily",
-                columns="FPI long position data",
+                columns="Date,Aggregate Net Long Position (INR Crore),Permissible Limit,Available Limit,Position %,Breach of 90% Threshold,Date of Breach",
             ),
 
             "fii_long": DatasetConfig(
                 name="FII Long Positions",
-                description="FII long positions in derivatives. Encoding: latin-1. NSE portal session required — not available via direct archive URL",
+                description="FII long positions in IRF by product category. "
+                            "File served as XLSX despite .csv extension. "
+                            "Columns: Product Category, FII Long Position (excl. LTI), LTI Long Position, Total FII Long Position.",
                 url_pattern="/archives/ird/fii/fii_longpos_{ddmmyyyy}.csv",
-                                file_pattern="fii_longpos_{ddmmyyyy}.csv",
-                file_format="csv",
+                file_pattern="fii_longpos_{ddmmyyyy}.csv",
+                file_format="xlsx",
                 portal_only=False,
-                encoding="latin-1",
+                skip_rows=[0, 2, 3],
                 frequency="Daily",
-                columns="FII long position data",
+                columns="Product Category,FII_Long_Excl_LTI_Rs,LTI_Long_Rs,Total_FII_Long_Rs",
+                rename_columns={
+                    "Total Value of Aggregate Gross Long Position of FIIs(excluding Long Term Investors)\n(A)": "FII_Long_Excl_LTI_Rs",
+                    "Total Value of Aggregate Gross Long Position of FIIs investors who are registered with SEBI  as Long Term Investors viz., Sovereign Wealth Funds, Insurance Funds etc.\n(B)": "LTI_Long_Rs",
+                    "Total Value of Aggregate Gross Long Position of ALL FIIs\n[C = A+B]": "Total_FII_Long_Rs",
+                },
             ),
 
             "tenure_symbol_map": DatasetConfig(
