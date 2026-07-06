@@ -227,7 +227,10 @@ def parse_to_df(content: bytes, cfg: DatasetConfig) -> pd.DataFrame:
                 if matching:
                     target = matching[0]
                 else:
-                    target = data_files[0]
+                    raise RuntimeError(
+                        f"No file matching pattern '{cfg.zip_extract}' found in ZIP.\n"
+                        f"Available files: {data_files}"
+                    )
             else:
                 target = data_files[0]
 
