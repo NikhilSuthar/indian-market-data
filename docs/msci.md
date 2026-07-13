@@ -8,7 +8,7 @@ permalink: /msci
 
 # MSCI
 
-<img src="{{ '/assets/msci.png' | relative_url }}" alt="MSCI" height="60"/>
+<img src="{{ '/assets/msci.png' | relative_url }}" alt="MSCI" style="height:50px;width:auto;max-width:160px;object-fit:contain;"/>
 
 **msci-data** — Download MSCI index end-of-day levels as pandas DataFrames. No API key required.
 
