@@ -20,10 +20,12 @@ aux_links:
     - "https://pypi.org/project/mcx-data/"
   "PyPI: indian-market-data":
     - "https://pypi.org/project/indian-market-data/"
+  "PyPI: msci-data":
+    - "https://pypi.org/project/msci-data/"
 
 aux_links_new_tab: true
 
-footer_content: "MIT License. Data from <a href='https://www.nseindia.com'>NSE India</a> and <a href='https://www.mcxindia.com'>MCX India</a>. &nbsp;|&nbsp; <a href='https://github.com/NikhilSuthar/indian-market-data'>View on GitHub</a>"
+footer_content: "MIT License. Data from <a href='https://www.nseindia.com'>NSE India</a>, <a href='https://www.mcxindia.com'>MCX India</a> and <a href='https://www.msci.com'>MSCI</a>. &nbsp;|&nbsp; <a href='https://github.com/NikhilSuthar/indian-market-data'>View on GitHub</a>"
 
 search_enabled: true
 search:

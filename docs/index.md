@@ -12,11 +12,13 @@ nav_order: 1
   <img src="{{ '/assets/BSE_logo.png' | relative_url }}" alt="BSE India" width="160"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" width="160"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="{{ '/assets/msci.png' | relative_url }}" alt="MSCI" width="160"/>
 </p>
 
 <p align="center">
-  Download <strong>NSE</strong>, <strong>BSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
-  Bhavcopy · Nifty/Sensex indices · F&amp;O · Commodity spot prices<br/>
+  Download <strong>NSE</strong>, <strong>BSE</strong>, <strong>MCX India</strong> and <strong>MSCI</strong> market data as pandas DataFrames.<br/>
+  Bhavcopy · Nifty/Sensex indices · F&amp;O · Commodity spot prices · Global index levels<br/>
   Works on <strong>AWS Lambda</strong>, Snowflake, and any cloud environment.
 </p>
 
