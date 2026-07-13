@@ -7,13 +7,13 @@ nav_order: 1
 # Indian Market Data
 
 <p align="center">
-  <img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" width="160"/>
+  <img src="{{ '/assets/nse.jpg' | relative_url }}" alt="NSE India" height="60"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="{{ '/assets/BSE_logo.png' | relative_url }}" alt="BSE India" width="160"/>
+  <img src="{{ '/assets/BSE_logo.png' | relative_url }}" alt="BSE India" height="60"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" width="160"/>
+  <img src="{{ '/assets/mcx.png' | relative_url }}" alt="MCX India" height="60"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="{{ '/assets/msci.png' | relative_url }}" alt="MSCI" width="160"/>
+  <img src="{{ '/assets/msci.png' | relative_url }}" alt="MSCI" height="60"/>
 </p>
 
 <p align="center">
