@@ -1,16 +1,18 @@
 # indian-market-data
 
 <p align="center">
-  <img src="docs/assets/nse.jpg" alt="NSE India" height="80"/>
+  <img src="docs/assets/nse.jpg" alt="NSE India" height="60"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/BSE_logo.png" alt="BSE India" height="80"/>
+  <img src="docs/assets/BSE_logo.png" alt="BSE India" height="60"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/assets/mcx.png" alt="MCX India" height="80"/>
+  <img src="docs/assets/mcx.png" alt="MCX India" height="60"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/assets/msci.png" alt="MSCI" height="60" style="max-width:140px;object-fit:contain;"/>
 </p>
 
 <p align="center">
-  Download <strong>NSE</strong>, <strong>BSE</strong> and <strong>MCX India</strong> market data as pandas DataFrames.<br/>
-  Bhavcopy, SENSEX/Nifty indices, F&amp;O, commodity spot prices — direct from exchange archives.<br/>
+  Download <strong>NSE</strong>, <strong>BSE</strong>, <strong>MCX India</strong> and <strong>MSCI</strong> market data as pandas DataFrames.<br/>
+  Bhavcopy, SENSEX/Nifty indices, F&amp;O, commodity spot prices, global index levels — direct from exchange archives.<br/>
   Works on <strong>AWS Lambda</strong>, <strong>Snowflake</strong>, and any cloud environment.
 </p>
 
@@ -18,6 +20,7 @@
   <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/v/nse-archives?label=nse-archives" alt="nse-archives PyPI"/></a>
   <a href="https://pypi.org/project/bse-index-data/"><img src="https://img.shields.io/pypi/v/bse-index-data?label=bse-index-data" alt="bse-index-data PyPI"/></a>
   <a href="https://pypi.org/project/mcx-data/"><img src="https://img.shields.io/pypi/v/mcx-data?label=mcx-data" alt="mcx-data PyPI"/></a>
+  <a href="https://pypi.org/project/msci-data/"><img src="https://img.shields.io/pypi/v/msci-data?label=msci-data" alt="msci-data PyPI"/></a>
   <a href="https://pypi.org/project/indian-market-data/"><img src="https://img.shields.io/pypi/v/indian-market-data?label=indian-market-data" alt="indian-market-data PyPI"/></a>
   <a href="https://pypi.org/project/nse-archives/"><img src="https://img.shields.io/pypi/pyversions/nse-archives" alt="Python 3.9+"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"/></a>
@@ -28,6 +31,7 @@ pip install indian-market-data     # NSE + MCX together
 pip install nse-archives           # NSE only
 pip install bse-index-data         # BSE only
 pip install mcx-data               # MCX only
+pip install msci-data              # MSCI only
 ```
 
 📖 **[Full Documentation](https://NikhilSuthar.github.io/indian-market-data)**

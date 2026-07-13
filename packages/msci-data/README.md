@@ -1,5 +1,9 @@
 # msci-data
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NikhilSuthar/indian-market-data/main/docs/assets/msci.png" alt="MSCI" height="50"/>
+</p>
+
 **Download MSCI index levels as pandas DataFrames. No API key required.**
 
 Pulls end-of-day index levels from MSCI's public levels API — the same one that powers charts on [msci.com/indexes](https://www.msci.com/indexes).
